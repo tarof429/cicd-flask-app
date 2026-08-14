@@ -1,6 +1,7 @@
 # A simple Python app that manages events
 
 import sys
+from datetime import datetime
 
 events = []
 
@@ -14,28 +15,49 @@ def print_menu():
     print('5) Exit')
 
 def create_new_event():
-    event = input('Event: ').strip()
+    event_name = input('Event: ').strip()
+    event_location = input('Location: ').strip()
+
+    while True:
+        event_date = input('Date (mm/dd/yyyy): ').strip()
+        try:
+            datetime.strptime(event_date, '%m/%d/%Y')
+            break
+        except ValueError:
+            print('Invalid date format, try again')
+
+    event = {
+        'name': event_name,
+        'location': event_location,
+        'date': event_date
+    }
     events.append(event)
 
 def list_events():
     if len(events) == 0:
         print('No events!')
+        return
+    
+    print('Events')
     for event in events:
-        print(event)
+        event_name = event['name']
+        event_location = event['location']
+        event_date = event['date']
+        print(f"{event_name}\t{event_location}\t{event_date}")
 
 def update_event():
     prev_event_name = input('Event: ').strip()
     new_event_name = input('New event name: ').strip()
     
     for event_index in range(len(events)):
-        if prev_event_name == events[event_index]:
-            events[event_index] = new_event_name
+        if prev_event_name == events[event_index]['name']:
+            events[event_index]['name'] = new_event_name
             break  
 
 def delete_event():
     event_name = input('Event: ').strip()
     for event in events:
-        if event == event_name:
+        if event['name'] == event_name:
             events.remove(event)
 
 def exit_app():
