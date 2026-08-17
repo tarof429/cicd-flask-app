@@ -1,9 +1,14 @@
 from flask import Flask, render_template, request, flash
+from flask_migrate import Migrate
 
+from models import db
 from forms import AddEventForm
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
+db.init_app(app)
+
+Migrate(app, db)
 
 @app.route('/')
 def index():
