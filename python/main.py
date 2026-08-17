@@ -59,6 +59,7 @@ def delete_event():
     for event in events:
         if event['name'] == event_name:
             events.remove(event)
+            break
 
 def exit_app():
     sys.exit('Goodbye!')
