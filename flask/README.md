@@ -40,6 +40,12 @@ To create a migration:
 flask db migrate -m "Initial"
 ```
 
+Create the events table:
+
+```sh
+flask db upgrade
+```
+
 ## Usage
 
 To run the application:
