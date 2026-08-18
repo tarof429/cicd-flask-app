@@ -10,15 +10,24 @@ class AddEventForm(FlaskForm):
                         ]
     )
     date = DateField('Date',
-                     format="%m/%d/%Y",
                      validators=[
                          DataRequired()
                      ]
     )
     time = TimeField('Time',
-                     format="%I:%M %p",
                      validators=[
                          DataRequired()
                      ]
     )
+    submit = SubmitField('Submit')
+
+class UpdateEventForm(FlaskForm):
+    title = StringField('Title',
+        validators=[
+            DataRequired(),
+            Length(max=30, message='Title must be 30 characters or fewer')
+        ]
+    )
+    date = DateField('Date')
+    time = TimeField('Time')
     submit = SubmitField('Submit')
