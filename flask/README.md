@@ -4,6 +4,8 @@
 
 This is the Flask version of the community event calendar application.
 
+<img src="images/events.png" />
+
 ## Initial Setup
 
 This application uses a virtual environment using `pip`. Below is an example of how to create the virtual environment with a directory called venv.
