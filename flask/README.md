@@ -55,3 +55,8 @@ To run the application:
 ```sh
 flask run
 ```
+
+To run tests:
+
+```sh
+python -m pytest
