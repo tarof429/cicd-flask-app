@@ -1,0 +1,8 @@
+*.md
+*.png
+venv/
+images/
+__pycache__/
+.pytest_cache/
+instance/
+tests/

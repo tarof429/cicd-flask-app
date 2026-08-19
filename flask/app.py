@@ -9,6 +9,8 @@ from forms import AddEventForm, UpdateEventForm
 def create_app(mode=None):
     app = Flask(__name__)
 
+    print(mode)
+    
     if mode is None:
         mode = os.environ.get('RUNTIME_MODE', 'dev')
 
@@ -16,6 +18,8 @@ def create_app(mode=None):
         app.config.from_object('config.TestConfig')
     elif mode == 'dev':
         app.config.from_object('config.DevConfig')
+    elif mode == 'prod':
+        app.config.from_object('config.ProdConfig')
 
     db.init_app(app)
 
