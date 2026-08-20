@@ -1,13 +1,29 @@
-# CI/CD Flask Application
+# Event Manager
 
 ## Introduction
 
-This project is a Python Flask application deployed to a remote server using CI/CD principles. At it's core is a community calendar of events with the following fields:
+This is a containerized Flask web application for creating and managing events.
 
-- title
-- date
-- time
-- description
-- location
+<img src="images/events.png" />
 
-The application uses Flask, a lightweight framework for creating web applications with Python. Data is persisted to a database.
+## Architecture
+
+A CI/CD Pipeline is used to create a container image containing the Flask web application. We use docker-compose to orchestrate the web container and the PostgreSQL container.
+```mermaid
+flowchart LR
+    CI[CI/CD Pipeline] --> Image[Container Image]
+    Image --> Compose[Docker Compose]
+    Compose --> Flask[Flask Application]
+    Compose --> DB[(PostgreSQL)]
+```
+
+## Technology Stack
+
+- Python
+- Flask
+- SQLAlchemy
+- PostgreSQL
+- Docker
+- Docker Compose
+- Pytest
+- Alembic/Flask-Migrate
