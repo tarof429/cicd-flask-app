@@ -1,5 +1,9 @@
 # Docker-based Flask web application
 
+## Introduction
+
+Docker can be used to containerize applications so that they can run in any kind of environment that supports a container runtime.
+
 ## Usage
 
 To build the image:

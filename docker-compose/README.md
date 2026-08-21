@@ -1,6 +1,8 @@
 # Docker-compose based Flask web application
 
-The docker-compose file uses Postgres as the backing database.
+## Introduction
+
+Containers often have dependencies on other containers and for this purpose docker-compose acts as a container orchestrator.
 
 ## Usage
 
