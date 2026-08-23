@@ -1,7 +1,6 @@
 services:
   app:
     image: events-app
-    #image: tarof429/community-homepage:1.0
     environment:
       - FLASK_APP=app.py
       - FLASK_DEBUG=True

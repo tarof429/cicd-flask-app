@@ -2,7 +2,9 @@
 
 ## Introduction
 
-Containers often have dependencies on other containers and for this purpose docker-compose acts as a container orchestrator.
+Containers often have dependencies on other containers. For this purpose, docker-compose acts as a container orchestrator.
+
+The docker-compose file in this directory specifies two services. Each service refers to a docker image. When run, docker containers are created and linked using docker networking so that the events-app can communicate with the PostgreSQL database.
 
 ## Usage
 
