@@ -27,3 +27,5 @@ flowchart LR
 - Docker Compose
 - Pytest
 - Alembic/Flask-Migrate
+- KVM
+- Kickstart
