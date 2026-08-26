@@ -1,0 +1,21 @@
+- name: Copy docker-compose
+  template:
+    src: docker-compose.j2
+    dest: docker-compose.yaml
+    
+- name: Run docker compose
+  community.docker.docker_compose_v2:
+    project_src: .
+  register: output
+
+- name: Print output
+  debug:
+    var: output
+
+- name: Check webapp
+  ansible.builtin.uri:
+    url: http://localhost:5000
+  register: _result
+  until: _result.status == 200
+  retries: 10
+  delay: 5

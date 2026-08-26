@@ -51,7 +51,7 @@ yum update -y
 Reboot to take advantage of the latest kernel. In data centers, servers often need to be running with the latest kernel for security compliance. 
 
 ```sh
-reboot.
+reboot
 ```
 
 Install Docker per https://docs.rockylinux.org/10/gemstones/containers/docker/.

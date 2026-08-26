@@ -1,0 +1,32 @@
+---
+- name: Setup webserver
+  hosts: webserver
+  tasks:
+  - name: ping
+    debug:
+      msg: Pong!
+
+  - name: Add docker repo
+    yum_repository:
+        name: docker-ce
+        description: Docker CE Stable - $basearch
+        baseurl: https://download.docker.com/linux/rhel/$releasever/$basearch/stable
+        gpgcheck: yes
+        gpgkey: https://download.docker.com/linux/rhel/gpg
+
+  - name: Install docker
+    package:
+      update_cache: yes
+      state: present
+      name:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-buildx-plugin
+        - docker-compose-plugin
+
+  - name: Enable docker daemon
+    service:
+      name: docker
+      enabled: yes
+      state: started

@@ -1,0 +1,16 @@
+---
+- name: Deploy webapp
+  hosts: webserver
+  tasks:
+  - name: copy
+    copy:
+      src: ../kickstart/docker-compose.yaml
+      dest: .
+  - name: Run docker compose
+    community.docker.docker_compose_v2:
+      project_src: .
+    register: output
+
+  - name: Print output
+    debug:
+      var: output
