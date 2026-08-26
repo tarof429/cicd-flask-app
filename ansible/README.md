@@ -68,4 +68,4 @@ The `update-webapp-2` playbook invokes a modified version of our role, now calle
 ansible-playbook -i inventory.ini update-webapp-2.yaml -e CONTAINER_VERSION=latest
 ```
 
-I usually specify variables *after* the playbook in case we need to define multiple variables.
+I usually specify variables *after* the playbook in case more variables need to be defined.
