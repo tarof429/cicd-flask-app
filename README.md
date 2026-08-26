@@ -1,10 +1,8 @@
 # CI/CD Flask Application
 
-Here's a Python Flask task manager application.
+This is a Python Flask task manager application that we can build, test and deploy using CI/CD.
 
 <img src="images/events.png" />
-
-So how do we deploy it? Manually? Nah...
 
 ## What is CI/CD
 
@@ -59,4 +57,5 @@ flowchart LR
 - Alembic/Flask-Migrate
 - KVM
 - Kickstart
+- Cloud-init
 - Ansible
