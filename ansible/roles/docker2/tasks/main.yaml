@@ -1,0 +1,49 @@
+- name: Print distro
+  debug:
+    msg: "Installing docker on {{ ansible_facts['os_family'] }}"
+
+- name: Add docker repo - RedHat
+  yum_repository:
+      name: docker-ce
+      description: Docker CE Stable - $basearch
+      baseurl: https://download.docker.com/linux/rhel/$releasever/$basearch/stable
+      gpgcheck: yes
+      gpgkey: https://download.docker.com/linux/rhel/gpg
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Install docker - RedHat
+  package:
+    update_cache: yes
+    state: present
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Check if docker script exists
+  stat:
+    path: /tmp/get-docker.sh
+  register: st
+
+- name: Install docker - Debian
+  get_url:
+    url: https://get.docker.com
+    dest: /tmp/get-docker.sh
+    mode: '0755'
+  register: download_result
+  when: ansible_facts['os_family'] == 'Debian' and st.stat.exists
+
+- name: Run install script - Debian
+  shell: /tmp/get-docker.sh
+  when:
+    download_result.changed
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Enable docker daemon
+  service:
+    name: docker
+    enabled: yes
+    state: started

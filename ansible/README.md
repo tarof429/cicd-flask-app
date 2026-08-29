@@ -8,9 +8,11 @@ On the other hand, Ansible is not perfect. Hosts are defined in either INI or YA
 
 Also because Ansible can make many changes at scale, user error can spell disaster. And if you make a mistake you can't easily reverse the damage. This is why you need to be very careful using Ansible in corporate environments; I suggest some best practices later.
 
-## Setup Webserver (1)
+The easiest way to think of Ansible is that it's an automation tool consisting of a list of servers and scripts. The list of servers is called an inventory and the scripts are called playbooks.
 
-The easiest way to think of Ansible is that it consists of a list of servers and a script. The list of servers is called an inventory and the script is called a playbook.
+Let's see how we can automate some tasks, first on a web server with RockyLinux, then on another server with Ubuntu.
+
+## Setup Webserver (1)
 
 The `setup-webserver-1.yaml` playbook replaces the manual steps we needed to perform to configure a webserver in preparation for running our Flask application as a docker container. It uses an inventory file format called INI and is essentially a flat file, with one server per line. The playbook is in YAML format and has a list of tasks. These are documented on Ansible's website.
 
@@ -69,3 +71,21 @@ ansible-playbook -i inventory.ini update-webapp-2.yaml -e CONTAINER_VERSION=late
 ```
 
 I usually specify variables *after* the playbook in case more variables need to be defined.
+
+## Setup Ubuntu Server
+
+Suppose we also have an Ubuntu server that we want to use to run docker containers. Perhaps we want to use this server to perform tasks like building the webapp container. In fact, perhaps it's our CI/CD server that we want to use for the following tasks:
+
+- Poll github for changes
+- Build webapp container
+- Push the container to dockerhub
+- Push the container to our deployment server
+- Commit any changes to github
+
+To do any of these tasks, we first need to install docker on it. This leads us to a problem because the playbook that we have for setting up the web server uses Ansible tasks specific to a RedHat-based Linux distro. 
+
+The `docker2` role takes care of this issue by performing tasks conditionally based on the Linux distribution. To accomplish this, we use Ansible facts, which Ansible gathers every time it connects to an inventory item. Ansible facts are an important part of Ansible and include all kinds of information related to the OS and hardware. To access each bit of information, we need to refer to it by its hash name, so in our case `ansible_facts['os_family']`.
+
+## References
+
+https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_vars_facts.html
