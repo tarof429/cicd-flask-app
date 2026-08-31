@@ -130,7 +130,7 @@ Suppose we also have an Ubuntu server that we want to use to run docker containe
 - Push the container to our deployment server
 - Commit any changes to github
 
-To do any of these tasks, we first need to install docker on it. This leads us to a problem because the playbook that we have for setting up the web server uses Ansible tasks specific to a RedHat-based Linux distro. 
+To do any of these tasks, we first need to install docker on it. This leads us to a problem because the playbooks that we have used so far assume that we are using a RedHat-based Linux distro. 
 
 The `docker2` role takes care of this issue by performing tasks conditionally based on the Linux distribution. To accomplish this, we use Ansible facts, which Ansible gathers every time it connects to an inventory item. Ansible facts are an important part of Ansible and include all kinds of information related to the OS and hardware. To access each bit of information, we need to refer to it by its hash name, so in our case `ansible_facts['os_family']`.
 
