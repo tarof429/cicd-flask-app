@@ -34,7 +34,7 @@ This is followed by tasks to update the yum repository, update all existing pack
 
 It seems that many people use Ansible with exactly this pattern: hosts in INI format and playbooks with a collection of tasks. However I believe the real power of Ansible is it's roles.
 
-# Setup Docker User
+## Setup Docker User
 
 Although the root user is able to communicate with the docker daemon, it is a best practice to create a separate user for this. In fact, what we should do is create a non-root user (called *admin* in our case) for interactive SSH sessions and add the user to the docker group.
 
@@ -72,7 +72,7 @@ If you look at `setup-webapp-1.yaml`, you'll see that the playbook copies a dock
 
 In the next example, we'll look at roles which solves this and other limitations of task-based playbooks.
 
-## Setup Webserver 2
+## Setup Webserver (2)
 
 In `setup-webserver-2.yaml`, we invoke 4 roles that accomplish what we've done so far. In Ansible, roles are like functions in other languages. They are essentially reusable blocks of code that can be called from playbooks. Each role that you define has it's own directory in the `roles` subdirectory; moreover, roles have a very-well defined directory layout that must be followed according to the documentation. 
 
@@ -90,7 +90,7 @@ Afterwards, we should still see the application running on the VM.
 http://<ip.of.vm>:5000
 ```
 
-## Update Webapp 1
+## Update Webapp (1)
 
 The `update-webapp-1.yaml` playbook just invokes the webapp-compose role. This playbook illustrates how roles can be reused across playbooks as if invoking a function. It we were to push a new version of the events-app application, this playbook can be used to update the container on the server with the latest version.
 
@@ -110,7 +110,7 @@ docker pull tarof429/events-app:${CONTAINER_VERSION}
 
 Let's see how we can solve this problem.
 
-## Update Webapp 2
+## Update Webapp (2)
 
 The `update-webapp-2` playbook invokes a modified version of our role, now called `webapp-compose2`. Instead of the `copy` task, we now use `template` to use Jinja2 to make use of the CONTAINER_VERSION variable (defined in the `vars` directory). However, note that CONTAINER_VERSION is defined to have the value of 1.0. If we don't have this version in docker registry, then docker pull will fail. To specify a different version, what we can do is specify it on the command-line.
 
