@@ -5,11 +5,16 @@
   - name: copy
     copy:
       src: ../kickstart/docker-compose.yaml
-      dest: .
+      dest: /home/admin
+    become: true
+    become_user: admin
+
   - name: Run docker compose
     community.docker.docker_compose_v2:
-      project_src: .
+      project_src: /home/admin
     register: output
+    become: true
+    become_user: admin
 
   - name: Print output
     debug:

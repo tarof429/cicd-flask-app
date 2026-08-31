@@ -1,0 +1,10 @@
+---
+- name: Login to docker registry
+  hosts: webserver
+  tasks:
+  - name: login to docker registry
+    community.docker.docker_login:
+      username: "{{ docker_user }}"
+      password: "{{ docker_pass }}"
+    become: true
+    become_user: admin

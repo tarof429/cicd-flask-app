@@ -1,0 +1,15 @@
+- name: Create Docker config directory for admin
+  ansible.builtin.file:
+    path: /home/admin/.docker
+    state: directory
+    owner: admin
+    group: admin
+    mode: '0700'
+  become: yes
+
+- name: Login to docker registry
+  community.docker.docker_login:
+    username: "{{ docker_user }}"
+    password: "{{ docker_pass }}"
+    config_path: /home/admin/.docker/config.json
+  become: yes

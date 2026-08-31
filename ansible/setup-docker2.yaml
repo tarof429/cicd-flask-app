@@ -1,3 +1,5 @@
 - hosts: all
   roles:
   - docker2
+  - docker_user
+  - registry2

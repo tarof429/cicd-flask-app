@@ -1,0 +1,6 @@
+- name: Login to docker registry
+  community.docker.docker_login:
+    username: "{{ docker_user }}"
+    password: "{{ docker_pass }}"
+  become_user: admin
+  become: yes

@@ -34,16 +34,22 @@
     dest: /tmp/get-docker.sh
     mode: '0755'
   register: download_result
-  when: ansible_facts['os_family'] == 'Debian' and st.stat.exists
+  when: ansible_facts['os_family'] == 'Debian' and not st.stat.exists
+  become: yes
+  become_user: root
 
 - name: Run install script - Debian
   shell: /tmp/get-docker.sh
   when:
     download_result.changed
   when: ansible_facts['os_family'] == 'Debian'
+  become: yes
+  become_user: root
 
 - name: Enable docker daemon
   service:
     name: docker
     enabled: yes
     state: started
+  become: yes
+  become_user: root

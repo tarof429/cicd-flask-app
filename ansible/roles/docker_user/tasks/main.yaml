@@ -1,0 +1,24 @@
+- name: Create docker user
+  user:
+    name: admin
+    groups: docker
+    shell: /bin/bash
+    append: yes
+  become: yes
+  become_user: root
+# - name: Create ~/.ssh
+#   file:
+#     path: /home/admin/.ssh
+#     state: directory
+#     owner: admin
+#     group: admin
+#     mode: '0755'
+#   become: yes
+#   become_user: root
+# - name: Copy public key
+#   ansible.posix.authorized_key:
+#     user: admin
+#     state: present
+#     key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+#   become: yes
+#   become_user: root

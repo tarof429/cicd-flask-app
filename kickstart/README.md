@@ -24,7 +24,7 @@ sh ./install.sh -n web-server -s 20 -p verysecret
 
 The `-p` parameter is the password for the root user (superuser). In a kickstart file this is usually stored as an encrypted string. However since storing passwords, even encrypted ones, isn't a good git practice, the install.sh script will copy `anaconda-ks-template.cfg` to `anaconda-ks.cfg` with the unencrypted password; this is never checked into git.
 
-Once installation has completed, the VM will reboot. This behavior is controlled by the kickstart file. In production environments with many VMs running on a server, changing reboot to shutdown may be a preferable.
+Once installation has completed, the VM will reboot. This behavior is controlled by the kickstart file. In production environments with many VMs running on a server, changing reboot to shutdown may be preferable.
 
 ## How to use the kickstarted server
 
@@ -32,7 +32,9 @@ Tag the events-app so that we can push it to dockerhub.
 
 ### On the VM
 
-Login to the VM. You can use SSH or the console to do this. 
+To be able to pull and push container images to docker hub, we need to login to dockerhub.
+
+Login to the VM. You can use SSH or the console to do this.
 
 Let's set the hostname to web-server.
 

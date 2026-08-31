@@ -15,7 +15,7 @@ You also need to install mkpasswd. This can be installed with the `whois` packag
 Next, download the latest LTS cloud init image for Ubuntu 24, available from https://cloud-images.ubuntu.com/releases/ and move it to /data/libvirt/default/boot
 
 ```sh
-sudo mv buntu-26.04-live-server-amd64.iso /data/libvirt/default/boot/
+sudo mv ubuntu-26.04-live-server-amd64.iso /data/libvirt/default/boot/
 ```
 
 Create VMs using the script `create_seeded_ubuntu_vm.sh` which is a thin wrapper around virt-install to use cloud-init. For example:

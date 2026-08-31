@@ -1,0 +1,15 @@
+---
+- name: Create normal user
+  hosts: webserver
+  tasks:
+  - name: Create docker user
+    user:
+      name: admin
+      groups: docker
+      shell: /bin/bash
+      append: yes
+  - name: Copy public key
+    ansible.posix.authorized_key:
+      user: admin
+      state: present
+      key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
