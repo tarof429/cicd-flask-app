@@ -206,6 +206,40 @@ ubuntu_server              : ok=8    changed=1    unreachable=0    failed=0    s
 webserver                  : ok=10   changed=0    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
 ```
 
+## YAML Inventory
+
+The file `inventory3.yaml` illustrates how to declare inventory in YAML format. This format gives great flexibility in defining servers and groups of servers. The `ping.yaml` playbook can be used to illustrate these principles.
+
+For example, if we want to target all servers:
+
+```sh
+ansible-playbook -i inventory3.yaml ping.yaml -e "myhosts=all"
+```
+
+To target just Rocky servers:
+
+```sh
+ansible-playbook -i inventory3.yaml ping.yaml -e "myhosts=rocky"
+```
+
+To target just Ubuntu servers:
+
+```sh
+ansible-playbook -i inventory3.yaml ping.yaml -e "myhosts=ubuntu"
+```
+
+To target just `rocky_vm`:
+
+```sh
+ansible-playbook -i inventory3.yaml ping.yaml -e "myhosts=rocky_vm"
+```
+
+We can also use wildcards to target any inventory running Rocky:
+
+```sh
+ansible-playbook -i inventory3.yaml ping.yaml -e "myhosts=rocky*"
+```
+
 ## References
 
 https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_vars_facts.html

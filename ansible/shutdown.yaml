@@ -1,0 +1,6 @@
+- hosts: "{{ myhosts }}"
+  become: yes
+  tasks:
+    - name: Shutdown
+      shell: /sbin/shutdown -h 1
+      
