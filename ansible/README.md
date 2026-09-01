@@ -240,6 +240,67 @@ We can also use wildcards to target any inventory running Rocky:
 ansible-playbook -i inventory3.yaml ping.yaml -e "myhosts=rocky*"
 ```
 
+# Vaults and ansible.cfg
+
+Vaults are a way to store secrets such as Docker registry credentials. Frst, we must create a vault using `ansible-vault create <vault file>`.
+
+```sh
+ansible-vault create myvault
+```
+
+Ansible will ask for a password for the vault. Once the vault is created, we need to add entries to it. The format will be like:
+
+```sh
+docker_user: <username>
+docker_pass: <token>
+```
+
+The next step is to tell our playbook to use this vault.
+
+```sh
+- hosts: "{{ myhosts }}"
+  vars_files:
+    - myvault
+  roles:
+    - registry2
+```
+
+However, at this point we should create `ansible.cfg` to point to a location on our filesystem which contains the vault password. 
+
+```sh
+[defaults]
+inventory = inventory3.yaml
+editor = vim
+vault_password_file = ~/.vault_pass
+```
+
+This will allow us to invoke the registry2 role without specifying credentials on the command-line. Although by convention the filename should be ansible.cfg, for illustration purposes we use myansible.cfg.
+
+```sh
+$ ANSIBLE_CONFIG=myansible.cfg ansible-playbook setup-registry2.yaml -e "myhosts=ubuntu" 
+
+PLAY [ubuntu] ******************************************************************
+
+TASK [Gathering Facts] *********************************************************
+information.
+ok: [ubuntu_vm]
+
+TASK [registry2 : Create Docker config directory for admin] ********************
+ok: [ubuntu_vm]
+
+TASK [registry2 : Login to docker registry] ************************************
+ok: [ubuntu_vm]
+
+PLAY RECAP *********************************************************************
+ubuntu_vm                  : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+```
+
+With ansible.cfg and a vault in place, the command for setting up our VMs now looks like this:
+
+```sh
+$ ANSIBLE_CONFIG=myansible.cfg ansible-playbook setup-vms2.yaml -e "myhosts=all" 
+```
+
 ## References
 
 https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_vars_facts.html

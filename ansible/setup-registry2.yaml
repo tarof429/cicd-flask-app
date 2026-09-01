@@ -1,0 +1,5 @@
+- hosts: "{{ myhosts }}"
+  vars_files:
+    - myvault
+  roles:
+    - registry2

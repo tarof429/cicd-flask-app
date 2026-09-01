@@ -1,0 +1,8 @@
+- hosts: all
+  vars_files:
+    - myvault
+  roles:
+  - update_packages
+  - docker2
+  - docker_user
+  - registry2
