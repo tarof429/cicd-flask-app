@@ -41,8 +41,7 @@
 - name: Run install script - Debian
   shell: /tmp/get-docker.sh
   when:
-    download_result.changed
-  when: ansible_facts['os_family'] == 'Debian'
+    ansible_facts['os_family'] == 'Debian' and download_result.changed
   become: yes
   become_user: root
 

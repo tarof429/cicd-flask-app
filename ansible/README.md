@@ -139,7 +139,71 @@ There is another problem: on Ubuntu, the user that we use to connect to the serv
 To invoke this playbook,
 
 ```sh
- ansible-playbook -i inventory2.ini setup-docker2.yaml -e docker_user=<username> -e docker_pass=<token>
+ ansible-playbook -i inventory2.ini setup-vms.yaml -e docker_user=<username> -e docker_pass=<token>
+```
+
+Below is sample output:
+
+```sh
+$  ansible-playbook -i inventory2.ini setup-vms.yaml -e docker_user=<username> -e docker_pass=<token>
+
+PLAY [all] *********************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [ubuntu_server]
+ok: [webserver]
+
+TASK [update_packages : Update packages] ***************************************
+changed: [webserver]
+changed: [ubuntu_server]
+
+TASK [docker2 : Print distro] **************************************************
+ok: [webserver] => {
+    "msg": "Installing docker on RedHat"
+}
+ok: [ubuntu_server] => {
+    "msg": "Installing docker on Debian"
+}
+
+TASK [docker2 : Add docker repo - RedHat] **************************************
+changed: [ubuntu_server]
+changed: [webserver]
+
+TASK [docker2 : Install docker - RedHat] ***************************************
+skipping: [ubuntu_server]
+ok: [webserver]
+
+TASK [docker2 : Check if docker script exists] *********************************
+changed: [ubuntu_server]
+changed: [webserver]
+
+TASK [docker2 : Install docker - Debian] ***************************************
+changed: [webserver]
+changed: [ubuntu_server]
+
+TASK [docker2 : Run install script - Debian] ***********************************
+changed: [webserver]
+changed: [ubuntu_server]
+
+TASK [docker2 : Enable docker daemon] ******************************************
+changed: [ubuntu_server]
+changed: [webserver]
+
+TASK [docker_user : Create docker user] ****************************************
+changed: [ubuntu_server]
+changed: [webserver]
+
+TASK [registry2 : Create Docker config directory for admin] ********************
+changed: [ubuntu_server]
+changed: [webserver]
+
+TASK [registry2 : Login to docker registry] ************************************
+changed: [ubuntu_server]
+changed: [webserver]
+
+PLAY RECAP *********************************************************************
+ubuntu_server              : ok=8    changed=1    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+webserver                  : ok=10   changed=0    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
 ```
 
 ## References
