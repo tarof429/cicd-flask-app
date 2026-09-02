@@ -19,3 +19,10 @@ docker run --name events-app --rm -d -p 5000:5000 events-app
 ```
 
 Access the application at http://localhost:5000.
+
+To push it to docker registry (for example):
+
+```sh
+docker tag  events-app:latest tarof429/events-app:latest
+docker push tarof429/events-app:latest
+```
