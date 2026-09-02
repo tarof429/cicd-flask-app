@@ -2,4 +2,6 @@
   package:
     update_cache: yes
     state: latest
+    name:
+      - git
   become: true

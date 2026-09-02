@@ -240,7 +240,7 @@ We can also use wildcards to target any inventory running Rocky:
 ansible-playbook -i inventory3.yaml ping.yaml -e "myhosts=rocky*"
 ```
 
-# Vaults and ansible.cfg
+## [Vaults and ansible.cfg](#vaults_and_ansible_cfg)
 
 Vaults are a way to store secrets such as Docker registry credentials. Frst, we must create a vault using `ansible-vault create <vault file>`.
 

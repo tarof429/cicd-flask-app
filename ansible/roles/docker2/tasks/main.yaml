@@ -36,14 +36,12 @@
   register: download_result
   when: ansible_facts['os_family'] == 'Debian' and not st.stat.exists
   become: yes
-  become_user: root
 
 - name: Run install script - Debian
   shell: /tmp/get-docker.sh
   when:
     ansible_facts['os_family'] == 'Debian' and download_result.changed
   become: yes
-  become_user: root
 
 - name: Enable docker daemon
   service:
@@ -51,4 +49,12 @@
     enabled: yes
     state: started
   become: yes
-  become_user: root
+
+- name: Install docker-compose
+  package:
+    update_cache: yes
+    state: present
+    name:
+      - docker-compose-plugin
+  become: yes
+      
