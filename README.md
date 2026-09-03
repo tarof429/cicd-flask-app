@@ -59,3 +59,4 @@ flowchart LR
 - Kickstart
 - Cloud-init
 - Ansible
+- Bash
