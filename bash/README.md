@@ -70,3 +70,6 @@ Now let's test the robustness of our pipeline. Let's add a new route in the Flas
 We can make the change directly on the Rocky server. Next, we run the pipeline again, and after deployment try http://<ip.of.ubuntu.vm>:5000/test. Did it work?
 
 If not, a quick workaround is to go to the Ubuntu server and delete the tarof429/events-app:latest image. Run the pipeline again and test the URL. Hopefully it worked. But there's a better way. 
+
+## Build pipeline (3)
+
