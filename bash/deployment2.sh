@@ -1,10 +1,15 @@
 #!/bin/bash
 
+set -o pipefail
+
 COMMIT_HASH=${1:-latest}
 
 COMMIT_HASH=${COMMIT_HASH} docker compose down
 
 COMMIT_HASH=${COMMIT_HASH} docker compose up -d
+
+# By default, assume the application is not running successfully
+STATUS="1"
 
 for i in {1..5}; do
     sleep 3

@@ -28,6 +28,10 @@ def test_event_persistence():
         assert saved_event.date == date(2026, 8, 5)
         assert saved_event.time == time(hour=10, minute=15, second=33)
 
+# Sample test that fails ;)
+# def test_false():
+#     assert False
+
 def test_long_event_name_persistence():
     """
     GIVEN a Event model
@@ -52,3 +56,5 @@ def test_long_event_name_persistence():
         assert saved_event.title == 'A very long event name'
         assert saved_event.date == date(2026, 8, 5)
         assert saved_event.time == time(hour=10, minute=15, second=33)
+
+    
