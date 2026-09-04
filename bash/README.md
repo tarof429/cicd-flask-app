@@ -73,20 +73,20 @@ If not, a quick workaround is to go to the Ubuntu server and delete the tarof429
 
 ## Build pipeline (3)
 
-In `build_pipeline3.sh, we capture the git revision hash into a variable and use it to push a unique image name to docker registry. When we invoke deployment.sh on the deployment server, we pass in the revision hash as the first argument. This allows the deployment server to pull a unique image name instead of latest. 
+In `build_pipeline3.sh`, we capture the git revision hash into a variable and use it to push a unique image name to docker registry. When we invoke deployment.sh on the deployment server, we pass in the revision hash as the first argument. This allows the deployment server to pull a unique image name instead of latest. 
 
 ```sh
- Container admin-app-1 Stopping 
- Container admin-app-1 Stopped 
- Container admin-app-1 Removing 
- Container admin-app-1 Removed 
- Container admin-db-1 Stopping 
- Container admin-db-1 Stopped 
- Container admin-db-1 Removing 
- Container admin-db-1 Removed 
- Network admin_default Removing 
- Network admin_default Removed 
- Image tarof429/events-app:a714168 Pulling
+Container admin-app-1 Stopping 
+Container admin-app-1 Stopped 
+Container admin-app-1 Removing 
+Container admin-app-1 Removed 
+Container admin-db-1 Stopping 
+Container admin-db-1 Stopped 
+Container admin-db-1 Removing 
+Container admin-db-1 Removed 
+Network admin_default Removing 
+Network admin_default Removed 
+Image tarof429/events-app:a714168 Pulling
  ...
 Image tarof429/events-app:a714168 Pulled 
  ```
