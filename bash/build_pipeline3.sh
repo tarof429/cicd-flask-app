@@ -26,4 +26,4 @@ docker push tarof429/events-app:${COMMIT_HASH}
 scp ../docker-compose/docker-compose3.yaml ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER}:docker-compose.yaml
 scp deployment2.sh ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER}:deployment.sh
 ssh ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} chmod +x deployment.sh
-ssh ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} COMMIT_HASH=${COMMIT_HASH} ./deployment.sh
+ssh ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} ./deployment.sh ${COMMIT_HASH}
