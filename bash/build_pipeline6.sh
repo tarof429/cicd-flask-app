@@ -8,14 +8,14 @@ DEPLOYMENT_USER="admin"
 ### Checkout ###
 git fetch
 
+
+
 if [[ "$#" = "1" ]] && [[ "$1" = "poll" ]]; then
     UPSTREAM_CHANGES=$(git rev-list --count HEAD..origin/main)
-else
-    UPSTREAM_CHANGES="1"
-fi
 
-if [[ "$UPSTREAM_CHANGES" != "1" ]]; then
-    exit 0
+    if [[ "$UPSTREAM_CHANGES" = "0" ]]; then
+        exit 0
+    fi
 fi
 
 git pull
