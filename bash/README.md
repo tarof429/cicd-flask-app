@@ -555,3 +555,22 @@ CONTAINER ID   IMAGE                         COMMAND                  CREATED   
 ad9b77f88f2f   tarof429/events-app:27ba1bf   "./entrypoint.sh"        25 minutes ago   Up 25 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp   admin-app-1
 faaa3eb27e67   postgres:14.24-alpine3.23     "docker-entrypoint.s…"   25 minutes ago   Up 25 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp   admin-db-1
 ```
+
+## Build pipeline (6)
+
+This script fixes a bug in git polling. The script also introduces a command-line option. 
+
+If you use the *poll* command-line option, then it will poll git for changes. This is suitable for running from a cron job.
+
+```sh
+$ ./build_pipeline6.sh poll
+```
+
+The script can still be run with no arguments to build the image and deploy the container immediately.
+
+```sh
+$ ./build_pipeline6.sh
+```
+
+Now that we our pipeline script is working with the docker registry hosted by Dockerhub, let's look at how to use a local private docker registry to store our docker images.
+
