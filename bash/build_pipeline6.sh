@@ -14,9 +14,6 @@ else
     UPSTREAM_CHANGES="1"
 fi
 
-echo $UPSTREAM_CHANGES
-exit 0
-
 if [[ "$UPSTREAM_CHANGES" != "1" ]]; then
     exit 0
 fi
