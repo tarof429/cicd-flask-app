@@ -104,7 +104,7 @@ tarof429/events-app:latest    8d8c0f95e6ed        248MB         57.1MB
 
 ## Build pipeline (4)
 
-Pipeline scripts should run unit tests. The `build_pipeline4.sh` script takes care of running pytest within a test container; if they fail then we do not continue to build the production image and pushing it to the deployment server.
+Pipeline scripts should run unit tests before pushing images and deployment. The `build_pipeline4.sh` script takes care of running pytest within a test container; if they fail then we do not continue to build the production image and pushing it to the deployment server.
 
 Below is a successful run (tests passed):
 
@@ -245,3 +245,12 @@ Tests failed
 $ 
 ```
 
+This script also includes comments for the different stages of our pipeline:
+
+- Checkout
+- Build
+- Test
+- Push
+- Deploy
+
+Although not well implemented, the idea is that control flow should stop if a stage fails.
