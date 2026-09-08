@@ -29,6 +29,10 @@ def create_app(mode=None):
     def index():
         return render_template('index.html')
 
+    @app.route('/test')
+    def test():
+        return '<html><body>test</body></html>'
+
     @app.errorhandler(404)
     def page_not_found(error):
         return render_template('page_not_found.html'), 404
