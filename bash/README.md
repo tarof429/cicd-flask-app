@@ -32,6 +32,7 @@ tar cf ~/Downloads/cicd-flask-app.tar cicd-flask-app
 scp ~/Downloads/cicd-flask-app.tar admin@<ip.of.rocky.vm>
 ssh admin@<ip.of.rocky.vm>
 tar xf ~/Downloads/cicd-flask-app.tar
+```
 
 In order to be able to run this pipeline, make sure of the following:
 

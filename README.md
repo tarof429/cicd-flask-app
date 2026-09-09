@@ -60,3 +60,4 @@ flowchart LR
 - Cloud-init
 - Ansible
 - Bash
+- Docker Registry
