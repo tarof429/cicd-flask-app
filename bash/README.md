@@ -603,17 +603,17 @@ admin@web-server:~/cicd-flask-app/bash$ sh ./build_pipeline7.sh
 Already up to date.
 Commit hash: 9f08673
 Running tests...
-[+] Building 1.0s (13/13) FINISHED                                                                                                                          docker:default
+[+] Building 0.9s (13/13) FINISHED                                                                                                                          docker:default
  => [internal] load build definition from Dockerfile.test                                                                                                             0.0s
  => => transferring dockerfile: 467B                                                                                                                                  0.0s
- => [internal] load metadata for docker.io/library/python:3.10.21-alpine3.24                                                                                          0.7s
+ => [internal] load metadata for docker.io/library/python:3.10.21-alpine3.24                                                                                          0.6s
  => [auth] library/python:pull token for registry-1.docker.io                                                                                                         0.0s
  => [internal] load .dockerignore                                                                                                                                     0.0s
  => => transferring context: 2B                                                                                                                                       0.0s
  => [1/7] FROM docker.io/library/python:3.10.21-alpine3.24@sha256:6e67d897508774ad8f2250bbf0c414e029d3bc612b565017fba334b6193a798d                                    0.0s
  => => resolve docker.io/library/python:3.10.21-alpine3.24@sha256:6e67d897508774ad8f2250bbf0c414e029d3bc612b565017fba334b6193a798d                                    0.0s
  => [internal] load build context                                                                                                                                     0.1s
- => => transferring context: 594.27kB                                                                                                                                 0.1s
+ => => transferring context: 594.31kB                                                                                                                                 0.1s
  => CACHED [2/7] WORKDIR /app                                                                                                                                         0.0s
  => CACHED [3/7] COPY flask/requirements.txt .                                                                                                                        0.0s
  => CACHED [4/7] RUN pip install --no-cache-dir -r requirements.txt                                                                                                   0.0s
@@ -624,23 +624,35 @@ Running tests...
  => => exporting layers                                                                                                                                               0.0s
  => => exporting manifest sha256:80555fe24ec03986d805014b7103c85606dc296051fbeccd11460073ec61d16f                                                                     0.0s
  => => exporting config sha256:ed0708897ee88123ea9528de59fc779a4a9da28de4040cdda2677d686750375b                                                                       0.0s
- => => exporting attestation manifest sha256:23173efa599243a005e47bb36a06353ed527097279b90807dfbb1f663cdc87b7                                                         0.0s
- => => exporting manifest list sha256:66e60f911fe02ffd116e23f8fad88c2690f912f2379ed6b134508d2fecbfd28b                                                                0.0s
+ => => exporting attestation manifest sha256:4dac50b2ae1ce434f4f2969333a9221d0ce2db4c0255e89d261ff5b029b3b028                                                         0.0s
+ => => exporting manifest list sha256:04bc7f7dd81827403650f4c59ea00f99837df5122d97da3a4cc6dce4485137d1                                                                0.0s
  => => naming to 192.168.1.133:5000/events-app:9f08673                                                                                                                0.0s
  => => unpacking to 192.168.1.133:5000/events-app:9f08673                                                                                                             0.0s
-[+] up 1/1
- ✔ Container docker-compose-app-1 Recreated                                                                                                                            0.1s
+The push refers to repository [192.168.1.133:5000/events-app]
+0eb4214139e9: Pushed 
+c1aca9005329: Pushed 
+55afa1ecc21d: Pushed 
+e872d8403654: Pushed 
+ac5139085299: Pushed 
+1568f7417c2d: Pushed 
+9f88a3ab9ff9: Pushed 
+44136fa355b3: Pushed 
+46958db24bed: Pushed 
+823c447f50bc: Pushed 
+94603fbf8bbe: Pushed 
+c899487a8b8e: Pushed 
+9f08673: digest: sha256:04bc7f7dd81827403650f4c59ea00f99837df5122d97da3a4cc6dce4485137d1 size: 856
 Attaching to app-1, db-1
 Container docker-compose-db-1 Waiting 
 db-1  | 
 db-1  | PostgreSQL Database directory appears to contain a database; Skipping initialization
 db-1  | 
-db-1  | 2026-09-09 19:19:38.259 UTC [1] LOG:  starting PostgreSQL 14.24 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
-db-1  | 2026-09-09 19:19:38.259 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
-db-1  | 2026-09-09 19:19:38.259 UTC [1] LOG:  listening on IPv6 address "::", port 5432
-db-1  | 2026-09-09 19:19:38.263 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
-db-1  | 2026-09-09 19:19:38.267 UTC [28] LOG:  database system was shut down at 2026-09-08 21:25:15 UTC
-db-1  | 2026-09-09 19:19:38.271 UTC [1] LOG:  database system is ready to accept connections
+db-1  | 2026-09-09 22:05:31.497 UTC [1] LOG:  starting PostgreSQL 14.24 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+db-1  | 2026-09-09 22:05:31.497 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+db-1  | 2026-09-09 22:05:31.497 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+db-1  | 2026-09-09 22:05:31.501 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+db-1  | 2026-09-09 22:05:31.504 UTC [27] LOG:  database system was shut down at 2026-09-09 22:00:59 UTC
+db-1  | 2026-09-09 22:05:31.508 UTC [1] LOG:  database system is ready to accept connections
 Container docker-compose-db-1 Healthy 
 app-1  | ============================= test session starts ==============================
 app-1  | platform linux -- Python 3.10.21, pytest-9.1.1, pluggy-1.6.0
@@ -649,17 +661,17 @@ app-1  | collected 2 items
 app-1  | 
 app-1  | tests/test_event_db.py ..                                                [100%]
 app-1  | 
-app-1  | ============================== 2 passed in 0.54s ===============================
+app-1  | ============================== 2 passed in 0.45s ===============================
 app-1 exited with code 0
 Aborting on container exit...
 Container docker-compose-app-1 Stopping 
 Container docker-compose-app-1 Stopped 
 Container docker-compose-db-1 Stopping 
-db-1   | 2026-09-09 19:19:44.907 UTC [1] LOG:  received fast shutdown request
-db-1   | 2026-09-09 19:19:44.909 UTC [1] LOG:  aborting any active transactions
-db-1   | 2026-09-09 19:19:44.910 UTC [1] LOG:  background worker "logical replication launcher" (PID 34) exited with exit code 1
-db-1   | 2026-09-09 19:19:44.911 UTC [29] LOG:  shutting down
-db-1   | 2026-09-09 19:19:44.923 UTC [1] LOG:  database system is shut down
+db-1   | 2026-09-09 22:05:37.931 UTC [1] LOG:  received fast shutdown request
+db-1   | 2026-09-09 22:05:37.933 UTC [1] LOG:  aborting any active transactions
+db-1   | 2026-09-09 22:05:37.934 UTC [1] LOG:  background worker "logical replication launcher" (PID 33) exited with exit code 1
+db-1   | 2026-09-09 22:05:37.935 UTC [28] LOG:  shutting down
+db-1   | 2026-09-09 22:05:37.946 UTC [1] LOG:  database system is shut down
 Container docker-compose-db-1 Stopped 
 db-1 exited with code 0
 Building image...
@@ -683,12 +695,12 @@ Building image...
  => => exporting layers                                                                                                                                               0.0s
  => => exporting manifest sha256:1d79ef1cbf5cef3ea6699523acfff161a479429b0882a5f6f0db13cc9100899f                                                                     0.0s
  => => exporting config sha256:1134fc516e8ec0d6e864fdee1ab6f6691c1e2e447fed6690520cd287555077a4                                                                       0.0s
- => => exporting attestation manifest sha256:25e60876c8f07c64f732aeb0a303b9b512a077f09f03309a57745c4a77e96f87                                                         0.0s
- => => exporting manifest list sha256:818ad2fa1c3031b872053795de91d5031a166e5b4445f2ae91fd7247612a9e82                                                                0.0s
- => => naming to docker.io/library/events-app:latest                                                                                                                  0.0s
- => => unpacking to docker.io/library/events-app:latest                                                                                                               0.0s
+ => => exporting attestation manifest sha256:d23ddb1f1e7be68a440df3fec8870cb2a572edf7d906a9ffd46c95f00b9b022b                                                         0.0s
+ => => exporting manifest list sha256:838f1b345fe7a3a98d3573507f8e1e80584d78ee42e5030212f43b4b3c805713                                                                0.0s
+ => => naming to docker.io/tarof429/events-app:9f08673                                                                                                                0.0s
+ => => unpacking to docker.io/tarof429/events-app:9f08673                                                                                                             0.0s
 The push refers to repository [docker.io/tarof429/events-app]
-e5167882248f: Pushed 
+361ded08b576: Pushed 
 44136fa355b3: Already exists 
 c1aca9005329: Layer already exists 
 55afa1ecc21d: Layer already exists 
@@ -696,13 +708,13 @@ c1aca9005329: Layer already exists
 e872d8403654: Layer already exists 
 ac5139085299: Layer already exists 
 1568f7417c2d: Layer already exists 
+d337ddd5644b: Layer already exists 
 823c447f50bc: Layer already exists 
 9f88a3ab9ff9: Layer already exists 
-d337ddd5644b: Layer already exists 
 e74832a792f5: Layer already exists 
-9f08673: digest: sha256:818ad2fa1c3031b872053795de91d5031a166e5b4445f2ae91fd7247612a9e82 size: 856
-docker-compose3.yaml                                                                                                                     100%  735     1.8MB/s   00:00    
-deployment2.sh                                                                                                                           100%  500   999.8KB/s   00:00    
+9f08673: digest: sha256:838f1b345fe7a3a98d3573507f8e1e80584d78ee42e5030212f43b4b3c805713 size: 856
+docker-compose3.yaml                                                                                                                     100%  735     2.4MB/s   00:00    
+deployment2.sh                                                                                                                           100%  500     1.9MB/s   00:00    
  Container admin-app-1 Stopping 
  Container admin-app-1 Stopped 
  Container admin-app-1 Removing 
@@ -729,6 +741,20 @@ deployment2.sh                                                                  
  Container admin-app-1 Started 
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0Application is running
-100  1533  100  1533    0     0   159k      0 --:--:-- --:--:-- --:--:--  166k
-````
+100  1533  100  1533    0     0   171k      0 --:--:-- --:--:-- --:--:--Application is running
+  187k
+```
+
+To browse the repositories:
+
+```sh
+$ curl http://192.168.1.133:5000/v2/_catalog
+{"repositories":["events-app"]}
+```
+
+To browse the tags:
+
+```sh
+$ curl http://192.168.1.133:5000/v2/events-app/tags/list
+{"name":"events-app","tags":["9f08673"]}
+```
