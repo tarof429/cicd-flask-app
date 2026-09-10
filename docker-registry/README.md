@@ -303,7 +303,7 @@ Now restart docker daemon.
 root@web-server:/# systemctl start docker
 ```
 
-Now if we run the pipeline script build_pipeline7.sh on web-server, we should see new images.
+Now if we run the pipeline script *build_pipeline7.sh* (this is assuming we don't have a cronjob that automatically executes the script) on web-server, we should see new images.
 
 ```sh
 admin@web-server:~/cicd-flask-app/bash$ docker images
@@ -340,6 +340,13 @@ tmpfs                366M  4.0K  366M   1% /run/user/1000
 ```
 
 Did we have to create a subdirectory under /data? No, but but it can be less of a hastle later in case we need to perform system maintenance on it.
+
+There is a docker command that can also show docker storage information. Normally I would not pipe the output to grep; this is done below to reduce the terminal output.
+
+```sh
+admin@web-server:~/cicd-flask-app/bash$ docker info | grep Root
+ Docker Root Dir: /data/docker
+```
 
 ## References
 

@@ -9,8 +9,6 @@ from forms import AddEventForm, UpdateEventForm
 def create_app(mode=None):
     app = Flask(__name__)
 
-    print(mode)
-    
     if mode is None:
         mode = os.environ.get('RUNTIME_MODE', 'dev')
 

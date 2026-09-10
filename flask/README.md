@@ -2,7 +2,16 @@
 
 ## Introduction
 
-This is the Flask web application for creating and managing events.
+This is the Flask web application for creating and managing events. The tech stack includes:
+
+- Flask
+- Models
+- Factories
+- Templates
+- Forms
+- Configurations
+- Migrations
+- Tests
 
 ## Initial Setup
 
@@ -59,3 +68,11 @@ To run tests:
 ```sh
 python -m pytest
 ```
+
+To access the application, point your browser to:
+
+```sh
+http://localhost:5000
+```
+
+Note that this project includes both unit tests and integration tests. The unit tests ensure that the application can connect to the database and perform CRUD operations. The integration tests, on the other hand, ensure that the web application is functional by testing endpoints.
