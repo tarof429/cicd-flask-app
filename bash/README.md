@@ -758,3 +758,24 @@ To browse the tags:
 $ curl http://192.168.1.133:5000/v2/events-app/tags/list
 {"name":"events-app","tags":["9f08673"]}
 ```
+
+## Peer Review
+
+Let's say we work for a company and I'm proud of my achievement. I've used my extensive Linux background to write a pipeline script using a Bash script. Let's say that my manager wants me to have the code undergo a code review. When I see the meeting invite I dread clicking the Accept button.
+
+The meeting organizer turns out to be a pretty nice guy. He also has an extensive Linux background and loves to talk about it. Then I walk him through my code and he has the following suggestions:
+
+1. The comments are great and indicate a clear separation of stages.
+2. The use of variables are great, although he suggests more flexibility so that the values can be injected.
+3. Remove the poll responsibility from the script. Pipelines should only describe *what* to do, not *when*.
+4. Rename the pipeline script *pipeline.sh* and the deployment script *deploy.sh*. These script names are more descriptive.
+
+I promise that I'll make the changes and will test them shortly.
+
+## Pipeline
+
+After implementing the changes he requested, we now have *pipeline.sh* and *deploy.sh*. I tend to agree with all his suggestions, especially regarding the polling functionality. I also have this slight feeling that some form of logging would be useful if the pipeline isn't run through crontab. But at this point, I feel like turning my attention to the *cloud*.
+
+## Acknowledgements
+
+Although ChatGPT suggested the code changes for the scripts, I introduced the fictional code reviewer to make the interaction more human-like. I felt that these suggestions were valuable and most likeley represent best practices for DevOps.
