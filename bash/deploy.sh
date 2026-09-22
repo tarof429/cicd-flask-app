@@ -4,9 +4,9 @@ set -o pipefail
 
 COMMIT_HASH=${1:-latest}
 
-COMMIT_HASH=${COMMIT_HASH} docker compose down
+COMMIT_HASH=${COMMIT_HASH} docker compose pull app
 
-COMMIT_HASH=${COMMIT_HASH} docker compose up -d
+COMMIT_HASH=${COMMIT_HASH} docker compose up -d --force-recreate app
 
 # By default, assume the application is not running successfully
 STATUS="1"

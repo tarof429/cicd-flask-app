@@ -61,3 +61,4 @@ flowchart LR
 - Ansible
 - Bash
 - Docker Registry
+- Cloud/Digital Ocean/AWS

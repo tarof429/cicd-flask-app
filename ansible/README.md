@@ -8,7 +8,7 @@ On the other hand, Ansible is not perfect. Hosts are defined in either INI or YA
 
 Also because Ansible can make many changes at scale, user error can spell disaster. And if you make a mistake you can't easily reverse the damage. This is why you need to be very careful using Ansible in corporate environments; I suggest some best practices later.
 
-The easiest way to think of Ansible is that it's an automation tool consisting of a list of servers and scripts. The list of servers is called an inventory and the scripts are called playbooks.
+The easiest way to think of Ansible is that it's an automation tool consisting of a list of servers and scripts. The list of servers is called an inventory and the scripts are caƒlled playbooks.
 
 Let's see how we can automate some tasks, first on a web server with RockyLinux, then on another server with Ubuntu.
 
@@ -240,6 +240,12 @@ We can also use wildcards to target any inventory running Rocky:
 ansible-playbook -i inventory3.yaml ping.yaml -e "myhosts=rocky*"
 ```
 
+To target Digital Ocean droplets:
+
+```sh
+ANSIBLE_CONFIG=myansible2.cfg ansible-playbook -i inventory-do.yaml ping.yaml -e "myhosts=all"
+```
+
 ## [Vaults and ansible.cfg](#vaults_and_ansible_cfg)
 
 Vaults are a way to store secrets such as Docker registry credentials. Frst, we must create a vault using `ansible-vault create <vault file>`.
@@ -299,6 +305,111 @@ With ansible.cfg and a vault in place, the command for setting up our VMs now lo
 
 ```sh
 $ ANSIBLE_CONFIG=myansible.cfg ansible-playbook setup-vms2.yaml -e "myhosts=all" 
+```
+
+## [Configuring Digital Ocean Droplets](#configuring_droplets)
+
+In theory, configuring Digital Ocean droplets should be no different than KVMs. However, a few changes were made to the Ansible scripts due to unexpected issues, including:
+
+- Our ansible.cfg file that we had previously hard-coded the inventory file.
+- Our *update_packages* role couldn't proceed because of an apt lock file. This might have been caused because of the way the Droplet was provisioned. 
+- The *registry2* role did not change the owner of /home/admin/.docker/config.json. This error prevented the admin user from interacting with the docker daemon.
+
+To run this role, run:
+
+```sh
+$ export ANSIBLE_CONFIG=myansible2.cfg 
+$ ansible-playbook -i inventory-do.yaml setup-vms2.yaml -e "myhosts=all"
+```
+
+where myansible2.cfg looks something like this:
+
+```sh
+[defaults]
+editor = vim
+vault_password_file = ~/.vault_pass
+```
+
+Below is an example:
+
+```sh
+$ ansible-playbook -i inventory-do.yaml setup-vms2.yaml -e "myhosts=all"
+
+PLAY [all] *********************************************************************
+
+TASK [Gathering Facts] *********************************************************
+[WARNING]: Host 'web-server' is using the discovered Python interpreter at '/usr/bin/python3.12', but future installation of another Python interpreter could cause a different interpreter to be discovered. See https://docs.ansible.com/ansible-core/2.21/reference_appendices/interpreter_discovery.html for more information.
+ok: [web-server]
+[WARNING]: Host 'cicd-server' is using the discovered Python interpreter at '/usr/bin/python3.12', but future installation of another Python interpreter could cause a different interpreter to be discovered. See https://docs.ansible.com/ansible-core/2.21/reference_appendices/interpreter_discovery.html for more information.
+ok: [cicd-server]
+
+TASK [update_packages : Wait for apt locks] ************************************
+changed: [web-server]
+changed: [cicd-server]
+
+TASK [update_packages : Update all packages] ***********************************
+changed: [web-server]
+changed: [cicd-server]
+
+TASK [update_packages : Install git] *******************************************
+ok: [web-server]
+ok: [cicd-server]
+
+TASK [docker2 : Print distro] **************************************************
+ok: [cicd-server] => {
+    "msg": "Installing docker on Debian"
+}
+ok: [web-server] => {
+    "msg": "Installing docker on Debian"
+}
+
+TASK [docker2 : Add docker repo - RedHat] **************************************
+skipping: [cicd-server]
+skipping: [web-server]
+
+TASK [docker2 : Install docker - RedHat] ***************************************
+skipping: [cicd-server]
+skipping: [web-server]
+
+TASK [docker2 : Check if docker script exists] *********************************
+ok: [web-server]
+ok: [cicd-server]
+
+TASK [docker2 : Install docker - Debian] ***************************************
+changed: [web-server]
+changed: [cicd-server]
+
+TASK [docker2 : Run install script - Debian] ***********************************
+changed: [web-server]
+changed: [cicd-server]
+
+TASK [docker2 : Enable docker daemon] ******************************************
+ok: [web-server]
+ok: [cicd-server]
+
+TASK [docker2 : Install docker-compose] ****************************************
+ok: [web-server]
+ok: [cicd-server]
+
+TASK [docker_user : Create docker user] ****************************************
+changed: [web-server]
+changed: [cicd-server]
+
+TASK [registry2 : Create Docker config directory for admin] ********************
+changed: [web-server]
+changed: [cicd-server]
+
+TASK [registry2 : Login to docker registry] ************************************
+changed: [web-server]
+changed: [cicd-server]
+
+TASK [registry2 : Fix permissions] *********************************************
+changed: [web-server]
+changed: [cicd-server]
+
+PLAY RECAP *********************************************************************
+cicd-server                : ok=14   changed=8    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+web-server                 : ok=14   changed=8    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
 ```
 
 ## References

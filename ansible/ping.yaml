@@ -5,8 +5,3 @@
     - name: Ping
       debug:
         msg: Pong!
-    - name: Echo username
-      debug:
-        msg:
-          - "docker_user = {{ docker_user }}"
-          - "docker_pass is defined = {{ docker_pass is defined }}"

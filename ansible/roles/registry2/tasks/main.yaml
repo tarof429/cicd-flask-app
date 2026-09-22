@@ -13,3 +13,12 @@
     password: "{{ docker_pass }}"
     config_path: /home/admin/.docker/config.json
   become: yes
+
+- name: Fix permissions
+  ansible.builtin.file:
+    path: /home/admin/.docker/config.json
+    state: file
+    owner: admin
+    group: admin
+    mode: '0600'
+  become: yes

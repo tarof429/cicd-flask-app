@@ -38,44 +38,43 @@ Let's go through an exercise where we start a private registry on the Rocky VM (
 On the build server, run:
 
 ```sh
-docker run -d -p 5000:5000 --name registry registry:3
+docker run -d -p 3000:5000 --name registry registry:3
 ```
 
 Next, build and tag the image.
 
 ```sh
-docker build -f docker/Dockerfile -t localhost:5000/events-app:latest .
+docker build -f docker/Dockerfile -t localhost:3000/events-app:latest .
 ```
 
 Push the image. It should be very fast!
 
 ```sh
-docker push localhost:5000/events-app:latest 
+docker push localhost:3000/events-app:latest 
 ```
 
 If we try to pull the image from the Ubuntu VM, it will fail. This is because the registry is insecure.
 
 ```sh
-docker pull 192.168.1.133:5000/events-app:latest 
-Error response from daemon: failed to resolve reference "192.168.1.133:5000/events-app:latest": failed to do request: Head "https://192.168.1.133:5000/v2/events-app/manifests/latest": http: server gave HTTP response to HTTPS client
+docker pull localhost:3000/events-app:latest 
 ```
 
-One simple solution is to allow the docker client to pull from insecure registries. To do this, we can add the following to /etc/docker/daemon.json to the Ubuntu server.
+Be sure to allow the docker client to pull from insecure registries. To do this, we can add the following to /etc/docker/daemon.json to the Ubuntu server.
 
 ```yaml
 {
-    "insecure-registries" : [ "192.168.1.133:5000" ]
+    "insecure-registries" : [ "192.168.1.133:3000" ]
 }
 ```
 
 Restart the docker daemon and retry pulling the image. Now it should work.
 
 ```sh
- docker pull 192.168.1.133:5000/events-app:latest 
+ docker pull 192.168.1.133:3000/events-app:latest 
 latest: Pulling from events-app
 Digest: sha256:f6ca5dcece3d40661c04080289f3327958ec265d9c86b41eadc0806d0d5d01d7
-Status: Downloaded newer image for 192.168.1.133:5000/events-app:latest
-192.168.1.133:5000/events-app:latest
+Status: Downloaded newer image for 192.168.1.133:3000/events-app:latest
+192.168.1.133:3000/events-app:latest
 ```
 
 ## Implications of using a private registry

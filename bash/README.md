@@ -772,9 +772,27 @@ The meeting organizer turns out to be a pretty nice guy. He also has an extensiv
 
 I promise that I'll make the changes and will test them shortly.
 
-## Pipeline
+## Updated Pipeline
 
 After implementing the changes he requested, we now have *pipeline.sh* and *deploy.sh*. I tend to agree with all his suggestions, especially regarding the polling functionality. I also have this slight feeling that some form of logging would be useful if the pipeline isn't run through crontab. But at this point, I feel like turning my attention to the *cloud*.
+
+## [Running the pipeline in Digital Ocean](#digital_ocean)
+
+As a pre-requisite, you should have two droplets with 2GB RAM and docker installed; see [Configuring Droplets](../ansible/README.md#configuring_droplets). We can call these servers are called *cicd-server* and *web-server*.
+
+It's tempting to just copy *pipeline.sh* and *deploy.sh* to *cicd-server* and attempt to run the pipeline; however, this will not work. I found this out the hard way, by troubleshooting *deploy.sh* and came up with the following checklist:
+
+- Current user ID is *admin*
+- Git pull works without errors
+- Must be able to SSH from cicd-server to web-server
+- A docker registry must be running on cicd-server
+- Docker registry must be trusted
+
+It can be tedious to do this checklist, so *cicd-checklist.sh* can do this for us.
+
+All the steps to set up the servers have already been discussed. These need to be performed on the droplets.
+
+If using firewalls, configure ports 22 and 5000.
 
 ## Acknowledgements
 
