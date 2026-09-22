@@ -794,6 +794,12 @@ All the steps to set up the servers have already been discussed. These need to b
 
 If using firewalls, configure ports 22 and 5000.
 
+## Next Steps
+
+Bash scripts in a CI/CD pipeline provides a simple method for deploying our application to a web server. There are a few limitations however. Ideally, the pipeline should be scheduled to run automatically after a change in the git repository, as we noted earlier. Also, we don't have a log or even metrics. How do we handle multiple pipelines? Perhaps we'd like to use a more declarative language to describe our pipeline; describe what we want, not how. 
+
+This is where CI/CD platforms such as Jenkins come into play. 
+
 ## Acknowledgements
 
 Although ChatGPT suggested the code changes for the scripts, I introduced the fictional code reviewer to make the interaction more human-like. I felt that these suggestions were valuable and most likeley represent best practices for DevOps.

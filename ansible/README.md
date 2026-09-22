@@ -309,7 +309,7 @@ $ ANSIBLE_CONFIG=myansible.cfg ansible-playbook setup-vms2.yaml -e "myhosts=all"
 
 ## [Configuring Digital Ocean Droplets](#configuring_droplets)
 
-In theory, configuring Digital Ocean droplets should be no different than KVMs. However, a few changes were made to the Ansible scripts due to unexpected issues, including:
+In theory, configuring Digital Ocean droplets to run our CI/CD pipeline and application should be no different than doing it for KVMs. However, a few changes were made to the Ansible scripts due to unexpected issues, including:
 
 - Our ansible.cfg file that we had previously hard-coded the inventory file.
 - Our *update_packages* role couldn't proceed because of an apt lock file. This might have been caused because of the way the Droplet was provisioned. 

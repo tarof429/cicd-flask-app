@@ -33,4 +33,6 @@ After sourcing this script, run *cicd-checklist.sh*. If this passes, then run *p
 
 Afterwards, you should be able to reach the application at *http://<ip.of.web.server>:5000* or *http://<route.53.record.name>:5000*.
 
-To really test the pipeline, make a change in a route (such as /test), commit and push the changes.
+To really test the pipeline, make a change in a route (such as /test), commit and push the changes. You can then curl the test page and it should contain the updated text.
+
+<img src="images/test_page.png" />
