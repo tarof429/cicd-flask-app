@@ -778,12 +778,12 @@ After implementing the changes he requested, we now have *pipeline.sh* and *depl
 
 ## [Running the pipeline in Digital Ocean](#digital_ocean)
 
-As a pre-requisite, you should have two droplets with 2GB RAM and docker installed; see [Configuring Droplets](../ansible/README.md#configuring_droplets). We can call these servers are called *cicd-server* and *web-server*.
+See [Configuring Droplets](../ansible/README.md#configuring_droplets). We can call these servers are called *cicd-server* and *web-server*.
 
-It's tempting to just copy *pipeline.sh* and *deploy.sh* to *cicd-server* and attempt to run the pipeline; however, this will not work. I found this out the hard way, by troubleshooting *deploy.sh* and came up with the following checklist:
+It's tempting to just copy *pipeline.sh* and *deploy.sh* to *cicd-server* and attempt to run the pipeline; however, this will not work. I found this out the hard way by troubleshooting *deploy.sh* and came up with the following checklist:
 
 - Current user ID is *admin*
-- Git pull works without errors
+- Admin can checkout/pull this repository without errors
 - Must be able to SSH from cicd-server to web-server
 - A docker registry must be running on cicd-server
 - Docker registry must be trusted

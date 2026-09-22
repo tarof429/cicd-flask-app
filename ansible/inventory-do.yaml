@@ -1,8 +1,8 @@
 ubuntu:
   hosts:
     cicd-server:
-      ansible_host: 157.230.146.145
+      ansible_host: 138.68.15.11
       ansible_user: root
     web-server:
-      ansible_host: 138.68.243.188
+      ansible_host: 157.230.175.68
       ansible_user: root

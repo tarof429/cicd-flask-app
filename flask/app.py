@@ -29,7 +29,7 @@ def create_app(mode=None):
 
     @app.route('/test')
     def test():
-        return '<html><body>Test Page 2</body></html>'
+        return '<html><body>This is a test</body></html>'
 
     @app.errorhandler(404)
     def page_not_found(error):

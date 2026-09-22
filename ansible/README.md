@@ -319,7 +319,7 @@ To run this role, run:
 
 ```sh
 $ export ANSIBLE_CONFIG=myansible2.cfg 
-$ ansible-playbook -i inventory-do.yaml setup-vms2.yaml -e "myhosts=all"
+$ ansible-playbook -i inventory-do.yaml -e "myhosts=all" setup-vms2.yaml
 ```
 
 where myansible2.cfg looks something like this:
@@ -333,7 +333,7 @@ vault_password_file = ~/.vault_pass
 Below is an example:
 
 ```sh
-$ ansible-playbook -i inventory-do.yaml setup-vms2.yaml -e "myhosts=all"
+$ ansible-playbook -i inventory-do.yaml -e "myhosts=all" setup-vms2.yaml
 
 PLAY [all] *********************************************************************
 
