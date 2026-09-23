@@ -412,6 +412,10 @@ cicd-server                : ok=14   changed=8    unreachable=0    failed=0    s
 web-server                 : ok=14   changed=8    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
 ```
 
+## Patching
+
+Patching is a very common activity for VMs. The *patch* role takes care of this. Using the *reboot* role is a good idea to ensure the kernels are loading the latest kernel.
+
 ## References
 
 https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_vars_facts.html
