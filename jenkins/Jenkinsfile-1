@@ -1,0 +1,20 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Pull image') {
+            steps {
+                sh 'docker pull hello-world'
+            }
+        }
+        
+        stage('Run image') {
+            steps {
+                script {
+                    def output = sh(returnStdout: true, script: 'docker run hello-world')
+                    echo "${output}"
+                }
+            }
+        }
+    }
+}

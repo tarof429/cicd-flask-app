@@ -36,3 +36,16 @@ Afterwards, you should be able to reach the application at *http://<ip.of.web.se
 To really test the pipeline, make a change in a route (such as /test), commit and push the changes. You can then curl the test page and it should contain the updated text.
 
 <img src="images/test_page.png" />
+
+## Managing Droplets
+
+It can be handy to install *doctl* to manage droplets from the command-line. You will need to configure a PAT (personal access token) to use the CLI. Preferably, only assign the minimum scope needed to delete droplets.
+
+To delete both droplets used by the bash pipeline, run:
+
+```sh
+{
+ doctl compute droplet delete  cicd-server -f
+doctl compute droplet delete  web-server -f
+}
+```
