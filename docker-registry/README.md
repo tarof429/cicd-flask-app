@@ -177,7 +177,7 @@ Edit /etc/docker/daemon.json so tht it says:
 
 ```sh
 {
-    "insecure-registries" : [ "192.168.1.133:5000" ],
+    "insecure-registries" : [ "192.168.1.133:3000" ],
     "data-root": "/data/docker",
     "storage-driver": "overlay2"
 }

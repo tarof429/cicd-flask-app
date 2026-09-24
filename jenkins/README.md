@@ -107,3 +107,7 @@ The *Jenkinsfile-2* script defines several stages that we indicated earlier in *
 Environment variables defined at the top are globally available to the script. An alternative syntax syntax is to prefix the variable with *env.*. 
 
 Pushing images to our local docker registry doesn't require any credentials so a simple push statement should work. 
+
+A successful run is shown below.
+
+<img src="images/successful_build_stage.png" />
