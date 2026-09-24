@@ -4,6 +4,7 @@ pipeline {
     environment {
             PRIVATE_REGISTRY_SERVER = '192.168.1.133'
             PRIVATE_REGISTRY_PORT = '3000'
+            PRIVATE_REPOSITORY = "events-app"
     }
 
     stages {
