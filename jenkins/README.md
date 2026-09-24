@@ -99,3 +99,11 @@ After running the pipeline successfully, go to Build | Pipeline overview. This s
 ### Pipelines in detail
 
 I think it's best to read the official docs at https://www.jenkins.io/doc/book/pipeline/ instead of trying to repeat what's alredy been said.
+
+## Jenkinsfile with build stage
+
+The *Jenkinsfile-2* script defines several stages that we indicated earlier in *pipeline.sh*. In this script, only the *build* stage is defined; we'll continue to flesh out more stages in subsequent scripts. 
+
+Environment variables defined at the top are globally available to the script. An alternative syntax syntax is to prefix the variable with *env.*. 
+
+Pushing images to our local docker registry doesn't require any credentials so a simple push statement should work. 

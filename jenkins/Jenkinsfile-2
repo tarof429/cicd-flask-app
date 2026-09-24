@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    environment {
+            PRIVATE_REGISTRY_SERVER = '192.168.1.133'
+            PRIVATE_REGISTRY_PORT = '3000'
+    }
+
+    stages {
+        stage('Build') {
+            script {
+                def COMMIT_HASH = sh(
+                    script: 'git rev-parse --short HEAD',
+                    returnStdout: true
+                ).trim()
+
+                 env.IMAGE_TAG = ${COMMIT_HASH}-${env.BUILD_NUMBER}
+
+                sh(script: "docker build -f docker/Dockerfile.test \
+                    -t ${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_REPOSITORY}:${IMAGE_TAG} ."
+                )
+
+                sh(script: "docker push \
+                    ${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_REPOSITORY}:${IMAGE_TAG}"
+                )
+
+            }
+        }
+
+        stage ('Test') {
+
+        }
+
+        stage ('Publish') {
+
+        }
+
+        stage ('Deploy') {
+
+        }
+    }
+}
