@@ -15,7 +15,7 @@ pipeline {
                         returnStdout: true
                     ).trim()
 
-                    env.IMAGE_TAG = ${COMMIT_HASH}-${env.BUILD_NUMBER}
+                    env.IMAGE_TAG = "${COMMIT_HASH}-${env.BUILD_NUMBER}"
 
                     sh(script: "docker build -f docker/Dockerfile.test \
                         -t ${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_REPOSITORY}:${IMAGE_TAG} ."
