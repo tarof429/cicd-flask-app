@@ -30,14 +30,21 @@ pipeline {
         }
 
         stage ('Test') {
-
+            steps {
+                echo 'Test'
+            }
         }
 
         stage ('Publish') {
-
+            steps {
+                echo 'Publish'
+            }
         }
 
         stage ('Deploy') {
+            steps {
+                echo 'Deploy'
+            }
 
         }
     }
