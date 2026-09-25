@@ -11,7 +11,7 @@ services:
         condition: service_healthy
         restart: true
     volumes:
-      - - ./reports:/app/reports
+      - "./reports:/app/reports"
   db:
     image: postgres:14.24-alpine3.23
     healthcheck:
