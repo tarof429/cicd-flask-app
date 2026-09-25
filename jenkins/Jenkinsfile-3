@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    environment {
+            PRIVATE_REGISTRY_SERVER = '192.168.1.133'
+            PRIVATE_REGISTRY_PORT = '3000'
+            PRIVATE_REPOSITORY = "events-app"
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    def COMMIT_HASH = sh(
+                        script: 'git rev-parse --short HEAD',
+                        returnStdout: true
+                    ).trim()
+
+                    env.IMAGE_TAG = "${COMMIT_HASH}-${env.BUILD_NUMBER}"
+
+                    def imageName = "${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_REPOSITORY}:${IMAGE_TAG}"
+
+                    def customImage = docker.build(imageName, "-f docker/Dockerfile.test .")
+
+                    customImage.push()
+
+                }
+            }
+        }
+
+        stage ('Test') {
+            steps {
+                echo 'Test'
+            }
+        }
+
+        stage ('Publish') {
+            steps {
+                echo 'Publish'
+            }
+        }
+
+        stage ('Deploy') {
+            steps {
+                echo 'Deploy'
+            }
+
+        }
+    }
+}
