@@ -20,7 +20,7 @@ pipeline {
 
                     def imageName = "${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_REPOSITORY}:${IMAGE_TAG}"
 
-                    def customImage = docker.build(imageName, "-f docker/Dockerfile.test .")
+                    def customImage = docker.build(imageName, "-f docker/Dockerfile.test2 .")
 
                     customImage.push()
             
@@ -31,7 +31,7 @@ pipeline {
         stage ('Test') {
             steps {
                 sh "mkdir -p docker-compose/reports"
-                
+
                 dir('docker-compose') {
                     sh(script: "PRIVATE_REGISTRY_SERVER=${PRIVATE_REGISTRY_SERVER} \
                         PRIVATE_REGISTRY_PORT=${PRIVATE_REGISTRY_PORT} PRIVATE_REPOSITORY=${PRIVATE_REPOSITORY} IMAGE_TAG=${IMAGE_TAG} \
