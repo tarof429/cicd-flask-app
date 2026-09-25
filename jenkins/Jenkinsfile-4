@@ -41,9 +41,9 @@ pipeline {
                             docker compose -f docker-compose-test3.yaml up --abort-on-container-exit --exit-code-from app")
                     }
 
-                //     sh "mkdir -p reports"
-                //     sh(script: "docker run --rm -v test-reports:/source:ro \
-                //         -v $PWD/reports:/dest alpine:3.24 sh -c 'cp -a /source/. /dest/'")
+                    sh "mkdir -p reports"
+                    sh(script: "docker run --rm -v test-reports:/source:ro \
+                        -v $PWD/reports:/dest alpine:latest sh -c 'cp /source/result.xml /dest/'")
                 
                     if (testStatus != 0) {
                         error("Tests failed with exit code ${testStatus}")    
