@@ -113,3 +113,13 @@ A successful run is shown below.
 <img src="images/successful_build_stage.png" />
 
 The *Jenkinsfile-3* script takes the previous script one step further and uses the docker pipeline plugin (which needs to be installed) to build and push the docker image. This plugin can help abstract some of the details of interacting with docker.
+
+## Jenkinsfile with test stage
+
+The *Jenkinsfile-4* script adds the test stage. Initially, the pipeline fails to run correctly. This is because our docker compose file expects COMMIT_HASH for the image tag, but our Jenkinsfile computes the tag as an aggregation of the commit hash plus the build number. Hence we make a new version of the docker compose file to align with our goals.
+
+This script does work well; if the tests fail, the build will fail. 
+
+<img src="images/failed_build.png" />
+
+However, I find it difficult to dig deeper and find out which test failed. 

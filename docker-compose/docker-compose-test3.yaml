@@ -10,6 +10,8 @@ services:
       db:
         condition: service_healthy
         restart: true
+    volumes:
+      - - ./reports:/app/reports
   db:
     image: postgres:14.24-alpine3.23
     healthcheck:
