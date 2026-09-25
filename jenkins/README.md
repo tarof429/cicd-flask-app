@@ -112,6 +112,4 @@ A successful run is shown below.
 
 <img src="images/successful_build_stage.png" />
 
-Now let's see what happens if we make a change in flask/tests/test_smoke.py and change the assertion. If we commit the changes and run the build, we expect it to fail, but it doesn't. 
-
-If we run the tests manually, we can verify that the tests indeed fail. So how do we fix this?
+The *Jenkinsfile-3* script takes the previous script one step further and uses the docker pipeline plugin (which needs to be installed) to build and push the docker image. This plugin can help abstract some of the details of interacting with docker.
