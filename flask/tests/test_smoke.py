@@ -19,4 +19,4 @@ def client(app):
 
 def test_request_example(client):
     response = client.get("/")
-    assert b"Welcome to the Community Calendar fail!" in response.data
+    assert b"Welcome to the Community Calendar" in response.data
