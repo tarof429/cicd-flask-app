@@ -41,7 +41,7 @@ pipeline {
 
                     sh "mkdir -p reports"
                     sh(script: "docker run --rm -v docker-compose_test-reports:/source:ro \
-                        -v "$PWD/reports:/dest" alpine:3.24 sh -c 'cp -a /source/. /dest/'")
+                        -v $PWD/reports:/dest alpine:3.24 sh -c 'cp -a /source/. /dest/'")
                 
                     if (testStatus != 0) {
                         error("Tests failed with exit code ${testStatus}; report was copied.")    
