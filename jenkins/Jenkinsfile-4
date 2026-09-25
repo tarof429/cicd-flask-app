@@ -30,13 +30,22 @@ pipeline {
 
         stage ('Test') {
             steps {
-                sh "mkdir -p docker-compose/reports"
+                script {
+                    sh "mkdir -p docker-compose/reports"
 
-                dir('docker-compose') {
-                    sh(script: "PRIVATE_REGISTRY_SERVER=${PRIVATE_REGISTRY_SERVER} \
-                        PRIVATE_REGISTRY_PORT=${PRIVATE_REGISTRY_PORT} PRIVATE_REPOSITORY=${PRIVATE_REPOSITORY} IMAGE_TAG=${IMAGE_TAG} \
-                        docker compose -f docker-compose-test3.yaml up --abort-on-container-exit --exit-code-from app")
-                }
+                    dir('docker-compose') {
+                        def testStatus = sh(returnStatus: true, script: "PRIVATE_REGISTRY_SERVER=${PRIVATE_REGISTRY_SERVER} \
+                            PRIVATE_REGISTRY_PORT=${PRIVATE_REGISTRY_PORT} PRIVATE_REPOSITORY=${PRIVATE_REPOSITORY} IMAGE_TAG=${IMAGE_TAG} \
+                            docker compose -f docker-compose-test3.yaml up --abort-on-container-exit --exit-code-from app")
+                    }
+
+                    sh "mkdir -p reports"
+                    sh(script: "docker run --rm -v docker-compose_test-reports:/source:ro \
+                        -v "$PWD/reports:/dest" alpine:3.24 sh -c 'cp -a /source/. /dest/'")
+                
+                    if (testStatus != 0) {
+                        error("Tests failed with exit code ${testStatus}; report was copied.")    
+                   }
             }
         }
 
@@ -51,6 +60,12 @@ pipeline {
                 echo 'Deploy'
             }
 
+        }
+    }
+
+    post {
+        always {
+            junit 'docker-compose/reports/*.xml'
         }
     }
 }
