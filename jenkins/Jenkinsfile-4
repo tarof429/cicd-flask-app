@@ -48,6 +48,7 @@ pipeline {
                 //     if (testStatus != 0) {
                 //         error("Tests failed with exit code ${testStatus}; report was copied.")    
                 //    }
+                }
             }
         }
 
