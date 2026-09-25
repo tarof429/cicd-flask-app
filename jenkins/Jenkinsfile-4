@@ -62,10 +62,4 @@ pipeline {
 
         }
     }
-
-    post {
-        always {
-            junit 'docker-compose/reports/*.xml'
-        }
-    }
 }
