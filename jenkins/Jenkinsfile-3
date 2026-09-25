@@ -23,7 +23,7 @@ pipeline {
                     def customImage = docker.build(imageName, "-f docker/Dockerfile.test .")
 
                     customImage.push()
-
+            
                 }
             }
         }
