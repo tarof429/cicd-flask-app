@@ -1,3 +1,3 @@
 #!/bin/sh
 
-python -m pytest -v --junitxml=reports/result.xml
+python -m pytest -v --junitxml=/app/reports/result.xml
