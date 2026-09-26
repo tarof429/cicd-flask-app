@@ -40,6 +40,8 @@ pipeline {
                             docker compose -f docker-compose-test3.yaml up --abort-on-container-exit --exit-code-from app")
                     }
 
+                    sh "mkdir -p $WORKSPACE/test-reports"
+                    
                     docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
                         sh 'cp /source/result.xml "$WORKSPACE/test-reports/result.xml"'
                     }
