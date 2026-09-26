@@ -41,7 +41,7 @@ pipeline {
                     }
 
                     sh "mkdir -p $WORKSPACE/test-reports"
-                    
+
                     docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
                         sh 'cp /source/result.xml "$WORKSPACE/test-reports/result.xml"'
                     }
@@ -66,4 +66,10 @@ pipeline {
 
         }
     }
+
+        post {
+            always {
+                archiveArtifacts artifacts: 'test-reports/**', allowEmptyArchive: true
+            }
+        }
 }
