@@ -69,7 +69,7 @@ pipeline {
 
         post {
             always {
-                archiveArtifacts artifacts: 'test-reports/**', allowEmptyArchive: true
+                junit testResults: 'test-reports/result.xml', allowEmptyResults: true
             }
         }
 }
