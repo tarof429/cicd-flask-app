@@ -43,6 +43,7 @@ pipeline {
                     sh "mkdir -p $WORKSPACE/test-reports"
 
                     docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
+                        //sh 'cp /source/result.xml "$WORKSPACE/test-reports/result.xml"'
                         sh 'cp /source/report.html "$WORKSPACE/test-reports/report.html"'
                     }
 
@@ -69,6 +70,7 @@ pipeline {
 
     post {
         always {
+            //junit testResults: 'test-reports/result.xml', allowEmptyResults: true
             junit testResults: 'test-reports/report.html', allowEmptyResults: true
         }
     }
