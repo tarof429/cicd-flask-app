@@ -116,12 +116,8 @@ The *Jenkinsfile-3* script takes the previous script one step further and uses t
 
 ## Jenkinsfile with test stage
 
-The *Jenkinsfile-4* script adds the test stage. Initially, the pipeline fails to run correctly. This is because our docker compose file expects COMMIT_HASH for the image tag, but our Jenkinsfile computes the tag as an aggregation of the commit hash plus the build number. Hence we make a new version of the docker compose file to align with our goals.
+The *Jenkinsfile-4* script adds the test stage. Initially, the pipeline failed to run correctly. This is because our docker compose file expected COMMIT_HASH for the image tag, but our Jenkinsfile computes the tag as an aggregation of the commit hash plus the build number. Hence we make a new version of the docker compose file to align with our goals. Also we publish the test results to Jenkins. If we fix a broken test then we will see the trend directly in Jenkins.
 
-This script does work well; if the tests fail, the build will fail. 
+<img src="images/jenkins_test_trend.png" />
 
-<img src="images/failed_build.png" />
-
-However, I find it difficult to dig deeper and find out which test failed. 
-
-https://pytest-html.readthedocs.io/en/latest/user_guide.html#enhancing-reports
+Although pytest can generate HTML reports, I think it's better to generate XML reports and let Jenkins display it.
