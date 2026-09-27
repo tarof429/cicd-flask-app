@@ -34,17 +34,17 @@ pipeline {
 
                     def testStatus = 0
 
+                    sh "mkdir -p $WORKSPACE/test-reports"
+                    sh "rm -f $WORKSPACE/test-reports/*"
+
                     dir('docker-compose') {
                         testStatus = sh(returnStatus: true, script: "PRIVATE_REGISTRY_SERVER=${PRIVATE_REGISTRY_SERVER} \
                             PRIVATE_REGISTRY_PORT=${PRIVATE_REGISTRY_PORT} PRIVATE_REPOSITORY=${PRIVATE_REPOSITORY} IMAGE_TAG=${IMAGE_TAG} \
                             docker compose -f docker-compose-test3.yaml up --abort-on-container-exit --exit-code-from app")
                     }
 
-                    sh "mkdir -p $WORKSPACE/test-reports"
-                    sh "rm -f $WORKSPACE/test-reports/*"
-
                     docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
-                        sh 'cp /source/*.xml "$WORKSPACE/test-reports/'
+                        sh 'cp /source/*.xml "$WORKSPACE/test-reports/"'
                     }
 
                     if (testStatus != 0) {
