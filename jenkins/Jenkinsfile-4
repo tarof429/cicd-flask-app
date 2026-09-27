@@ -43,7 +43,7 @@ pipeline {
                     sh "mkdir -p $WORKSPACE/test-reports"
                     sh "rm -f $WORKSPACE/test-reports/*"
 
-                    docker.image('alpine:latest').withRun('--rm').inside('-v test-reports:/source:ro') {
+                    docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
                         sh 'cp /source/*.xml "$WORKSPACE/test-reports/'
                     }
 
