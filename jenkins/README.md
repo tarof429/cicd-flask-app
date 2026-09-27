@@ -123,3 +123,5 @@ This script does work well; if the tests fail, the build will fail.
 <img src="images/failed_build.png" />
 
 However, I find it difficult to dig deeper and find out which test failed. 
+
+https://pytest-html.readthedocs.io/en/latest/user_guide.html#enhancing-reports
