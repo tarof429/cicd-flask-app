@@ -26,6 +26,8 @@ pipeline {
                     def customImage = docker.build(imageName, "-f docker/Dockerfile.test2 .")
 
                     customImage.push()
+
+                    customImage.push('latest')
             
                 }
             }
