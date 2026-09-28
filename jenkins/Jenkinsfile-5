@@ -60,7 +60,7 @@ pipeline {
         stage ('Publish') {
             steps {
                 script {
-                    def customImage = docker.build("tarof429/events-app", "-f docker/Dockerfile .")
+                    def customImage = docker.build("tarof429/events-app:${IMAGE_TAG}", "-f docker/Dockerfile .")
 
                     docker.withRegistry("${DOCKERHUB_REGISTRY}", "dockerhub") {
                         customImage.push()
