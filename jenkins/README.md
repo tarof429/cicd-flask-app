@@ -123,3 +123,7 @@ The *Jenkinsfile-4* script adds the test stage. Initially, the pipeline failed t
 Although pytest can generate HTML reports, I think it's better to generate XML reports and let Jenkins display it.
 
 I had difficulty putting theory into practice. This is because both Jenkins *and* the tests are running as separate containers, so the problem was how to pass the test results, which are files, back to a location where Jenkins could find them. My solution was to store them in a docker volume called *test-reports*. When the tests are done, the pipeline uses a temporary container to copy those files back to the Jenkins container. Due to the complexity of this logic, I ended up writing *pipeline2.sh* which mirrors the Jenkins pipeline more closely and allowed me to troubleshoot issues found during development. Consuquently, I believe bash scripts are an excellent way to troubleshoot pipeline issues. 
+
+## Jenkinsfile with the publish stage
+
+The *Jenkinsfile-5* script adds the publish stage. We wrap the *push* in *withRegistry* block. This allows us to authenticate to Dockerhub using credentials stored in Jenkins. We also push the image using the *latest* tag to make it easy to grab the latest stable image.
