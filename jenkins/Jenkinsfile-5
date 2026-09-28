@@ -1,0 +1,85 @@
+pipeline {
+    agent any
+
+    environment {
+            PRIVATE_REGISTRY_SERVER = '192.168.1.133'
+            PRIVATE_REGISTRY_PORT = '3000'
+            PRIVATE_REPOSITORY = "events-app"
+            PUBLIC_REPOSITORY="tarof429/events-app"
+            IMAGE_TAG = ''
+            DOCKERHUB_REGISTRY = "https://index.docker.io/v1/"
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    def COMMIT_HASH = sh(
+                        script: 'git rev-parse --short HEAD',
+                        returnStdout: true
+                    ).trim()
+
+                    MAGE_TAG = "${COMMIT_HASH}-${env.BUILD_NUMBER}"
+
+                    def imageName = "${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_REPOSITORY}:${IMAGE_TAG}"
+
+                    def customImage = docker.build(imageName, "-f docker/Dockerfile.test2 .")
+
+                    customImage.push()
+            
+                }
+            }
+        }
+
+        stage ('Test') {
+            steps {
+                script {
+
+                    def testStatus = 0
+
+                    sh "mkdir -p $WORKSPACE/test-reports"
+                    sh "rm -f $WORKSPACE/test-reports/*"
+
+                    dir('docker-compose') {
+                        testStatus = sh(returnStatus: true, script: "PRIVATE_REGISTRY_SERVER=${PRIVATE_REGISTRY_SERVER} \
+                            PRIVATE_REGISTRY_PORT=${PRIVATE_REGISTRY_PORT} PRIVATE_REPOSITORY=${PRIVATE_REPOSITORY} IMAGE_TAG=${IMAGE_TAG} \
+                            docker compose -f docker-compose-test3.yaml up --abort-on-container-exit --exit-code-from app")
+                    }
+
+                    docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
+                        sh 'cp /source/*.xml "$WORKSPACE/test-reports/"'
+                    }
+
+                    if (testStatus != 0) {
+                        error("Tests failed with exit code ${testStatus}")    
+                   }
+                }
+            }
+        }
+
+        stage ('Publish') {
+            steps {
+                script {
+                    def customImage = docker.build("tarof429/events-app", "-f docker/Dockerfile .")
+
+                    docker.withRegistry("${DOCKERHUB_REGISTRY}", "dockerhub") {
+                        customImage.push()
+                    }
+                }
+            }
+        }
+
+        stage ('Deploy') {
+            steps {
+                echo 'Deploy'
+            }
+
+        }
+    }
+
+    post {
+        always {
+            junit 'test-reports/*.xml'
+        }
+    }
+}
