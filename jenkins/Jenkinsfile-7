@@ -53,7 +53,6 @@ pipeline {
 
                     docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
                         sh 'cp /source/*.xml "$WORKSPACE/test-reports/"'
-                        sh'cp /source/*.txt "$WORKSPACE/test-reports/"'
                     }
                     sh "mv $WORKSPACE/trivy_result.txt $WORKSPACE/test-reports/"
 
