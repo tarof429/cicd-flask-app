@@ -130,4 +130,8 @@ The *Jenkinsfile-5* script adds the publish stage. We wrap the *push* in *withRe
 
 ## Jenkinsfile with the deploy stage
 
-The *Jenkinsfile-6* script adds the deploy stage. We use the Jenkins SSH Agent plugin to copy files to the deployment server and run the deploy script.
+The *Jenkinsfile-6* script adds the deploy stage. I use the Jenkins SSH Agent plugin to copy files to the deployment server and run the deploy script. A few minor fixes were made to get this pipeline to work:
+
+- The psycopg2-binary Python library was added to requirements.txt
+- A new deploy2.sh which uses IMAGE_TAG was added
+
