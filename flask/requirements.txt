@@ -13,6 +13,7 @@ Mako==1.4.1
 MarkupSafe==3.0.3
 packaging==26.3
 pluggy==1.6.0
+psycopg2-binary==2.9.13
 Pygments==2.21.0
 pytest==9.1.1
 pytest-html==4.2.0
@@ -21,4 +22,3 @@ SQLAlchemy==2.0.52
 typing_extensions==4.16.0
 Werkzeug==3.1.8
 WTForms==3.2.2
-
