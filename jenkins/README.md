@@ -145,7 +145,7 @@ Adding a trigger, such as periodically polling github for changes, will keep the
 
 Corporate security standards often require that container images running in a deployment environment need to be free of vulnerabilities, known as CVEs. While it's impossible for images to be completely safe, usually companies set a minimum threshold. Trivy is a free and open source scanner that can be used to scan our image.
 
-Trivy can be installed in a variety of ways, but we'll install it directly on the deployment server. See https://trivy.dev/docs/latest/getting-started/installation/. 
+Trivy can be installed in a variety of ways, but initially we'll install it directly on the deployment server. See https://trivy.dev/docs/latest/getting-started/installation/. 
 
 The bash script *scan_with_trivy.sh* takes one parameter, the image tag. For example:
 
@@ -178,3 +178,46 @@ But interestingly, we do not use jaraco.context directly.
 After some more investigation, I found that the vulnerability came from the base image.
 
 <img src="images/image_vulnerabilities.png"/>
+
+Let's bulid a new docker image for Jenkins that contains trivy.
+
+```sh
+docker build -t myjenkins:a92b7-2 -f Dockerfile2 .
+```
+
+Bring it up (taking care to stop the old one first).
+
+```sh
+DOCKER_GID="$(stat -c '%g' /var/run/docker.sock)" docker compose -f docker-compose2.yaml up -d 
+```
+
+Confirm that trivy is now installed.
+
+```sh
+admin@web-server:~/cicd-flask-app/jenkins$ docker ps
+CONTAINER ID   IMAGE               COMMAND                  CREATED          STATUS          PORTS                                                    NAMES
+cd939294be64   myjenkins:a92b7-2   "/usr/bin/tini -- /u…"   16 seconds ago   Up 15 seconds   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp, 50000/tcp   jenkins-jenkins-1
+c13fdd123cbb   jenkins/ssh-agent   "setup-sshd"             16 seconds ago   Up 15 seconds   22/tcp                                                   jenkins-ssh-agent-1
+79d17642ed83   registry:3          "/entrypoint.sh /etc…"   46 hours ago     Up 46 hours     0.0.0.0:3000->5000/tcp, [::]:3000->5000/tcp              registry
+admin@web-server:~/cicd-flask-app/jenkins$ docker exec -ti cd939294be64 bash
+jenkins@cd939294be64:/$ which trivy
+/usr/local/bin/trivy
+```
+
+Run the build with *Jenkinsfile-7*. The scan works!
+
+```sh
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] sh
++ trivy image --severity HIGH,CRITICAL 192.168.1.133:3000/events-app:57a0b52-89
+2026-09-29T20:10:05Z	INFO	[vulndb] Need to update DB
+2026-09-29T20:10:05Z	INFO	[vulndb] Downloading vulnerability DB...
+```
+
+We intentionally don't fail the build, and rather let the build deploy as usual. We can see the trivy report in Jenkins' stage view.
+
+<img src="images/trivy_jenkins_output.png" />
+
+This logic gives us a chance to fix vulnerabilities while keeping the deployment server up-to-date with the latest version of our application.
+
