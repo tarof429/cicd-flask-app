@@ -79,10 +79,10 @@ pipeline {
                             sh "scp -o StrictHostKeyChecking=no docker-compose4.yaml ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER}:docker-compose.yaml"
                         }
                         dir('bash') {
-                            sh "scp -o StrictHostKeyChecking=no deploy.sh ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER}:deploy.sh"
+                            sh "scp -o StrictHostKeyChecking=no deploy2.sh ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER}:deploy.sh"
                         }
                         sh "ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} chmod +x deploy.sh"
-                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} ./deploy.sh ${COMMIT_HASH}"
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} ./deploy.sh ${IMAGE_TAG}"
                     }
                 }
             }
