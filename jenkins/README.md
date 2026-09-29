@@ -140,3 +140,41 @@ The *Jenkinsfile-6* script adds the deploy stage. I use the Jenkins SSH Agent pl
 Adding a trigger, such as periodically polling github for changes, will keep the application up to date on the deployment server.
 
 <img src="images/polling_scm.png" />
+
+## Container scanning with Trivy
+
+Corporate security standards often require that container images running in a deployment environment need to be free of vulnerabilities, known as CVEs. While it's impossible for images to be completely safe, usually companies set a minimum threshold. Trivy is a free and open source scanner that can be used to scan our image.
+
+Trivy can be installed in a variety of ways, but we'll install it directly on the deployment server. See https://trivy.dev/docs/latest/getting-started/installation/. 
+
+The bash script *scan_with_trivy.sh* takes one parameter, the image tag. For example:
+
+```sh
+bash ./scan_wiith_trivy.sh  af0433a-87
+```
+
+At this time, the following was reported:
+
+```sh
+Python (python-pkg)
+
+Total: 2 (HIGH: 2, CRITICAL: 0)
+
+┌───────────────────────────┬────────────────┬──────────┬────────┬───────────────────┬───────────────┬──────────────────────────────────────────────────────────────┐
+│          Library          │ Vulnerability  │ Severity │ Status │ Installed Version │ Fixed Version │                            Title                             │
+├───────────────────────────┼────────────────┼──────────┼────────┼───────────────────┼───────────────┼──────────────────────────────────────────────────────────────┤
+│ jaraco.context (METADATA) │ CVE-2026-23949 │ HIGH     │ fixed  │ 5.3.0             │ 6.1.0         │ jaraco.context: jaraco.context: Path traversal via malicious │
+│                           │                │          │        │                   │               │ tar archives                                                 │
+│                           │                │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-23949                   │
+├───────────────────────────┼────────────────┤          │        ├───────────────────┼───────────────┼──────────────────────────────────────────────────────────────┤
+│ wheel (METADATA)          │ CVE-2026-24049 │          │        │ 0.45.1            │ 0.46.2        │ wheel: wheel: Privilege Escalation or Arbitrary Code         │
+│                           │                │          │        │                   │               │ Execution via malicious wheel file...                        │
+│                           │                │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-24049                   │
+└───────────────────────────┴───────
+```
+
+But interestingly, we do not use jaraco.context directly.
+
+After some more investigation, I found that the vulnerability came from the base image.
+
+<img src="images/image_vulnerabilities.png"/>
