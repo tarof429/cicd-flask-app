@@ -127,3 +127,7 @@ I had difficulty putting theory into practice. This is because both Jenkins *and
 ## Jenkinsfile with the publish stage
 
 The *Jenkinsfile-5* script adds the publish stage. We wrap the *push* in *withRegistry* block. This allows us to authenticate to Dockerhub using credentials stored in Jenkins. We also push the image using the *latest* tag to make it easy to grab the latest stable image.
+
+## Jenkinsfile with the deploy stage
+
+The *Jenkinsfile-6* script adds the deploy stage. We use the Jenkins SSH Agent plugin to copy files to the deployment server and run the deploy script.
