@@ -135,3 +135,8 @@ The *Jenkinsfile-6* script adds the deploy stage. I use the Jenkins SSH Agent pl
 - The psycopg2-binary Python library was added to requirements.txt
 - A new deploy2.sh which uses IMAGE_TAG was added
 
+## Adding polling to the Jenkins job
+
+Adding a trigger, such as periodically polling github for changes, will keep the application up to date on the deployment server.
+
+<img src="images/polling_scm.png" />
