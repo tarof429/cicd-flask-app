@@ -75,8 +75,12 @@ pipeline {
             steps {
                 script {
                     sshagent(['deployment-server-key']) {
-                        sh "scp -o StrictHostKeyChecking=no ../docker-compose/docker-compose4.yaml ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER}:docker-compose.yaml"
-                        sh "scp -o StrictHostKeyChecking=no ../docker-compose/deploy.sh ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER}:deploy.sh"
+                        dir('docker-compose') {
+                            sh "scp -o StrictHostKeyChecking=no docker-compose4.yaml ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER}:docker-compose.yaml"
+                        }
+                        dir('bash') {
+                            sh "scp -o StrictHostKeyChecking=no deploy.sh ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER}:deploy.sh"
+                        }
                         sh "ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} chmod +x deploy.sh"
                         sh "ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} ./deploy.sh ${COMMIT_HASH}"
                     }
