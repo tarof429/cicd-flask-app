@@ -29,7 +29,7 @@ pipeline {
 
                     def output = sh(returnStdout: true, script: "trivy image --severity HIGH,CRITICAL ${imageName}")
 
-                    echo "${output}"
+                    writeFile("trivy_result.txt", output)
 
                     customImage.push()
                 }
@@ -53,6 +53,7 @@ pipeline {
 
                     docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
                         sh 'cp /source/*.xml "$WORKSPACE/test-reports/"'
+                        sh'cp /source/*.txt "$WORKSPACE/test-reports/"'
                     }
 
                     if (testStatus != 0) {
@@ -97,6 +98,7 @@ pipeline {
     post {
         always {
             junit 'test-reports/*.xml'
+             archiveArtifacts artifacts: 'test-reports/trivy_result.txt'
         }
     }
 }
