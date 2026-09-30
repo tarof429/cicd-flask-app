@@ -1,2 +1,3 @@
 docker-compose/reports/
 test-reports/
+docker-compose/current_image_tag.txt
