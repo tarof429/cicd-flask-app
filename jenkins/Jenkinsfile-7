@@ -6,7 +6,6 @@ pipeline {
             PRIVATE_REGISTRY_PORT = '3000'
             PRIVATE_REPOSITORY = "events-app"
             PUBLIC_REPOSITORY="tarof429/events-app"
-            IMAGE_TAG = ''
             DOCKERHUB_REGISTRY = "https://index.docker.io/v1/"
             DEPLOYMENT_USER = "admin"
             DEPLOYMENT_SERVER = "192.168.1.30"
@@ -53,7 +52,6 @@ pipeline {
 
                     docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
                         sh 'cp /source/*.xml "$WORKSPACE/test-reports/"'
-                        sh'cp /source/*.txt "$WORKSPACE/test-reports/"'
                     }
                     sh "mv $WORKSPACE/trivy_result.txt $WORKSPACE/test-reports/"
 
