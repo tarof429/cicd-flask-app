@@ -222,3 +222,8 @@ We intentionally don't fail the build, and rather let the build deploy as usual.
 This logic gives us a chance to fix vulnerabilities while keeping the deployment server up-to-date with the latest version of our application.
 
 The pipeline script has been updated to move the trivy results to a file under the test-results subdirectory. It is also archived for easy access in the Jenkins UI.
+
+## Removing old images using at
+
+The *Jenkinsfile-8* script uses *at* to schedule removal old docker images. This helps to reduce disk usage on the deployment server. Why use *at*? Initially, I planned to run this command before the new image was brought up. Now it's a bit of legacy logic. Still, I find it interesting that cleanup tasks can be scheduled asynchronously, so the code is left as is.
+
