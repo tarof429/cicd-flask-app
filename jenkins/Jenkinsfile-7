@@ -79,21 +79,32 @@ pipeline {
             steps {
                 script {
                     sshagent(['deployment-server-key']) {
+                        def previous_image_tag
+                        
                         dir('docker-compose') {
-                            writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
+                            previous_image_tag = readFile(file: "current_image_tag.txt").trim()
+                            
                             sh "scp -o StrictHostKeyChecking=no docker-compose4.yaml ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER}:docker-compose.yaml"
                         }
-                        
                         dir('bash') {
                             sh "scp -o StrictHostKeyChecking=no deploy2.sh ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER}:deploy.sh"
                         }
                         
                         sh "ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} chmod +x deploy.sh"
                         sh "ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} ./deploy.sh ${env.IMAGE_TAG}"
+
+                        writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
+
+                        // Queue removal on the deployment server.
+                        if (previous_image_tag) {
+                            sh """
+                            ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} \
+                                "echo 'docker rmi ${PUBLIC_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
+                            """
+                        }
                     }
                 }
             }
-
         }
     }
 
