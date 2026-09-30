@@ -61,9 +61,10 @@ pipeline {
                     }
                     sh "mv $WORKSPACE/trivy_result.txt $WORKSPACE/test-reports/"
 
-                    // Queue removal on the build server
+                    // Queue removal on the  server
                     if (previous_image_tag) {
-                        sh "'docker rmi ${PUBLIC_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
+                        echo "Removing docker image ${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_REPOSITORY}:${previous_image_tag}"
+                        sh "'docker rmi ${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
                     }
 
                     if (testStatus != 0) {
