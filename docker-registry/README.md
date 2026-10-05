@@ -183,6 +183,8 @@ Edit /etc/docker/daemon.json so tht it says:
 }
 ```
 
+Be *sure* that the IP in this file is correct!
+
 Restart docker daemon.
 
 ```sh

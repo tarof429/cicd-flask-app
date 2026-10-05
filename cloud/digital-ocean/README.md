@@ -8,7 +8,7 @@ Digital Ocean droplets can be used to run our CI/CD pipeline to deploy our Flask
 
 Create 2 droplets with Ubuntu and 2GB RAM each; this can be done using the GUI. The droplets should be created in a nearby region.
 
-## Usage for the Bash Pipeline
+## Steps for the Bash Pipeline
 
 To configure the droplets we can use Ansible. See [Configuring Droplets](../ansible/README.md#configuring_droplets). For additional security, configure firewalls for the droplets, opening ports 22 and 5000 to each other and to ourselves.
 
@@ -46,6 +46,15 @@ To delete both droplets used by the bash pipeline, run:
 ```sh
 {
  doctl compute droplet delete  cicd-server -f
-doctl compute droplet delete  web-server -f
+ doctl compute droplet delete  web-server -f
 }
 ```
+
+## Steps for the Jenkins Pipeline
+
+Similar to the steps needed to set up the bash pipeline, use Ansible to [configure droplets](../ansible/README.md#configuring_droplets). For additional security, configure firewalls for the droplets, opening ports 22 and 5000 to each other and to ourselves.
+
+ Checkout this repository to the cicd-server and run [cicd-checklist.sh](../bash/cicd-checklist.sh). Common errors are:
+
+ - JSON file used to configure insecure registries has an outdated IP
+ - SSH key was not configured
