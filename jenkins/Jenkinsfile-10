@@ -1,0 +1,142 @@
+pipeline {
+    agent any
+
+    environment {
+            PRIVATE_REGISTRY_SERVER = '192.168.1.133'
+            PRIVATE_REGISTRY_PORT = '3000'
+            PRIVATE_REPOSITORY = "events-app"
+            PUBLIC_REPOSITORY="tarof429/events-app"
+            DOCKERHUB_REGISTRY = "https://index.docker.io/v1/"
+            DEPLOYMENT_USER = "admin"
+            DEPLOYMENT_SERVER = "192.168.1.30"
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    def COMMIT_HASH = sh(
+                        script: 'git rev-parse --short HEAD',
+                        returnStdout: true
+                    ).trim()
+
+                    env.IMAGE_TAG = "${COMMIT_HASH}-${env.BUILD_NUMBER}"
+
+                    def imageName = "${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_REPOSITORY}:${env.IMAGE_TAG}"
+
+                    def customImage = docker.build(imageName, "-f docker/Dockerfile.test2 .")
+
+                    def output = sh(returnStdout: true, script: "trivy image --severity HIGH,CRITICAL ${imageName}")
+
+                    writeFile(file: "trivy_result.txt", text: "${output}")
+
+                    customImage.push()
+                }
+            }
+        }
+
+        stage ('Test') {
+            steps {
+                script {
+
+                    def testStatus = 0
+
+                    sh "mkdir -p $WORKSPACE/test-reports"
+                    sh "rm -f $WORKSPACE/test-reports/*"
+
+                    def previous_image_tag
+
+                    dir('docker-compose') {
+                        previous_image_tag = readFile(file: "current_image_tag.txt").trim()
+
+                        writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
+
+                        testStatus = sh(returnStatus: true, script: "PRIVATE_REGISTRY_SERVER=${PRIVATE_REGISTRY_SERVER} \
+                            PRIVATE_REGISTRY_PORT=${PRIVATE_REGISTRY_PORT} PRIVATE_REPOSITORY=${PRIVATE_REPOSITORY} IMAGE_TAG=${env.IMAGE_TAG} \
+                            docker compose -f docker-compose-test3.yaml up --abort-on-container-exit --exit-code-from app")
+                    }
+
+                    docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
+                        sh 'cp /source/*.xml "$WORKSPACE/test-reports/"'
+                    }
+                    sh "mv $WORKSPACE/trivy_result.txt $WORKSPACE/test-reports/"
+
+                    // Queue removal on the  server
+                    if (previous_image_tag) {
+                        echo "Removing docker image ${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_REPOSITORY}:${previous_image_tag}"
+                        sh "docker rmi ${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_REPOSITORY}:${previous_image_tag}"
+                    
+                        echo "Removing docker image ${PUBLIC_REPOSITORY}:${previous_image_tag}"
+                        sh "docker rmi ${PUBLIC_REPOSITORY}:${previous_image_tag}"
+                    }
+
+                    if (testStatus != 0) {
+                        error("Tests failed with exit code ${testStatus}")    
+                   }
+                }
+            }
+        }
+
+        stage ('Publish') {
+            when {
+                expression {
+                    env.BRANCH_NAME == 'main'
+                }
+            }
+            steps {
+                script {
+                    def customImage = docker.build("tarof429/events-app:${env.IMAGE_TAG}", "-f docker/Dockerfile .")
+
+                    docker.withRegistry("${DOCKERHUB_REGISTRY}", "dockerhub") {
+                        customImage.push()
+                        customImage.push('latest')
+                    }
+                }
+            }
+        }
+
+        stage ('Deploy') {
+            when {
+                expression {
+                    env.BRANCH_NAME == 'main'
+                }
+            }
+            steps {
+                script {
+                    sshagent(['deployment-server-key']) {
+                        def previous_image_tag
+                        
+                        dir('docker-compose') {
+                            previous_image_tag = readFile(file: "current_image_tag.txt").trim()
+                            
+                            sh "scp -o StrictHostKeyChecking=no docker-compose4.yaml ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER}:docker-compose.yaml"
+                        }
+                        dir('bash') {
+                            sh "scp -o StrictHostKeyChecking=no deploy2.sh ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER}:deploy.sh"
+                        }
+                        
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} chmod +x deploy.sh"
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} ./deploy.sh ${env.IMAGE_TAG}"
+
+                        writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
+
+                        // Queue removal on the deployment server
+                        if (previous_image_tag) {
+                            sh """
+                            ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} \
+                                "echo 'docker rmi ${PUBLIC_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
+                            """
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            junit 'test-reports/*.xml'
+             archiveArtifacts artifacts: 'test-reports/trivy_result.txt'
+        }
+    }
+}

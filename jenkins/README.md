@@ -227,5 +227,20 @@ The pipeline script has been updated to move the trivy results to a file under t
 
 The *Jenkinsfile-8* script uses *at* to schedule removal old docker images. This helps to reduce disk usage on the deployment server. Why use *at*? Initially, I planned to run this command before the new image was brought up. Now it's a bit of legacy logic. Still, I find it interesting that cleanup tasks can be scheduled asynchronously, so the code is left as is.
 
-
 *Jenkinsfile-9* extends the image cleanup to the webserver (the where Jenkins is running). Since we're inside the container we just delete the images immediately without scheduling.
+
+## Conditional branch builds
+
+The *Jenkinsfile-10* script introduces the idea of conditional stages. 
+
+Now that the pipeline runs correctly in KVM, we can explore how it works in Digital Ocean. But to be safe and prevent accidental deployment, we work in a development branch. Even if changes are pushed to github, we'll skip the last two stages, *Publish* and *Deploy*, if the pipeline job is configured to only poll for the main branch. We can remove the condition once we are comfortable. 
+
+Below is a diagram:
+
+```sh
+Environment  Branch     Push to Deployment Server
+-----------  ------     ------------------------
+KVM          Main       Yes
+DO           feature/do  No
+```
+
