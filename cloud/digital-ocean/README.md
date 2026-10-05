@@ -58,3 +58,29 @@ Similar to the steps needed to set up the bash pipeline, use Ansible to [configu
 
  - JSON file used to configure insecure registries has an outdated IP
  - SSH key was not configured
+
+Next, SSH to the cicd-server as admin. 
+
+Build our custom image for Jenkins:
+
+```sh
+docker build -t myjenkins:a92b7-2 -f Dockerfile2 .
+```
+
+Bring up Jenkins:
+
+```sh
+DOCKER_GID="$(stat -c '%g' /var/run/docker.sock)" docker compose -f docker-compose2.yaml up -d 
+```
+
+Update the firewall and open port 8080 to my IP.
+
+Get the admin password. For example:
+
+```sh
+docker exec -ti a430fbd48125 cat /var/jenkins_home/secrets/initialAdminPassword
+ ```
+
+ Once Jenkins is running, install the  Jenkins SSH Agent plugin.
+
+ Next, add the credentials for dockerhub and deployment-server-key.
