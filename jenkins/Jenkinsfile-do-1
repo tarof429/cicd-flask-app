@@ -47,8 +47,11 @@ pipeline {
                     def previous_image_tag
 
                     dir('docker-compose') {
-                        previous_image_tag = readFile(file: "current_image_tag.txt").trim()
-
+                        try {
+                            previous_image_tag = readFile(file: "current_image_tag.txt").trim()
+                        } catch(err) {
+                            echo "Unable to read current_image_tag.txt: ${err}"
+                        }
                         writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
 
                         testStatus = sh(returnStatus: true, script: "PRIVATE_REGISTRY_SERVER=${PRIVATE_REGISTRY_SERVER} \

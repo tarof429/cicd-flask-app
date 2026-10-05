@@ -81,6 +81,7 @@ Get the admin password. For example:
 docker exec -ti a430fbd48125 cat /var/jenkins_home/secrets/initialAdminPassword
  ```
 
- Once Jenkins is running, install the  Jenkins SSH Agent plugin.
+ Once Jenkins is running, install the  Jenkins SSH Agent plugin and  docker pipeline plugin.
 
  Next, add the credentials for dockerhub and deployment-server-key.
+
