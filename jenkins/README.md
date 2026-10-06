@@ -250,3 +250,36 @@ The *Jenkinsfile-do-1* script is our first attempt to support Digital Ocean. An 
 
 On further thought, I felt that having separate scripts for diferent cloud environments was not ideal and that ths could probably could be improved.
 
+The *Jenkinsfile-11* script is a simple fix that relies on parameters set in the Jenkins job. This solution depends on parameters defined in Jenkins itself, not in the pipeline script. As a reminder, I have added the appropriate values in the script as comments.
+
+```groovy
+    environment {
+            // KVM
+            // PRIVATE_REGISTRY_SERVER = '192.168.1.133'
+            // DEPLOYMENT_SERVER = "192.168.1.30"
+
+            // Digital Ocean
+            // PRIVATE_REGISTRY_SERVER = '178.128.185.60'
+            // DEPLOYMENT_SERVER = "157.230.166.124"
+
+            PRIVATE_REGISTRY_PORT = '3000'
+            PRIVATE_REPOSITORY = "events-app"
+            PUBLIC_REPOSITORY="tarof429/events-app"
+            DOCKERHUB_REGISTRY = "https://index.docker.io/v1/"
+            DEPLOYMENT_USER = "admin"
+    }
+```
+
+The updated build shows the default values for these variables.
+
+<img src="images/parameterized_build.png" />
+
+Of course, the question is whether this won't cause issues. What if the user triggering the build enters an IP address that he shouldn't have? For this valid concern, I'd say the following:
+
+- Nothing is perfect; this is a simple solution
+- Firewalls should be set on the servers to prevent unauthorized access
+- SSH keys should also limit unauthorized access
+
+On the deployment server droplet, we only allow SSH from the Jenkins or from my own IP. This is done both at the firewall as well as the SSH key level.
+
+I think that, in addition, also limit who has access to each Jenkins server. Developers shouldn't have access to production environments. 
