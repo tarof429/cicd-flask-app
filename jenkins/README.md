@@ -135,6 +135,8 @@ The *Jenkinsfile-6* script adds the deploy stage. I use the Jenkins SSH Agent pl
 - The psycopg2-binary Python library was added to requirements.txt
 - A new deploy2.sh which uses IMAGE_TAG was added
 
+If you get stuck with the SSH Agent plugin, see https://medium.com/@Shamimw/how-i-spent-hours-learning-ssh-access-in-jenkins-using-sshagent-so-you-dont-have-to-6d1420657084. The private key referred by the plugin is the private key of the cicd-server where Jenkins is running.
+
 ## Adding polling to the Jenkins job
 
 Adding a trigger, such as periodically polling github for changes, will keep the application up to date on the deployment server.
