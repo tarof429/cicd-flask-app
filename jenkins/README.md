@@ -244,3 +244,9 @@ KVM          Main       Yes
 DO           feature/do  No
 ```
 
+## Digital Ocean
+
+The *Jenkinsfile-do-1* script is our first attempt to support Digital Ocean. An unexpected issue occurred when first running this pipeline: the build failed due to a missing current_image_tag.txt file. This is the reason why try...catch blocks were introdcued.
+
+On further thought, I felt that having separate scripts for diferent cloud environments was not ideal and that ths could probably could be improved.
+
