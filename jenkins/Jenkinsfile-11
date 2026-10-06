@@ -91,7 +91,7 @@ pipeline {
                     if (testStatus != 0) {
                         error("Tests failed with exit code ${testStatus}")    
                    } else {
-                    eco "Tests passed!"
+                    echo "Tests passed!"
                    }
                 }
             }
