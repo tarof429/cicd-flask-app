@@ -288,6 +288,4 @@ I think that, in addition, also limit who has access to each Jenkins server. Dev
 
 The script *Jenkinsfile-11* has been corrected to check for env.GIT_BRANCH. This means that Jenkins running in KVM will deploy to production while the Droplet will not. 
 
-## Playing with conditional stages
-
-Now let's say what we really want is to have more control over whether we deploy when running in Digital Ocean. Since this is an experiment, what we could do is change the Jenkins job definition stages to only run when the branch is *prod*. 
+On further thought, I find that the conditional stage is making the build confusing. *Jenkinsfile-12* removes the condition. Also we disable the build on the KVM Jenkins and only focus on the Digital Ocean Jenkins.
