@@ -70,9 +70,7 @@ pipeline {
                     }
                     sh "mv $WORKSPACE/trivy_result.txt $WORKSPACE/test-reports/"
 
-                    // Queue removal on the  server
                     if (previous_image_tag) {
-                        
                         echo "Removing docker image ${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_REPOSITORY}:${previous_image_tag}"
                         try {
                             sh "docker rmi ${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_REPOSITORY}:${previous_image_tag}"
