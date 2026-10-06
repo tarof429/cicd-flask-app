@@ -283,3 +283,7 @@ Of course, the question is whether this won't cause issues. What if the user tri
 On the deployment server droplet, we only allow SSH from the Jenkins or from my own IP. This is done both at the firewall as well as the SSH key level.
 
 I think that, in addition, also limit who has access to each Jenkins server. Developers shouldn't have access to production environments. 
+
+## Correction regarding conditional stages
+
+The script *Jenkinsfile-11* has been corrected to check for env.GIT_BRANCH. This means that Jenkins running in KVM will deploy to production while the Droplet will not. 

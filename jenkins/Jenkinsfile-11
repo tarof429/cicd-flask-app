@@ -98,7 +98,7 @@ pipeline {
         stage ('Publish') {
             when {
                 expression {
-                    env.BRANCH_NAME == 'main'
+                    env.GIT_BRANCH == 'origin/main'
                 }
             }
             steps {
@@ -116,7 +116,7 @@ pipeline {
         stage ('Deploy') {
             when {
                 expression {
-                    env.BRANCH_NAME == 'main'
+                    env.GIT_BRANCH == 'origin/main'
                 }
             }
             steps {
