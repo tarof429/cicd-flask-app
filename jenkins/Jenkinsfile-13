@@ -178,23 +178,15 @@ pipeline {
                                 previous_image_tag = readFile(file: "current_image_tag.txt").trim()
                             }
 
-                            // Stop current container
-                            try {
-                                sh """
-                                    echo "Stopping current container"
-                                    ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
-                                        "echo 'docker stop events-app'"
-                                """
-                            } catch (err) {
-                                echo "Unable to stop container: ${err}"
-                            }
 
                             // Remove current container
                             try {
                                 sh """
+                                set +x
                                     echo "Removing current container"
+                                    
                                     ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
-                                        "echo 'docker rm events-app'"
+                                        "echo 'docker rm -f events-app'"
                                 """
                             } catch (err) {
                                 echo "Unable to remove container: ${err}"
@@ -202,29 +194,27 @@ pipeline {
 
                             // Start new container
                             def DB_PORT = "25060"
-
-                            echo "Starting new container"
                             
                             withCredentials([
-                                    usernamePassword(
-                                        credentialsId: 'db-credentials',
-                                        passwordVariable: 'DB_PASS',
-                                        usernameVariable: 'DB_USER'
-                                    ),
-                                    string(credentialsId: 'db-host', variable: 'DB_HOST'),
-                                    string(credentialsId: 'db-name', variable: 'DB_NAME')
-                                ]) {
-                                    sh '''
-                                        set +x
-                                        DATABASE_URI="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require"
+                                usernamePassword(
+                                    credentialsId: 'db-credentials',
+                                    usernameVariable: 'DB_USER',
+                                    passwordVariable: 'DB_PASS'
+                                ),
+                                string(credentialsId: 'db-host', variable: 'DB_HOST'),
+                                string(credentialsId: 'db-name', variable: 'DB_NAME')
+                            ]) {
+                                sh '''
+                                    set +x
+                                    DATABASE_URI="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require"
 
-                                        docker run -d -p 5000:5000 --name events-app \
-                                            -e "RUNTIME_MODE=prod" \
-                                            -e "DATABASE_URI=${DATABASE_URI}" \
-                                            tarof429/events-app:${IMAGE_TAG}
-                                    '''
-                                }
-                            
+                                    ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER@$DEPLOYMENT_SERVER" \
+                                    "docker run -d -p 5000:5000 --name events-app \
+                                        -e RUNTIME_MODE=prod \
+                                        -e DATABASE_URI='$DATABASE_URI' \
+                                        tarof429/events-app:${IMAGE_TAG}"
+                                '''
+                            }
 
                             // Queue removal on the deployment server
                             if (previous_image_tag) {
