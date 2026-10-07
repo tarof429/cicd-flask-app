@@ -183,7 +183,7 @@ pipeline {
                                 sh """
                                     echo "Stopping current container"
                                     ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
-                                        "echo 'docker stop events-app"
+                                        "echo 'docker stop events-app'"
                                 """
                             } catch (err) {
                                 echo "Unable to stop container: ${err}"
@@ -194,7 +194,7 @@ pipeline {
                                 sh """
                                     echo "Removing current container"
                                     ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
-                                        "echo 'docker rm events-app"
+                                        "echo 'docker rm events-app'"
                                 """
                             } catch (err) {
                                 echo "Unable to remove container: ${err}"
