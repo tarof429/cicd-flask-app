@@ -169,70 +169,72 @@ pipeline {
                 }
             }
             steps {
-                timeout(time: 10) {
-                    sshagent(['deployment-server-key']) {
-                        def previous_image_tag
-                            
-                        dir('docker-compose') {
-                            previous_image_tag = readFile(file: "current_image_tag.txt").trim()
-                        }
-
-                        // Stop current container
-                        try {
-                            sh """
-                                echo "Stopping current container"
-                                ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
-                                    "echo 'docker stop events-app"
-                            """
-                        } catch (err) {
-                            echo "Unable to stop container: ${err}"
-                        }
-
-                        // Remove current container
-                        try {
-                            sh """
-                                echo "Removing current container"
-                                ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
-                                    "echo 'docker rm events-app"
-                            """
-                        } catch (err) {
-                            echo "Unable to remove container: ${err}"
-                        }
-
-                        // Start new container
-                        def DB_PORT = "25060"
-
-                        echo "Starting new container"
-                        
-                        withCredentials([
-                                usernamePassword(
-                                    credentialsId: 'db-credentials',
-                                    passwordVariable: 'DB_PASS',
-                                    usernameVariable: 'DB_USER'
-                                ),
-                                string(credentialsId: 'db-host', variable: 'DB_HOST'),
-                                string(credentialsId: 'db-name', variable: 'DB_NAME')
-                            ]) {
-                                sh '''
-                                    set +x
-                                    DATABASE_URI="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require"
-
-                                    docker run -d -p 5000:5000 --name events-app \
-                                        -e "RUNTIME_MODE=prod" \
-                                        -e "DATABASE_URI=${DATABASE_URI}" \
-                                        tarof429/events-app:${IMAGE_TAG}
-                                '''
+                script {
+                    timeout(time: 10) {
+                        sshagent(['deployment-server-key']) {
+                            def previous_image_tag
+                                
+                            dir('docker-compose') {
+                                previous_image_tag = readFile(file: "current_image_tag.txt").trim()
                             }
-                        
 
-                        // Queue removal on the deployment server
-                        if (previous_image_tag) {
-                            echo "Removing old image"
+                            // Stop current container
+                            try {
+                                sh """
+                                    echo "Stopping current container"
+                                    ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
+                                        "echo 'docker stop events-app"
+                                """
+                            } catch (err) {
+                                echo "Unable to stop container: ${err}"
+                            }
 
-                            sh """
-                            ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
-                                "echo 'docker rmi ${env.PUBLIC_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
-                            """
+                            // Remove current container
+                            try {
+                                sh """
+                                    echo "Removing current container"
+                                    ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
+                                        "echo 'docker rm events-app"
+                                """
+                            } catch (err) {
+                                echo "Unable to remove container: ${err}"
+                            }
+
+                            // Start new container
+                            def DB_PORT = "25060"
+
+                            echo "Starting new container"
+                            
+                            withCredentials([
+                                    usernamePassword(
+                                        credentialsId: 'db-credentials',
+                                        passwordVariable: 'DB_PASS',
+                                        usernameVariable: 'DB_USER'
+                                    ),
+                                    string(credentialsId: 'db-host', variable: 'DB_HOST'),
+                                    string(credentialsId: 'db-name', variable: 'DB_NAME')
+                                ]) {
+                                    sh '''
+                                        set +x
+                                        DATABASE_URI="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require"
+
+                                        docker run -d -p 5000:5000 --name events-app \
+                                            -e "RUNTIME_MODE=prod" \
+                                            -e "DATABASE_URI=${DATABASE_URI}" \
+                                            tarof429/events-app:${IMAGE_TAG}
+                                    '''
+                                }
+                            
+
+                            // Queue removal on the deployment server
+                            if (previous_image_tag) {
+                                echo "Removing old image"
+
+                                sh """
+                                ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
+                                    "echo 'docker rmi ${env.PUBLIC_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
+                                """
+                            }
                         }
                     }
                 }
