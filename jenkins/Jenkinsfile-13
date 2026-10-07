@@ -176,7 +176,12 @@ pipeline {
                     timeout(time: 10) {
                         sshagent(['deployment-server-key']) {
                             def previous_image_tag
-                                
+                            
+                            dir('bash') {
+                                sh "scp -o StrictHostKeyChecking=no app_is_up.sh ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER}:app_is_up.sh"
+                            }
+                            sh "ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} chmod +x app_is_up.sh"
+
                             dir('docker-compose') {
                                 previous_image_tag = readFile(file: "current_image_tag.txt").trim()
                             }
@@ -190,7 +195,7 @@ pipeline {
                                         "docker stop events-app && docker rm events-app"
                                 """
                             } catch (err) {
-                                error( "Unable to remove container: ${err}")
+                                error( "Unable to stop/remove container: ${err}")
                                 
                             }
 
@@ -206,7 +211,7 @@ pipeline {
                             ]) {
                                 sh '''
                                     set +x
-                                    DATABASE_URI="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require"
+                                    DATABASE_URI="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${env.DB_PORT}/${DB_NAME}?sslmode=require"
 
                                     ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@{env.$DEPLOYMENT_SERVER} \
                                     "docker run -d -p 5000:5000 --name events-app \
@@ -224,6 +229,13 @@ pipeline {
                                 ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
                                     "echo 'docker rmi ${env.PUBLIC_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
                                 """
+                            }
+
+
+                            def status = sh(returnStatus: true, script: "ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} ./app_is_up.sh"
+
+                            if (status != 0) {
+                                error("App is not running!")
                             }
                         }
                     }
