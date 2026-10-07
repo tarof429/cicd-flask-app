@@ -189,11 +189,11 @@ pipeline {
 
                             // Stop and remove current container
                             try {
-                                sh """
+                                sh '''
                                 set +x
-                                    ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
+                                    ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER@$DEPLOYMENT_SERVER" \
                                         "docker stop events-app; docker rm -f events-app"
-                                """
+                                '''
                             } catch (err) {
                                 echo( "Unable to stop/remove container: ${err}")
                                 
@@ -213,7 +213,7 @@ pipeline {
                                     set +x
                                     DATABASE_URI="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require"
 
-                                    ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@{env.$DEPLOYMENT_SERVER} \
+                                    ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER@$DEPLOYMENT_SERVER" \
                                     "docker run -d -p 5000:5000 --name events-app \
                                         -e RUNTIME_MODE=prod \
                                         -e DATABASE_URI='$DATABASE_URI' \
@@ -225,10 +225,10 @@ pipeline {
                             if (previous_image_tag) {
                                 echo "Removing old image"
 
-                                sh """
-                                ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
-                                    "echo 'docker rmi ${env.PUBLIC_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
-                                """
+                                sh '''
+                                ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER@$DEPLOYMENT_SERVER" \
+                                    "echo 'docker rmi ${PUBLIC_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
+                                '''
                             }
 
 
