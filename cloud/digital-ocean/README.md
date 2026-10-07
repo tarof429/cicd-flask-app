@@ -81,7 +81,99 @@ Get the admin password. For example:
 docker exec -ti a430fbd48125 cat /var/jenkins_home/secrets/initialAdminPassword
  ```
 
- Once Jenkins is running, install the  Jenkins SSH Agent plugin and  docker pipeline plugin.
+ Once Jenkins is running, install the Jenkins SSH Agent plugin and docker pipeline plugin.
 
  Next, add the credentials for dockerhub and deployment-server-key.
 
+ The SSH Agent Plugin can be tricky to get working. I recommend creating a simple pipeline and test whether you can SSH to another server using the following pipeline code:
+
+ ```groovy
+pipeline {
+    agent any
+
+    environment {
+            DEPLOYMENT_SERVER = "<ip.of.server>"
+            DEPLOYMENT_USER = "admin"
+    }
+
+    stages {
+        stage ('Deploy') {
+            steps {
+                script {
+                    sshagent(['deployment-server-key']) {
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} ls"
+                    }
+                }
+            }
+        }
+    }
+}
+ ```
+
+## Using the App Platform
+
+Let's back up a bit and look at an alternative way to run our docker container. Cloud platforms like Digital Ocean provide a serverless way of running docker images. This means we do not need to maintian a separate server to run our events application. Let's see how to do this.
+
+First shutdown the application running on the deployment server droplet, getting the tag from the docker daemon.
+
+```sh
+ IMAGE_TAG=0e3ca6a-17 docker compose down
+```
+
+Let's try running just the docker container. We did this a long time ago before docker compose was introduced.
+
+```sh
+docker run -p 5000:5000 --name events-app tarof429/events-app:0e3ca6a-17
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> a355d8372f18, Initial
+ * Serving Flask app 'app.py'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.17.0.2:5000
+Press CTRL+C to quit
+```
+
+Remember this works because if we don't set the environment variable to anything, by default the application will use an embedded database.
+
+To run the application with the embedded database in the App Platform, select App Platofrm, DockerHub, fill in the docker image and tag, and at the next screen adjust the port.
+
+<img src="images/app_platform_configuration.png" />
+
+Afterwards we can navigate to the URL and access our app!
+
+<img src="images/app_platform_running.png" />
+
+This is great. But it would be nice if we could add persistence.
+
+## Using a managed database
+
+What we need is a managed database. To add PostgreSQL, select Data & Learning, Managed Databses, create database cluster, and create a PostgreSQL database in a data center close to us, with the cheapest configuration and no auto-scaling. To use this database, copy the connection details, build the URI from it, and run the docker container. The following script can help!
+
+```sh
+#!/bin/bash
+
+USERNAME="<redacted>"
+PASSWORD="<redacted>"
+HOST="<redacted>"
+PORT="<redacted>"
+DATABASE="<redacted>"
+IMAGE_TAG="0e3ca6a-17"
+
+DATABASE_URI=postgresql://${USERNAME}:${PASSWORD}@${HOST}:${PORT}/${DATABASE}?sslmode=require
+
+docker run -d -p 5000:5000 --name events-app \
+	-e "RUNTIME_MODE=prod" \
+	-e "DATABASE_URI=${DATABASE_URI}" \
+	tarof429/events-app:0e3ca6a-17
+```
+
+To run it:
+
+```bash
+IMAGE_TAG=0e3ca6a-17 bash ./run.sh
+```
+
+This information gives us powerful clues on how we can automate deployment of containers to use managed databases using our pipeline script.

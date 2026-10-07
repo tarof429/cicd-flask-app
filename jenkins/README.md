@@ -246,7 +246,7 @@ KVM          Main       Yes
 DO           feature/do  No
 ```
 
-## Digital Ocean
+## Digital Ocean pipeline
 
 The *Jenkinsfile-do-1* script is our first attempt to support Digital Ocean. An unexpected issue occurred when first running this pipeline: the build failed due to a missing current_image_tag.txt file. This is the reason why try...catch blocks were introdcued.
 
@@ -290,4 +290,4 @@ I think that, in addition, also limit who has access to each Jenkins server. Dev
 
 The script *Jenkinsfile-11* has been corrected to check for env.GIT_BRANCH. This means that Jenkins running in KVM will deploy to production while the Droplet will not. 
 
-On further thought, I find that the conditional stage is making the build confusing. *Jenkinsfile-12* removes the condition. Also we disable the build on the KVM Jenkins and only focus on the Digital Ocean Jenkins.
+On further thought, I find that the conditional stage for the git branch is making the build confusing. *Jenkinsfile-12* removes the condition. Also, temporarily we disable the build on the KVM Jenkins and only focus on Digital Ocean Jenkins so that we can deploy docker images to dockerhub.
