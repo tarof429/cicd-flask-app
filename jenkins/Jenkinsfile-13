@@ -232,7 +232,7 @@ pipeline {
                             }
 
 
-                            def status = sh(returnStatus: true, script: "ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} ./app_is_up.sh"
+                            def status = sh(returnStatus: true, script: "ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} ./app_is_up.sh")
 
                             if (status != 0) {
                                 error("App is not running!")
