@@ -192,7 +192,7 @@ pipeline {
                                 sh """
                                 set +x
                                     ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
-                                        "docker stop events-app && docker rm events-app"
+                                        "docker stop events-app; docker rm -f events-app"
                                 """
                             } catch (err) {
                                 error( "Unable to stop/remove container: ${err}")
