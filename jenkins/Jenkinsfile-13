@@ -195,7 +195,7 @@ pipeline {
                                         "docker stop events-app; docker rm -f events-app"
                                 """
                             } catch (err) {
-                                error( "Unable to stop/remove container: ${err}")
+                                echo( "Unable to stop/remove container: ${err}")
                                 
                             }
 
