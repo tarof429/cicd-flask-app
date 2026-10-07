@@ -294,3 +294,6 @@ On further thought, I find that the conditional stage for the git branch is maki
 
 ## Digital Ocean deployment with managed database
 
+The script *Jenkinsfile-13* introduces the CLOUD_PROVIDER parameter to set values for our variables. We need to create the parameter through the Jenkins job since it is not provided by the script.
+
+<img src="images/cloud_provider.png" />
