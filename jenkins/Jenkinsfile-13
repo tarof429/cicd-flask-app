@@ -223,7 +223,7 @@ pipeline {
                                         tarof429/events-app:${IMAGE_TAG}
                                 '''
                             }
-                        }
+                        
 
                         // Queue removal on the deployment server
                         if (previous_image_tag) {
