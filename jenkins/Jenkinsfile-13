@@ -9,6 +9,8 @@ pipeline {
             // Digital Ocean
             DO_PRIVATE_REGISTRY_SERVER = '178.128.185.60'
             DO_DEPLOYMENT_SERVER = "157.230.166.124"
+            DO_DB_PORT = "25060"
+
 
             PRIVATE_REGISTRY_PORT = '3000'
             PRIVATE_REPOSITORY = "events-app"
@@ -27,6 +29,7 @@ pipeline {
                     } else if (env.CLOUD_PROVIDER == "DO") {
                         env.PRIVATE_REGISTRY_SERVER = "${env.DO_PRIVATE_REGISTRY_SERVER}"
                         env.DEPLOYMENT_SERVER = "${env.DO_DEPLOYMENT_SERVER}"
+                        env.DB_PORT = "${env.DO_DB_PORT}"
                     } else {
                         error("Invalid provider")
                     }
@@ -193,7 +196,6 @@ pipeline {
                             }
 
                             // Start new container
-                            def DB_PORT = "25060"
                             
                             withCredentials([
                                 usernamePassword(
