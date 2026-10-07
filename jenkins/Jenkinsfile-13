@@ -123,7 +123,12 @@ pipeline {
             }
         }
 
-        stage ('Deploy') {
+        stage ('Deploy to KVM') {
+            when {
+                expression {
+                    env.CLOUD_PROVIDER == 'KVM'
+                }
+            }
             steps {
                 script {
                     sshagent(['deployment-server-key']) {
@@ -141,8 +146,10 @@ pipeline {
                         sh "ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} chmod +x deploy.sh"
                         sh "ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} ./deploy.sh ${env.IMAGE_TAG}"
 
-                        writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
-
+                        dir('docker-compose') {
+                            writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
+                        }
+                        
                         // Queue removal on the deployment server
                         if (previous_image_tag) {
                             sh """
@@ -152,6 +159,17 @@ pipeline {
                         }
                     }
                 }
+            }
+        }
+
+        stage ('Deploy to Digital Ocean') {
+            when {
+                expression {
+                    env.CLOUD_PROVIDER == 'DO'
+                }
+            }
+            steps {
+                echo "Deploying to Digital Ocean"
             }
         }
     }
