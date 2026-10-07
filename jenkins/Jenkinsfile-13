@@ -17,10 +17,6 @@ pipeline {
             DEPLOYMENT_USER = "admin"
     }
 
-    parameters {
-        choice(name: 'CLOUD_PROVIDER', choices: ['KVM', 'DO'], description: 'Choose cloud provider')
-    }
-
     stages {
         stage('Process') {
             steps {
