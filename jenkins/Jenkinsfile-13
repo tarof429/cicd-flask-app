@@ -182,21 +182,19 @@ pipeline {
                             }
 
 
-                            // Remove current container
+                            // Stop and remove current container
                             try {
                                 sh """
                                 set +x
-                                    echo "Removing current container"
-                                    
                                     ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
-                                        "echo 'docker rm -f events-app'"
+                                        "docker stop events-app && docker rm events-app"
                                 """
                             } catch (err) {
-                                echo "Unable to remove container: ${err}"
+                                error( "Unable to remove container: ${err}")
+                                
                             }
 
                             // Start new container
-                            
                             withCredentials([
                                 usernamePassword(
                                     credentialsId: 'db-credentials',
@@ -210,11 +208,11 @@ pipeline {
                                     set +x
                                     DATABASE_URI="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require"
 
-                                    ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER@$DEPLOYMENT_SERVER" \
+                                    ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@{env.$DEPLOYMENT_SERVER} \
                                     "docker run -d -p 5000:5000 --name events-app \
                                         -e RUNTIME_MODE=prod \
                                         -e DATABASE_URI='$DATABASE_URI' \
-                                        tarof429/events-app:${IMAGE_TAG}"
+                                        ${PUBLIC_REPOSITORY}:${IMAGE_TAG}"
                                 '''
                             }
 
