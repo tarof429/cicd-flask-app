@@ -177,3 +177,5 @@ IMAGE_TAG=0e3ca6a-17 bash ./run.sh
 ```
 
 This information gives us powerful clues on how we can automate deployment of containers to use managed databases using our pipeline script.
+
+See [Digital Ocean Pipeline](../jenkins/README.md#digital_ocean_pipeline) for details on how to deploy the application to Digital Ocean using a Jenkins pipeline.
