@@ -179,3 +179,17 @@ IMAGE_TAG=0e3ca6a-17 bash ./run.sh
 This information gives us powerful clues on how we can automate deployment of containers to use managed databases using our pipeline script.
 
 See [Digital Ocean Pipeline](../jenkins/README.md#digital_ocean_pipeline) for details on how to deploy the application to Digital Ocean using a Jenkins pipeline.
+
+## Managed Database Insights
+
+In the Digital Ocean managed database portal, there are many metrics that we can observe. For example, we can see that memory usage is rather high.
+
+<img src="images/do_postgresql_memory_usage.png" />
+
+We can also improve the security of our database. Let's restrict access to the database to our web-server only. Under Network Access, select Add Trusted Source and select the web-server droplet.
+
+## Updating managed database using Ansible
+
+What if our managed database connection details change? This might be to a migration, an emergency backup and restore, or an upgrade. In that case, we just need to get the new values and update Jenkins. What if this is tedious for us?
+
+Ansible actually has a module for updating this task. There are two ways that we could use to store our secrets: vaults or through environment variables. Because the vault is a file, it can be easily copied from one system to another. This is a security risk. Hence, we'll use our Linux machine and specify environment variables on the command line. See [Jenkins Credentials](../ansible/README.md#jenkins_credentials). 

@@ -1,0 +1,42 @@
+- name: Generate token
+  community.general.jenkins_credential:
+    name: "test-token"
+    jenkins_user: "{{ my_jenkins_user }}"
+    jenkins_password: "{{ my_jenkins_password }}"
+    type: "token"
+    url: "{{ jenkins_url }}"
+  register: token_result
+
+- name: Uppdate db-credentials
+  community.general.jenkins_credential:
+    id: "db-credentials"
+    type: "user_and_pass"
+    jenkins_user: "admin"
+    token: "{{ token_result.token }}"
+    description: "DB User and password credential"
+    username: "{{ db_user }}"
+    password: "{{ db_pass }}"
+    url: "{{ jenkins_url }}"
+    force: true
+
+- name: Uppdate db-host
+  community.general.jenkins_credential:
+    id: "db-host"
+    type: "text"
+    jenkins_user: "admin"
+    token: "{{ token_result.token }}"
+    description: "The db host"
+    secret: "{{ db_host }}"
+    url: "{{ jenkins_url }}"
+    force: true
+
+- name: Uppdate db-name
+  community.general.jenkins_credential:
+    id: "db-name"
+    type: "text"
+    jenkins_user: "admin"
+    token: "{{ token_result.token }}"
+    description: "DB name"
+    secret: "{{ db_name }}"
+    url: "{{ jenkins_url }}"
+    force: true

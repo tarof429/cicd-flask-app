@@ -212,7 +212,7 @@ pipeline {
                                 sh '''
                                     set +x
                                     DATABASE_URI="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require"
-
+    
                                     ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER@$DEPLOYMENT_SERVER" \
                                     "docker run -d -p 5000:5000 --name events-app \
                                         -e RUNTIME_MODE=prod \
