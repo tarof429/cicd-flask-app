@@ -1,0 +1,24 @@
+- name: Generate token
+  community.general.jenkins_credential:
+    name: "test-token"
+    jenkins_user: "{{ my_jenkins_user }}"
+    jenkins_password: "{{ my_jenkins_password }}"
+    type: "token"
+    url: "{{ jenkins_url }}"
+  register: token_result
+
+- name: Print token
+  debug:
+    msg: "{{ token_result }}"
+
+- name: cicd-server-key
+  community.general.jenkins_credential:
+    id: "test-key"
+    type: "ssh_key"
+    jenkins_user: "{{ my_jenkins_user }}"
+    token: "{{ token_result.token }}"
+    description: "SSH key credential"
+    username: "admin"
+    private_key_path: "{{ role_path }}/files/key"
+    force: true
+  delegate_to: localhost

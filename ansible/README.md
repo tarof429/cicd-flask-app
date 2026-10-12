@@ -431,6 +431,10 @@ ansible-playbook -i inventory-do.yaml \
 jenkins_managed_db_credentials.yaml 
 ```
 
+## [Updating Jenkins Credentials - CI/CD Server Key][#jenkins_credentials_for cicd_server_key]
+
+The *jenkins_cicd_server_key* role updates Jenkins credentials with the private key of the cicd-server where Jenkins is running.
+
 ## References
 
 https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_vars_facts.html

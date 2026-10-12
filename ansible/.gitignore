@@ -1,3 +1,4 @@
 myvault
 myansible.cfg
 myansible2.cfg
+roles/jenkins_cicd_server_key/files/

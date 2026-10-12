@@ -193,3 +193,5 @@ We can also improve the security of our database. Let's restrict access to the d
 What if our managed database connection details change? This might be due to a migration, an emergency backup and restore, or an upgrade. When that happens, we need to get the new values from the Digital Ocean UI and update Jenkins. How tedious!
 
 Ansible actually has a module for updating Jenkins. See how we update credentials for the Digital Ocean managed database [here](../../ansible/README.md#jenkins_credentials_for_dodb).
+
+This might be a good opportunity to further automate Jenkins credentials setup. 
