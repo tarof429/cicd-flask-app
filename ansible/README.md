@@ -416,9 +416,9 @@ web-server                 : ok=14   changed=8    unreachable=0    failed=0    s
 
 Patching is a very common activity for VMs. The *patch* role takes care of this. Using the *reboot* role is a good idea to ensure the kernels are loading the latest kernel.
 
-## [Updating Jenkins Credentials - Digital Ocean Managed Database](#jenkins_credentials)
+## [Updating Jenkins Credentials - Digital Ocean Managed Database](#jenkins_credentials_for_dodb)
 
-The *jenkins_managed_db_credentials* role updates Jenkmins credentials needed to use the Digital Ocean managed database as a backend for the events app. Use this role when deploying the app to with managed PostgreSQL. 
+The *jenkins_managed_db_credentials* role updates Jenkins credentials needed to use the Digital Ocean managed database as a backend for the events app. Use this role when deploying the app with managed PostgreSQL. 
 
 ```sh
 ansible-playbook -i inventory-do.yaml \
