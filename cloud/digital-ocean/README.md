@@ -194,4 +194,8 @@ What if our managed database connection details change? This might be due to a m
 
 Ansible actually has a module for updating Jenkins. See how we update credentials for the Digital Ocean managed database [here](../../ansible/README.md#jenkins_credentials_for_dodb).
 
-This might be a good opportunity to further automate Jenkins credentials setup. 
+This might be a good opportunity to further automate Jenkins credentials setup by adding CI/CD server key credential creation. See [here](../../ansible/README.md#jenkins_credentials_for_cicd_server_key).
+
+Now at this point, it would seem like we should update our pipeline to deploy our application to deploy to the app platform and connected to the managed database. However, it's unrealistiic to assume that we only need to deploy one container. What if we had 10 or more? Let's develop a new microservice and see what it's like to actually deploy it. 
+
+We can shut down our Digital Ocean resources and work in our KVM environment. The good thing is, when we're ready to work with Digital Ocean again, we can use Ansbile to speed up deployment.

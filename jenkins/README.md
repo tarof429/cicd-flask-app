@@ -296,4 +296,8 @@ On further thought, I find that the conditional stage for the git branch is maki
 
 The script *Jenkinsfile-13* introduces the CLOUD_PROVIDER parameter to set values for our variables. We need to create the parameter through the Jenkins job since it is not provided by the script.
 
+## Adjusting for new credentials
+
+The script *Jenkinsfile-14* uses the updated cicd-server-key credential that is populated by the cicd-server-key Ansible role. Previous playbooks used the deployment-server-key credential even though it actually contained the private key of the CI/CD server. 
+
 <img src="images/cloud_provider.png" />
