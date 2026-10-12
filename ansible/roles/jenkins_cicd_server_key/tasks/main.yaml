@@ -7,18 +7,15 @@
     url: "{{ jenkins_url }}"
   register: token_result
 
-- name: Print token
-  debug:
-    msg: "{{ token_result }}"
-
 - name: cicd-server-key
   community.general.jenkins_credential:
-    id: "test-key"
+    id: "cicd-server-key"
     type: "ssh_key"
     jenkins_user: "{{ my_jenkins_user }}"
     token: "{{ token_result.token }}"
     description: "SSH key credential"
     username: "admin"
-    private_key_path: "{{ role_path }}/files/key"
+    private_key_path: /tmp/cicd-server-key
+    url: "{{ jenkins_url }}"
     force: true
   delegate_to: localhost
