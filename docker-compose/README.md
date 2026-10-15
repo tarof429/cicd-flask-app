@@ -8,6 +8,8 @@ The docker-compose file in this directory specifies two services. Each service r
 
 ## Usage
 
+The basic syntax is:
+
 ```sh
 docker compose -f docker/docker-compose.yaml up -d
 ```

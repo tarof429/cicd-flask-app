@@ -12,6 +12,12 @@ To build the image:
 docker build -f docker/Dockerfile -t events-app .
 ```
 
+or choose the latest Dockerfile such as:
+
+```sh
+docker build -f docker/Dockerfile2 -t events-app .
+```
+
 To run the container:
 
 ```sh
