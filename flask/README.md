@@ -57,10 +57,16 @@ flask db upgrade
 
 ## Usage
 
-To run the application:
+To run the application (whith no message broker):
 
 ```sh
-flask run
+MESSAGE_BROKER_TYPE=none flask run
+```
+
+Use the following command if you need to access the application from another host:
+
+```sh
+MESSAGE_BROKER_TYPE=none flask run --host=0.0.0.0
 ```
 
 To run tests:

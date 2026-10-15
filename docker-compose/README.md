@@ -59,6 +59,10 @@ Container docker-compose-db-1 Stopped
 db-1 exited with code 0
 ```
 
+Docker compose files 2-4 were created for deployment to servers using either the bash script or Jenkins pipeline.
+
+The *docker-compose5.yaml* file was created after notification was introduced in the code. Because it specifies DATABASE_URI (which we were doing earlier), the app will use the db service. The volume has been fixed to point to the correct location.
+
 ## Notes
 
 There are two services in the docker-compose file. The first service is the Postgres database. The second sevice runs the Flask application. Since the database needs to have the correct schema, this can take a while before it is available for use. To handle this suituation, the docker-compose file defines both a dependency asnd a healthcheck; this pattern is discussed at https://docs.docker.com/compose/how-tos/startup-order/. Furthermore, the Flask application service defines the POSTGRES_URL so that it can connect to the external database.

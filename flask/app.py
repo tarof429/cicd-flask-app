@@ -6,6 +6,8 @@ from sqlalchemy.exc import IntegrityError, DataError
 from models import db, Event
 from forms import AddEventForm, UpdateEventForm
 
+import pika
+
 def create_app(mode=None):
     app = Flask(__name__)
 
@@ -59,6 +61,36 @@ def create_app(mode=None):
             flash('Invalid action', 'danger')
             return redirect(url_for('list_events'))
 
+    def publish_event(message):
+        if app.config['MESSAGE_BROKER_TYPE'] == 'rabbitmq':
+            publish_to_rabbitmq(message)
+        else:
+            print('Not publishing notification...')
+            pass
+
+    def publish_to_rabbitmq(message):
+        credentials = pika.PlainCredentials(
+            os.environ["RABBITMQ_USER"],
+            os.environ["RABBITMQ_PASS"]
+        )
+
+        parameters = pika.ConnectionParameters(
+            host="rabbitmq",
+            credentials=credentials
+        )
+
+        connection = pika.BlockingConnection(parameters)
+
+        try:
+            channel = connection.channel()
+            channel.queue_declare(queue='event_confirmation', durable=True, arguments={'x-queue-type': 'quorum'})
+
+            channel.basic_publish(exchange='',
+                      routing_key='event_confirmation',
+                      body=message)
+        finally:
+            connection.close()
+
     @app.route('/add_event', methods=['GET', 'POST'])
     def add_event():
         form = AddEventForm()
@@ -79,6 +111,8 @@ def create_app(mode=None):
             except Exception as e:
                 flash(str(e), 'danger')
                 db.session.rollback()
+
+            publish_event('Added new event!')
 
             events = Event.query.all()
             return render_template('events.html', events=events)

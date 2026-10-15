@@ -63,3 +63,4 @@ flowchart LR
 - Docker Registry
 - Cloud/Digital Ocean/AWS
 - Jenkins/Trivy
+- RabbitMQ

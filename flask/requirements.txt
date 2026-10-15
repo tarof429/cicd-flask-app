@@ -20,6 +20,7 @@ nab-project==0.0.18
 nab-provider==0.0.18
 nab-resolver==0.0.18
 packaging==26.3
+pika==1.4.4
 pipdeptree==4.2.5
 pluggy==1.6.0
 psycopg2-binary==2.9.13
