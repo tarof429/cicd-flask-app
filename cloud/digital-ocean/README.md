@@ -198,4 +198,4 @@ This might be a good opportunity to further automate Jenkins credentials setup b
 
 Now at this point, it would seem like we should update our pipeline to deploy our application to deploy to the app platform and connected to the managed database. However, it's unrealistiic to assume that we only need to deploy one container. What if we had 10 or more? Let's develop a new microservice and see what it's like to actually deploy it. 
 
-We can shut down our Digital Ocean resources and work in our KVM environment. The good thing is, when we're ready to work with Digital Ocean again, we can use Ansbile to speed up deployment.
+We can shut down our Digital Ocean resources and work in our KVM environment. The good thing is, when we're ready to work with Digital Ocean again, we can use Ansbile to speed up again quickly.
