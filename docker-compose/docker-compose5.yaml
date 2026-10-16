@@ -3,7 +3,7 @@ services:
     image: events-app
     environment:
       - FLASK_APP=app.py
-      - FLASK_DEBUG=True
+      - FLASK_DEBUG=False
       - RUNTIME_MODE=${RUNTIME_MODE:-dev}
       - DATABASE_URI=postgresql://admin:secret@db:5432/db
       - RABBITMQ_USER=user
