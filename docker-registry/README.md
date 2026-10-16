@@ -31,11 +31,11 @@ A quick review of the docker images on hub.docker.com should show the new image.
 
 If we wnated to push the image to a private registry, we would replace registry-1.docker.io with the IP or hostname of our registry and optionally the port.
 
-## Using a private registry
+## [Using a private registry](#private_registry)
 
-Let's go through an exercise where we start a private registry on the Rocky VM (build server) and pull it from our Ubuntu VM.
+Let's go through an exercise where we start a private registry on the Rocky VM (CI/CD server) and pull it from our Ubuntu VM.
 
-On the build server, run:
+On the CI/CD server, run:
 
 ```sh
 docker run -d -p 3000:5000 --name registry registry:3

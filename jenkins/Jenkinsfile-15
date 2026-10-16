@@ -1,0 +1,253 @@
+pipeline {
+    agent any
+
+    environment {
+            // KVM
+            KVM_PRIVATE_REGISTRY_SERVER = '192.168.1.133'
+            KVM_DEPLOYMENT_SERVER = "192.168.1.30"
+
+            // Digital Ocean
+            DO_PRIVATE_REGISTRY_SERVER = '178.128.185.60'
+            DO_DEPLOYMENT_SERVER = "157.230.166.124"
+            DO_DB_PORT = "25060"
+
+
+            PRIVATE_REGISTRY_PORT = '3000'
+            PRIVATE_REPOSITORY = "events-app"
+            PUBLIC_REPOSITORY="tarof429/events-app"
+            DOCKERHUB_REGISTRY = "https://index.docker.io/v1/"
+            DEPLOYMENT_USER = "admin"
+    }
+
+    stages {
+        stage('Process') {
+            steps {
+                script {
+                    if (params.CLOUD_PROVIDER == "KVM") {
+                        env.PRIVATE_REGISTRY_SERVER = "${env.KVM_PRIVATE_REGISTRY_SERVER}"
+                        env.DEPLOYMENT_SERVER = "${env.KVM_DEPLOYMENT_SERVER}"
+                    } else if (env.CLOUD_PROVIDER == "DO") {
+                        env.PRIVATE_REGISTRY_SERVER = "${env.DO_PRIVATE_REGISTRY_SERVER}"
+                        env.DEPLOYMENT_SERVER = "${env.DO_DEPLOYMENT_SERVER}"
+                        env.DB_PORT = "${env.DO_DB_PORT}"
+                    } else {
+                        error("Invalid provider")
+                    }
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                script {
+                    def COMMIT_HASH = sh(
+                        script: 'git rev-parse --short HEAD',
+                        returnStdout: true
+                    ).trim()
+
+                    env.IMAGE_TAG = "${COMMIT_HASH}-${env.BUILD_NUMBER}"
+
+                    def imageName = "${env.PRIVATE_REGISTRY_SERVER}:${env.PRIVATE_REGISTRY_PORT}/${env.PRIVATE_REPOSITORY}:${env.IMAGE_TAG}"
+
+                    def customImage = docker.build(imageName, "-f docker/Dockerfile.test2 .")
+
+                    def output = sh(returnStdout: true, script: "trivy image --severity HIGH,CRITICAL ${imageName}")
+
+                    writeFile(file: "trivy_result.txt", text: "${output}")
+
+                    customImage.push()
+                }
+            }
+        }
+
+        stage ('Test') {
+            steps {
+                script {
+
+                    def testStatus = 0
+
+                    sh "mkdir -p $WORKSPACE/test-reports"
+                    sh "rm -f $WORKSPACE/test-reports/*"
+
+                    def previous_image_tag
+
+                    dir('docker-compose') {
+                        try {
+                            previous_image_tag = readFile(file: "current_image_tag.txt").trim()
+                        } catch(err) {
+                            echo "Unable to read current_image_tag.txt: ${err}"
+                        }
+                        writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
+
+                        testStatus = sh(returnStatus: true, script: "PRIVATE_REGISTRY_SERVER=${env.PRIVATE_REGISTRY_SERVER} \
+                            PRIVATE_REGISTRY_PORT=${env.PRIVATE_REGISTRY_PORT} PRIVATE_REPOSITORY=${env.PRIVATE_REPOSITORY} IMAGE_TAG=${env.IMAGE_TAG} \
+                            docker compose -f docker-compose-test4.yaml up --abort-on-container-exit --exit-code-from app")
+                    }
+
+                    docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
+                        sh 'cp /source/*.xml "$WORKSPACE/test-reports/"'
+                    }
+                    sh "mv $WORKSPACE/trivy_result.txt $WORKSPACE/test-reports/"
+
+                    if (previous_image_tag) {
+                        echo "Removing docker image ${env.PRIVATE_REGISTRY_SERVER}:${env.PRIVATE_REGISTRY_PORT}/${env.PRIVATE_REPOSITORY}:${previous_image_tag}"
+                        try {
+                            sh "docker rmi ${env.PRIVATE_REGISTRY_SERVER}:${env.PRIVATE_REGISTRY_PORT}/${env.PRIVATE_REPOSITORY}:${previous_image_tag}"
+                        } catch (err) {
+                            echo "Command failed: ${err}"
+                        }
+                        
+                        echo "Removing docker image ${env.PUBLIC_REPOSITORY}:${previous_image_tag}"
+                        try {
+                            sh "docker rmi ${env.PUBLIC_REPOSITORY}:${previous_image_tag}"
+                        } catch (err) {
+                            echo "Command failed: ${err}"
+                        }
+                    }
+
+                    if (testStatus != 0) {
+                        error("Tests failed with exit code ${testStatus}")    
+                   } else {
+                    echo "Tests passed!"
+                   }
+                }
+            }
+        }
+
+        stage ('Publish') {
+            steps {
+                script {
+                    def customImage = docker.build("tarof429/events-app:${env.IMAGE_TAG}", "-f docker/Dockerfile .")
+
+                    docker.withRegistry("${env.DOCKERHUB_REGISTRY}", "dockerhub") {
+                        customImage.push()
+                        customImage.push('latest')
+                    }
+                }
+            }
+        }
+
+        stage ('Deploy to KVM') {
+            when {
+                expression {
+                    env.CLOUD_PROVIDER == 'KVM'
+                }
+            }
+            steps {
+                script {
+                    sshagent(['cicd-server-key']) {
+                        def previous_image_tag
+                        
+                        dir('docker-compose') {
+                            previous_image_tag = readFile(file: "current_image_tag.txt").trim()
+                            
+                            sh "scp -o StrictHostKeyChecking=no docker-compose4.yaml ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER}:docker-compose.yaml"
+                        }
+                        dir('bash') {
+                            sh "scp -o StrictHostKeyChecking=no deploy2.sh ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER}:deploy.sh"
+                        }
+                        
+                        sh "ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} chmod +x deploy.sh"
+                        sh "ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} ./deploy.sh ${env.IMAGE_TAG}"
+
+                        dir('docker-compose') {
+                            writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
+                        }
+
+                        // Queue removal on the deployment server
+                        if (previous_image_tag) {
+                            sh """
+                            ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
+                                "echo 'docker rmi ${env.PUBLIC_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage ('Deploy to Digital Ocean') {
+            when {
+                expression {
+                    env.CLOUD_PROVIDER == 'DO'
+                }
+            }
+            steps {
+                script {
+                    timeout(time: 10) {
+                        sshagent(['cicd-server-key']) {
+                            def previous_image_tag
+                            
+                            dir('bash') {
+                                sh "scp -o StrictHostKeyChecking=no app_is_up.sh ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER}:app_is_up.sh"
+                            }
+                            sh "ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} chmod +x app_is_up.sh"
+
+                            dir('docker-compose') {
+                                previous_image_tag = readFile(file: "current_image_tag.txt").trim()
+                            }
+
+
+                            // Stop and remove current container
+                            try {
+                                sh '''
+                                set +x
+                                    ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER@$DEPLOYMENT_SERVER" \
+                                        "docker stop events-app; docker rm -f events-app"
+                                '''
+                            } catch (err) {
+                                echo( "Unable to stop/remove container: ${err}")
+                                
+                            }
+
+                            // Start new container
+                            withCredentials([
+                                usernamePassword(
+                                    credentialsId: 'db-credentials',
+                                    usernameVariable: 'DB_USER',
+                                    passwordVariable: 'DB_PASS'
+                                ),
+                                string(credentialsId: 'db-host', variable: 'DB_HOST'),
+                                string(credentialsId: 'db-name', variable: 'DB_NAME')
+                            ]) {
+                                sh '''
+                                    set +x
+                                    DATABASE_URI="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require"
+    
+                                    ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER@$DEPLOYMENT_SERVER" \
+                                    "docker run -d -p 5000:5000 --name events-app \
+                                        -e RUNTIME_MODE=prod \
+                                        -e DATABASE_URI='$DATABASE_URI' \
+                                        ${PUBLIC_REPOSITORY}:${IMAGE_TAG}"
+                                '''
+                            }
+
+                            // Queue removal on the deployment server
+                            if (previous_image_tag) {
+                                echo "Removing old image"
+
+                                sh '''
+                                ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER@$DEPLOYMENT_SERVER" \
+                                    "echo 'docker rmi ${PUBLIC_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
+                                '''
+                            }
+
+
+                            def status = sh(returnStatus: true, script: "ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${DEPLOYMENT_SERVER} ./app_is_up.sh")
+
+                            if (status != 0) {
+                                error("App is not running!")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            junit 'test-reports/*.xml'
+             archiveArtifacts artifacts: 'test-reports/trivy_result.txt'
+        }
+    }
+}

@@ -33,11 +33,11 @@ docker tag  events-app:latest tarof429/events-app:latest
 docker push tarof429/events-app:latest
 ```
 
-## Building test container
+## [Building test container](#building_test_container)
 
 Unit tests (pytests) can be run inside of a container. This strategy provides an environment neutral way of running unit tests.
 
-First, build the image; this Dockerfile points to `entrypoint_test.sh` which runs the tests.
+First, build the image; this Dockerfile points to `entrypoint_test.sh` which runs the tests. For example:
 
 ```sh
 docker build -f docker/Dockerfile.test -t events-app-test .
@@ -67,4 +67,14 @@ FAILED tests/test_event_db.py::test_false - assert False
 ========================= 1 failed, 2 passed in 0.50s ==
 ```
 
-Another way to run these tests is using docker-compose.
+Or if we want to push to the local registry:
+
+```sh
+docker build -f docker/Dockerfile.test2 -t localhost:3000/events-app-test:latest .
+```
+
+To push the image:
+
+```sh
+docker push localhost:3000/events-app-test:latest
+```
