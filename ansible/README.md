@@ -421,19 +421,32 @@ Patching is a very common activity for VMs. The *patch* role takes care of this.
 The *jenkins_managed_db_credentials* role updates Jenkins credentials needed to use the Digital Ocean managed database as a backend for the events app. Use this role when deploying the app with managed PostgreSQL. 
 
 ```sh
+ANSIBLE_CONFIG=myansible2.cfg \
 ansible-playbook -i inventory-do.yaml \
 -e "my_jenkins_user=redacted" \
 -e "my_jenkins_password=redacted" \
 -e "db_user=redacted" \
 -e "db_pass=redacted" \
 -e "db_host=redacted" \
--e "db_name=redacted \
+-e "db_name=redacted" \
 jenkins_managed_db_credentials.yaml 
 ```
 
 ## [Updating Jenkins Credentials - CI/CD Server Key][#jenkins_credentials_for_cicd_server_key]
 
 The *jenkins_cicd_server_key* role updates Jenkins credentials with the private key of the cicd-server where Jenkins is running.
+
+To run this role with KVM servers:
+
+```sh
+ANSIBLE_CONFIG=myansible2.cfg \
+ansible-playbook -i inventory4.yaml \
+-e "myhosts=cicd-server-1" \
+-e "jenkins_url=redacted" \
+-e "my_jenkins_user=redacted" 
+-e "my_jenkins_password=redacted" \
+jenkins_cicd_server_key.yaml
+```
 
 ## References
 
