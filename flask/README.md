@@ -82,3 +82,9 @@ http://localhost:5000
 ```
 
 Note that this project includes both unit tests and integration tests. The unit tests ensure that the application can connect to the database and perform CRUD operations. The integration tests, on the other hand, ensure that the web application is functional by testing endpoints.
+
+## References
+
+https://oneuptime.com/blog/post/2026-02-02-flask-testing/view
+
+https://flask.palletsprojects.com/en/stable/testing/
