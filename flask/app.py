@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, flash, redirect, url_for
+from flask import Flask, render_template, request, flash, redirect, url_for, abort
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError, DataError
 
@@ -16,6 +16,7 @@ def create_app(mode=None):
 
     if mode == 'test':
         app.config.from_object('config.TestConfig')
+        app.config["WTF_CSRF_ENABLED"] = False
     elif mode == 'dev':
         app.config.from_object('config.DevConfig')
     elif mode == 'prod':
@@ -121,8 +122,10 @@ def create_app(mode=None):
 
     @app.route('/update_event/<int:id>', methods=['GET', 'POST'])
     def update_event(id):
-        event = Event.query.get_or_404(id)
-
+        event = db.session.get(Event, id)
+        if event is None:
+            abort(404)
+            
         form = UpdateEventForm(obj=event)
 
         if request.method == 'POST' and form.validate_on_submit():
@@ -148,12 +151,14 @@ def create_app(mode=None):
         
     @app.route('/delete_event/<int:id>')
     def delete_event(id):
-        event = Event.query.get_or_404(id)
+        event = db.session.get(Event, id)
+        if event is None:
+            abort(404)
+
         db.session.delete(event)
         db.session.commit()
         
         flash('Event deleted', 'success')
         return redirect(url_for('list_events')) 
-
 
     return app
