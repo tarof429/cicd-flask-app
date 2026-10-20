@@ -140,7 +140,7 @@ pipeline {
                         dir('docker-compose') {
                             previous_image_tag = readFile(file: "current_image_tag.txt").trim()
                             
-                            sh "scp -o StrictHostKeyChecking=no docker-compose4.yaml ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER}:docker-compose.yaml"
+                            sh "scp -o StrictHostKeyChecking=no docker-compose5.yaml ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER}:docker-compose.yaml"
                         }
                         dir('bash') {
                             sh "scp -o StrictHostKeyChecking=no deploy2.sh ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER}:deploy.sh"

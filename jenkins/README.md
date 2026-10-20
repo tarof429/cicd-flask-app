@@ -301,3 +301,7 @@ The script *Jenkinsfile-13* introduces the CLOUD_PROVIDER parameter to set value
 The script *Jenkinsfile-14* uses the updated cicd-server-key credential that is populated by the cicd-server-key Ansible role. Previous playbooks used the deployment-server-key credential even though it actually contained the private key of the CI/CD server. 
 
 <img src="images/cloud_provider.png" />
+
+## Adding support for RabbitMQ
+
+The script *Jenkinsfile-15* uses an updated docker compose file that includes RabbitMQ as a service. 

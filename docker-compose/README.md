@@ -28,8 +28,6 @@ IMAGE_TAG=latest \
 docker compose -f docker-compose5.yaml up -d
 ```
 
-
-
 Access the application at http://localhost:5000.
 
 ## Tests
