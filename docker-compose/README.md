@@ -78,7 +78,27 @@ docker compose -f docker-compose-test4.yaml up \
 --abort-on-container-exit --exit-code-from app
 ```
 
-## Notes
+Test results will be stored in a docker volume, which you can view by running:
 
-There are two services in the docker-compose file. The first service is the Postgres database. The second sevice runs the Flask application. Since the database needs to have the correct schema, this can take a while before it is available for use. To handle this suituation, the docker-compose file defines both a dependency asnd a healthcheck; this pattern is discussed at https://docs.docker.com/compose/how-tos/startup-order/. Furthermore, the Flask application service defines the POSTGRES_URL so that it can connect to the external database.
+```sh
+docker run --rm -v test-reports:/source:ro python:latest \
+  python -c 'import xml.dom.minidom, sys; print(xml.dom.minidom.parse("/source/result.xml").toprettyxml())'
+```
 
+If the tests pass, the result will look like this:
+
+```sh
+$ docker run --rm -v test-reports:/source:ro python:latest \
+  python -c 'import xml.dom.minidom, sys; print(xml.dom.minidom.parse("/source/result.xml").toprettyxml())'
+<?xml version="1.0" ?>ach
+<testsuites name="pytest tests">
+	<testsuite name="pytest" errors="0" failures="0" skipped="0" tests="6" time="0.182" timestamp="2026-10-20T04:43:11.332254+00:00" hostname="60315a82605c">
+		<testcase classname="tests.integration.test_publish" name="test_publish_to_rabbitmq" time="0.029"/>
+		<testcase classname="tests.test_event_db" name="test_event_persistence" time="0.014"/>
+		<testcase classname="tests.test_event_db" name="test_long_event_name_persistence" time="0.012"/>
+		<testcase classname="tests.test_web_ui" name="test_request_example" time="0.017"/>
+		<testcase classname="tests.test_web_ui" name="test_list_events" time="0.016"/>
+		<testcase classname="tests.test_web_ui" name="test_add_and_update_event" time="0.033"/>
+	</testsuite>
+</testsuites>
+```

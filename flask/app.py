@@ -69,29 +69,6 @@ def create_app(mode=None):
             print('Not publishing notification...')
             pass
 
-    def publish_to_rabbitmq(message):
-        credentials = pika.PlainCredentials(
-            os.environ["RABBITMQ_USER"],
-            os.environ["RABBITMQ_PASS"]
-        )
-
-        parameters = pika.ConnectionParameters(
-            host="rabbitmq",
-            credentials=credentials
-        )
-
-        connection = pika.BlockingConnection(parameters)
-
-        try:
-            channel = connection.channel()
-            channel.queue_declare(queue='event_confirmation', durable=True, arguments={'x-queue-type': 'quorum'})
-
-            channel.basic_publish(exchange='',
-                      routing_key='event_confirmation',
-                      body=message)
-        finally:
-            connection.close()
-
     @app.route('/add_event', methods=['GET', 'POST'])
     def add_event():
         form = AddEventForm()
@@ -162,3 +139,27 @@ def create_app(mode=None):
         return redirect(url_for('list_events')) 
 
     return app
+
+def publish_to_rabbitmq(message):
+    credentials = pika.PlainCredentials(
+        os.environ["RABBITMQ_USER"],
+        os.environ["RABBITMQ_PASS"]
+    )
+
+    parameters = pika.ConnectionParameters(
+        host = os.environ.get('RABBITMQ_HOST', 'rabbitmq'),
+        virtual_host = os.environ.get('RABBITMQ_VHOST', "rabbitmq"),
+        credentials = credentials
+    )
+
+    connection = pika.BlockingConnection(parameters)
+
+    try:
+        channel = connection.channel()
+        channel.queue_declare(queue='event_confirmation', durable=True, arguments={'x-queue-type': 'quorum'})
+
+        channel.basic_publish(exchange='',
+                    routing_key='event_confirmation',
+                    body=message)
+    finally:
+        connection.close()

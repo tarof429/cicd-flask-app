@@ -44,7 +44,7 @@ docker run -d -p 3000:5000 --name registry registry:3
 Next, build and tag the image.
 
 ```sh
-docker build -f docker/Dockerfile -t localhost:3000/events-app:latest .
+docker build -f docker/Dockerfile2 -t localhost:3000/events-app:latest .
 ```
 
 Push the image. It should be very fast!
@@ -53,7 +53,7 @@ Push the image. It should be very fast!
 docker push localhost:3000/events-app:latest 
 ```
 
-If we try to pull the image from the Ubuntu VM, it will fail. This is because the registry is insecure.
+If we try to pull the image from another server, it will fail. This is because the registry is insecure.
 
 ```sh
 docker pull localhost:3000/events-app:latest 

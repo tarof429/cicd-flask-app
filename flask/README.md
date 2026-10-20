@@ -69,10 +69,10 @@ Use the following command if you need to access the application from another hos
 MESSAGE_BROKER_TYPE=none flask run --host=0.0.0.0
 ```
 
-To run tests:
+To run non-integration tests:
 
 ```sh
-python -m pytest
+python -m pytest --ignore **/integration
 ```
 
 To access the application, point your browser to:
