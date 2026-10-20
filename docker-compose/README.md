@@ -14,6 +14,22 @@ The basic syntax is:
 docker compose -f docker/docker-compose.yaml up -d
 ```
 
+Docker compose files 2-4 were created for deployment to servers using either the bash script or Jenkins pipeline.
+
+The *docker-compose5.yaml* script was created after notification was introduced in the code. Because it specifies DATABASE_URI (which we were doing earlier), the app will use the db service. The volume has been fixed to point to the correct location.
+
+To run *docker-compose5.yaml*:
+
+```sh
+PRIVATE_REGISTRY_SERVER=localhost \
+PRIVATE_REGISTRY_PORT=3000 \
+PRIVATE_REPOSITORY=events-app \
+IMAGE_TAG=latest \
+docker compose -f docker-compose5.yaml up -d
+```
+
+
+
 Access the application at http://localhost:5000.
 
 ## Tests
@@ -58,10 +74,6 @@ db-1   | 2026-09-04 16:58:43.170 UTC [1] LOG:  database system is shut down
 Container docker-compose-db-1 Stopped 
 db-1 exited with code 0
 ```
-
-Docker compose files 2-4 were created for deployment to servers using either the bash script or Jenkins pipeline.
-
-The *docker-compose5.yaml* script was created after notification was introduced in the code. Because it specifies DATABASE_URI (which we were doing earlier), the app will use the db service. The volume has been fixed to point to the correct location.
 
 The *docker-compose-test2.yaml* script and beyond relies on docker registry. See [here](../docker-registry/README.md#private_registry). 
 

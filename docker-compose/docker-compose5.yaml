@@ -1,6 +1,6 @@
 services:
   app:
-    image: events-app
+    image: tarof429/events-app:${IMAGE_TAG}
     environment:
       - FLASK_APP=app.py
       - FLASK_DEBUG=False
