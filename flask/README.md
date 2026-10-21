@@ -69,6 +69,12 @@ Use the following command if you need to access the application from another hos
 MESSAGE_BROKER_TYPE=none flask run --host=0.0.0.0
 ```
 
+To run the application with an external rabbitmq (for example, rabbitmq running in a container):
+
+```sh
+ MESSAGE_BROKER_TYPE=rabbitmq RABBITMQ_USER=user RABBITMQ_PASS=password RABBITMQ_HOST=localhost RABBITMQ_VHOST=rabbitmq flask run --host=0.0.0.0
+ ```
+
 To run non-integration tests:
 
 ```sh

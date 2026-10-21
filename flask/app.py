@@ -1,15 +1,37 @@
-import os
+import os, logging
 from flask import Flask, render_template, request, flash, redirect, url_for, abort
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError, DataError
+from logging.handlers import RotatingFileHandler
 
 from models import db, Event
 from forms import AddEventForm, UpdateEventForm
 
 import pika
 
+def configure_logging():
+    logs_dir = 'logs'
+
+    os.makedirs(logs_dir, exist_ok = True)
+
+    logsize = 10 * 10 * 1024 # 10MB
+    handler = RotatingFileHandler(os.path.join(logs_dir, 'app.log'), 
+                                       maxBytes = logsize, backupCount = 3)
+
+    handler.setFormatter(logging.Formatter(
+        '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+    ))
+    handler.setLevel(logging.INFO)
+
+    return handler
+
 def create_app(mode=None):
     app = Flask(__name__)
+
+    file_handler = configure_logging()
+    app.logger.addHandler(file_handler)
+
+    app.logger.setLevel(logging.INFO)
 
     if mode is None:
         mode = os.environ.get('RUNTIME_MODE', 'dev')
@@ -28,6 +50,8 @@ def create_app(mode=None):
 
     @app.route('/')
     def index():
+        app.logger.info("Home page accessed")
+
         return render_template('index.html')
 
     @app.route('/test')
@@ -62,13 +86,6 @@ def create_app(mode=None):
             flash('Invalid action', 'danger')
             return redirect(url_for('list_events'))
 
-    def publish_event(message):
-        if app.config['MESSAGE_BROKER_TYPE'] == 'rabbitmq':
-            publish_to_rabbitmq(message)
-        else:
-            print('Not publishing notification...')
-            pass
-
     @app.route('/add_event', methods=['GET', 'POST'])
     def add_event():
         form = AddEventForm()
@@ -79,18 +96,23 @@ def create_app(mode=None):
 
             try:
                 db.session.commit()
+                if app.config['MESSAGE_BROKER_TYPE'] == 'rabbitmq':
+                    app.logger.info(f'Publishing message for event: {new_event.title}')
+                    publish_to_rabbitmq('Added new event!')
+                    
                 flash('Added event', 'success')
             except IntegrityError:
+                db.session.rollback()
+                app.logger.exception('Integrity error')
                 flash('Event name must be unique', 'danger')
-                db.session.rollback()
             except DataError:
+                db.session.rollback()
+                app.logger.exception('Invalid data submitted')
                 flash('Invalid data submitted', 'danger')
+            except Exception:
                 db.session.rollback()
-            except Exception as e:
-                flash(str(e), 'danger')
-                db.session.rollback()
-
-            publish_event('Added new event!')
+                app.logger.exception('Unhandled exception')
+                flash('Error while creating event. Please contact administrator.', 'danger')
 
             events = Event.query.all()
             return render_template('events.html', events=events)
@@ -113,16 +135,16 @@ def create_app(mode=None):
                 flash('Event updated', 'success')
                 return redirect(url_for('list_events'))
             except IntegrityError:
+                db.session.rollback()
                 flash('Event name must be unique!', 'danger')
-                db.session.rollback()
             except DataError:
-                flash('Invalid data submitted', 'danger')
                 db.session.rollback()
+                flash('Invalid data submitted', 'danger')
             except Exception as e:
+                db.session.rollback()
                 flash('An unhandled exception happened when calling update_event()', 'danger')
                 flash(str(e), 'danger')
-                db.session.rollback()
-        
+
         return render_template('update_event_form.html', 
             form=form, page_title='Update event')
         
@@ -152,9 +174,11 @@ def publish_to_rabbitmq(message):
         credentials = credentials
     )
 
-    connection = pika.BlockingConnection(parameters)
+    connection = None
 
     try:
+        connection = pika.BlockingConnection(parameters)
+
         channel = connection.channel()
         channel.queue_declare(queue='event_confirmation', durable=True, arguments={'x-queue-type': 'quorum'})
 
@@ -162,4 +186,5 @@ def publish_to_rabbitmq(message):
                     routing_key='event_confirmation',
                     body=message)
     finally:
-        connection.close()
+        if connection is not None:
+            connection.close()
