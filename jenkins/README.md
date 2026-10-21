@@ -304,4 +304,4 @@ The script *Jenkinsfile-14* uses the updated cicd-server-key credential that is 
 
 ## Adding support for RabbitMQ
 
-The script *Jenkinsfile-15* uses an updated docker compose file that includes RabbitMQ as a service. 
+The script *Jenkinsfile-15* uses an updated docker compose file that includes RabbitMQ as a service. Tests have also been expanded to include RabbitMQ integration.

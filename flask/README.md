@@ -63,22 +63,10 @@ To run the application (whith no message broker):
 MESSAGE_BROKER_TYPE=none flask run
 ```
 
-Use the following command if you need to access the application from another host:
+Use the following command if you need to runthe application and access the application from another host:
 
 ```sh
 MESSAGE_BROKER_TYPE=none flask run --host=0.0.0.0
-```
-
-To run the application with an external rabbitmq (for example, rabbitmq running in a container):
-
-```sh
- MESSAGE_BROKER_TYPE=rabbitmq RABBITMQ_USER=user RABBITMQ_PASS=password RABBITMQ_HOST=localhost RABBITMQ_VHOST=rabbitmq flask run --host=0.0.0.0
- ```
-
-To run non-integration tests:
-
-```sh
-python -m pytest --ignore **/integration
 ```
 
 To access the application, point your browser to:
@@ -87,10 +75,29 @@ To access the application, point your browser to:
 http://localhost:5000
 ```
 
-Note that this project includes both unit tests and integration tests. The unit tests ensure that the application can connect to the database and perform CRUD operations. The integration tests, on the other hand, ensure that the web application is functional by testing endpoints.
+To run the application with an external rabbitmq (for example, rabbitmq running in a container):
 
-## References
+```sh
+MESSAGE_BROKER_TYPE=rabbitmq RABBITMQ_USER=user RABBITMQ_PASS=password RABBITMQ_HOST=localhost RABBITMQ_VHOST=rabbitmq flask run --host=0.0.0.0
+ ```
 
-https://oneuptime.com/blog/post/2026-02-02-flask-testing/view
+If the application is configured to send messages to rabbitmq, then after adding an event, the following will show up in the log:
 
-https://flask.palletsprojects.com/en/stable/testing/
+```sh
+[2026-10-21 21:01:27,103] INFO in app: Publishing message for event: Go walking
+```
+
+To run non-integration tests:
+
+```sh
+python -m pytest --ignore **/integration
+```
+
+To run all the tests (rabbitmq must be running):
+
+```sh
+MESSAGE_BROKER_TYPE=rabbitmq RABBITMQ_USER=user RABBITMQ_PASS=password RABBITMQ_HOST=localhost RABBITMQ_VHOST=rabbitmq python -m pytest
+```
+
+
+
