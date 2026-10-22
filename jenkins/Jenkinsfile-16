@@ -14,7 +14,7 @@ pipeline {
 
             PRIVATE_REGISTRY_PORT = '3000'
             PRIVATE_EVENT_APP_REPOSITORY = "events-app"
-            PUBLIC_EVENTS_APP_REPOSITORY="tarof429/events-app"
+            PUBLIC_EVENT_APP_REPOSITORY="tarof429/events-app"
 
             PRIVATE_EVENT_NOTIFIER_REPOSITORY = "events-notifier"
             PUBLIC_EVENT_NOTIFIER_REPOSITORY = "tarof429/events-notifier"
@@ -84,7 +84,7 @@ pipeline {
 
                         testStatus = sh(returnStatus: true, script: "PRIVATE_REGISTRY_SERVER=${env.PRIVATE_REGISTRY_SERVER} \
                             PRIVATE_REGISTRY_PORT=${env.PRIVATE_REGISTRY_PORT} PRIVATE_EVENT_APP_REPOSITORY=${env.PRIVATE_EVENT_APP_REPOSITORY} IMAGE_TAG=${env.IMAGE_TAG} \
-                            docker compose -f docker-compose-test4.yaml up --abort-on-container-exit --exit-code-from app")
+                            docker compose -f docker-compose-test5.yaml up --abort-on-container-exit --exit-code-from app")
                     }
 
                     docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
@@ -100,9 +100,9 @@ pipeline {
                             echo "Command failed: ${err}"
                         }
                         
-                        echo "Removing docker image ${env.PUBLIC_EVENTS_APP_REPOSITORY}:${previous_image_tag}"
+                        echo "Removing docker image ${env.PUBLIC_EVENT_APP_REPOSITORY}:${previous_image_tag}"
                         try {
-                            sh "docker rmi ${env.PUBLIC_EVENTS_APP_REPOSITORY}:${previous_image_tag}"
+                            sh "docker rmi ${env.PUBLIC_EVENT_APP_REPOSITORY}:${previous_image_tag}"
                         } catch (err) {
                             echo "Command failed: ${err}"
                         }
@@ -170,7 +170,7 @@ pipeline {
                         if (previous_image_tag) {
                             sh """
                             ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
-                                "echo 'docker rmi ${env.PUBLIC_EVENTS_APP_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
+                                "echo 'docker rmi ${env.PUBLIC_EVENT_APP_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
                             """
                         }
                     }
@@ -230,7 +230,7 @@ pipeline {
                                     "docker run -d -p 5000:5000 --name events-app \
                                         -e RUNTIME_MODE=prod \
                                         -e DATABASE_URI='$DATABASE_URI' \
-                                        ${PUBLIC_EVENTS_APP_REPOSITORY}:${IMAGE_TAG}"
+                                        ${PUBLIC_EVENT_APP_REPOSITORY}:${IMAGE_TAG}"
                                 '''
                             }
 
@@ -240,7 +240,7 @@ pipeline {
 
                                 sh '''
                                 ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER@$DEPLOYMENT_SERVER" \
-                                    "echo 'docker rmi ${PUBLIC_EVENTS_APP_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
+                                    "echo 'docker rmi ${PUBLIC_EVENT_APP_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
                                 '''
                             }
 
