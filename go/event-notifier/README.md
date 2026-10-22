@@ -12,7 +12,7 @@ To build:
 make
 ```
 
-To run the vent notifier:
+To run the event notifier:
 
 ```sh
 AMPQ_USER=user AMPQ_PASSWORD=password \
@@ -20,22 +20,13 @@ AMPQ_USER=user AMPQ_PASSWORD=password \
    AMPQ_VHOST=rabbitmq ./event-notifier 
  ```
 
-To build the docker container:
+If the Flask application is run using docker compose, then the event notifier should be run as another service so that they can communicate with each other over the docker network.
+
+When run as a service, it can be useful to see the log messages from the container:
 
 ```sh
-docker build -t event-notifier .
-```
-
-To run the docker container:
-
-```sh
-docker run \
-   --name event-notifier \
-   --rm \
-   -e AMPQ_USER=user \
-   -e AMPQ_PASSWORD=password \
-   -e AMPQ_HOST=localhost \
-   -e AMPQ_PORT=5672 \
-   -e AMPQ_VHOST=rabbitmq \
-   event-notifier 
+$ docker logs  -f admin-eventnotifier-1 
+2026/10/22 05:43:59  [*] Waiting for messages. To exit press CTRL+C
+2026/10/22 05:46:10 Received a message: (Added new event: Celebrate events!!)
+2026/10/22 05:46:10 Sending notification: (Added new event: Celebrate events!!)
 ```
