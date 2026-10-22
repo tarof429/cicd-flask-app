@@ -14,14 +14,24 @@
 
 
 <body>
-    <header class="bg-info text-white text-center py-3 mb-4">
-        <ul class="nav justify-content-center">
-            <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('index') }}">Home</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('list_events') }}">Events</a></li>
+    <header class="bg-info text-white py-3 mb-4 d-flex align-items-center position-relative">
+        <ul class="nav justify-content-center mx-auto">
+            <li class="nav-item">
+                <a class="nav-link text-white" href="{{ url_for('index') }}">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="{{ url_for('list_events') }}">Events</a>
+            </li>
             <li class="nav-item">
                 <a class="nav-link text-white py-0" href="{{ url_for('add_event') }}">
                     <i class="bi bi-plus-circle fs-4"></i>
                 </a>
+            </li>
+        </ul>
+
+        <ul class="nav position-absolute end-0 me-2">
+            <li class="nav-item">
+                <a class="nav-link text-white" href="{{ url_for('preferences') }}">Preferences</a>
             </li>
         </ul>
     </header>

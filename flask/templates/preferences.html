@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Preferences{% endblock %}
+
+{% block content %}
+    <div class="card mx-auto" style="max-width: 500px;">
+        <div class="card-body">
+            <h2 class="card-title">{{ page_title }}</h2>
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                {% if form.notificationDelay.errors|length > 1 %}
+                    <p class="error-message">{{ form.notificationDelay.errors[1] }}</p>
+                {% endif %}
+
+                <div class="form-group">
+                    {{ form.sysadminemail.label(class="form-label") }}
+                    {{ form.sysadminemail(size=20, class="form-control", placeholder='admin@nowhere' )}}
+                </div>
+                <div class="form-group">
+                    {{ form.notificationDelay.label(class="form-label") }}
+                    {{ form.notificationDelay(class="form-control" )}}
+                </div>
+                <div class="mt-3">
+                    {{ form.submit(class="btn btn-info btn-block") }}
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

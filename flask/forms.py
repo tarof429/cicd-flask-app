@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DateField, TimeField, SubmitField
-from wtforms.validators import DataRequired, Length
+from wtforms import StringField, DateField, TimeField, IntegerField, SubmitField,EmailField
+from wtforms.validators import DataRequired, Length, NumberRange
 
 class AddEventForm(FlaskForm):
     title = StringField('Title',
@@ -31,3 +31,13 @@ class UpdateEventForm(FlaskForm):
     date = DateField('Date')
     time = TimeField('Time')
     submit = SubmitField('Submit')
+
+class PreferencesForm(FlaskForm):
+    sysadminemail = EmailField('System Admin e-mail address')
+    notificationDelay = IntegerField('Notification delay',
+                            default = 0,
+                            validators = [
+                                NumberRange(min = 0, max=60,
+                                            message= 'Delay must be a number between 0 and 60')
+                            ])
+    submit = SubmitField('Save')
