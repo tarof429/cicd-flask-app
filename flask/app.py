@@ -98,7 +98,7 @@ def create_app(mode=None):
                 db.session.commit()
                 if app.config['MESSAGE_BROKER_TYPE'] == 'rabbitmq':
                     app.logger.info(f'Publishing message for event: {new_event.title}')
-                    publish_to_rabbitmq('Added new event!')
+                    publish_to_rabbitmq(f'Added new event: {new_event.title}!')
                     
                 flash('Added event', 'success')
             except IntegrityError:

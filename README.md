@@ -64,3 +64,4 @@ flowchart LR
 - Cloud/Digital Ocean/AWS
 - Jenkins/Trivy
 - RabbitMQ
+- Go
