@@ -42,6 +42,10 @@ services:
       - AMPQ_HOST=rabbitmq
       - AMPQ_PORT=5672
       - AMPQ_VHOST=rabbitmq
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+        restart: true
     volumes:
       - "prefs:/prefs"
   db:
