@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DateField, TimeField, IntegerField, SubmitField,EmailField
+from wtforms import StringField, DateField, TimeField, IntegerField, SubmitField, EmailField
 from wtforms.validators import DataRequired, Length, NumberRange
 
 class AddEventForm(FlaskForm):
@@ -41,3 +41,4 @@ class PreferencesForm(FlaskForm):
                                             message= 'Delay must be a number between 0 and 60')
                             ])
     submit = SubmitField('Save')
+    cancel = SubmitField('Cancel')

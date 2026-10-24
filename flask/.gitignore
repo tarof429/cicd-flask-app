@@ -4,3 +4,5 @@ instance/
 tests/__pycache__/
 .pytest_cache/
 logs/
+preferences.yaml
+tests/data/

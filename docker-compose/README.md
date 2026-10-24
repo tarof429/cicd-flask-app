@@ -18,15 +18,8 @@ Docker compose files 2-4 were created for deployment to servers using either the
 
 The *docker-compose5.yaml* script was created after notification was introduced in the code. Because it specifies DATABASE_URI (which we were doing earlier), the app will use the db service. The volume has been fixed to point to the correct location.
 
-To run *docker-compose5.yaml*:
 
-```sh
-PRIVATE_REGISTRY_SERVER=localhost \
-PRIVATE_REGISTRY_PORT=3000 \
-PRIVATE_REPOSITORY=events-app \
-IMAGE_TAG=latest \
-docker compose -f docker-compose5.yaml up -d
-```
+The *docker-compose6.yaml* script integrates with the event-notifier.
 
 Access the application at http://localhost:5000.
 

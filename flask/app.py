@@ -3,11 +3,11 @@ from flask import Flask, render_template, request, flash, redirect, url_for, abo
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError, DataError
 from logging.handlers import RotatingFileHandler
-
+import yaml
+import pika
 from models import db, Event
 from forms import *
-
-import pika
+from prefs import Prefs
 
 def configure_logging():
     logs_dir = 'logs'
@@ -47,7 +47,7 @@ def create_app(mode=None):
     db.init_app(app)
 
     Migrate(app, db)
-
+    
     @app.route('/')
     def index():
         app.logger.info("Home page accessed")
@@ -60,19 +60,48 @@ def create_app(mode=None):
 
     @app.route('/preferences',  methods=['GET', 'POST'])
     def preferences():
+        prefs = Prefs(os.getenv('PREFERENCES_CONFIG', 'preferences.yaml'))
+
         form = PreferencesForm()
 
         if request.method == 'POST' and form.validate_on_submit():
-            sysadminemail = form.sysadminemail.data
-            notificationDelay = form.notificationDelay.data
-
-            app.logger.info(f'Sysadmin email: {sysadminemail}')
-            app.logger.info(f'Notification delay: {notificationDelay}')
-
             events = Event.query.all()
-            return redirect(url_for('list_events', events = events))          
 
-        return render_template('preferences.html', form=form, page_title = 'Preferences')
+            if form.cancel.data:
+                return redirect(url_for('list_events', events = events))
+            else:
+                sysadminemail = form.sysadminemail.data
+                notificationDelay = form.notificationDelay.data
+
+                app.logger.info(f'Sysadmin email: {sysadminemail}')
+                app.logger.info(f'Notification delay: {notificationDelay}')
+
+                data = {
+                    'sysadminemail': sysadminemail,
+                    'notificationDelay': notificationDelay
+                }
+
+                prefs.write(data)
+
+                return redirect(url_for('list_events', events = events))
+
+        data = prefs.load()
+
+        app.logger.info(data)
+
+        sysadminemail = data.get("sysadminemail")
+        if sysadminemail is None:
+            form.sysadminemail.data = ''
+        else:
+            form.sysadminemail.data = sysadminemail
+
+        notificationDelay = data.get('notificationDelay')
+        if notificationDelay is None:
+            form.notificationDelay.data = ''
+        else:
+            form.notificationDelay.data = notificationDelay
+
+        return render_template('preferences.html', form = form, page_title = 'Preferences')
 
     @app.errorhandler(404)
     def page_not_found(error):
