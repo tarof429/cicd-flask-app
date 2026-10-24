@@ -5,6 +5,7 @@ import (
 	"os"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+	"gopkg.in/yaml.v3"
 )
 
 func failOnError(err error, msg string) {
@@ -17,12 +18,32 @@ func sendNotification(msg string) {
 	log.Printf("Sending notification: (%v)", msg)
 }
 
+type Preferences struct {
+	sysadminemail     string `yaml:sysadminemail`
+	notificationDelay string `yaml:notificationDelay`
+}
+
 func main() {
 	var user = os.Getenv("AMPQ_USER")
 	var password = os.Getenv("AMPQ_PASSWORD")
 	var host = os.Getenv("AMPQ_HOST")
 	var port = os.Getenv("AMPQ_PORT")
 	var vhost = os.Getenv("AMPQ_VHOST")
+	var prefsFile = os.Getenv("PREFERENCES_CONFIG")
+
+	f, err := os.ReadFile(prefsFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var prefs Preferences
+
+	if err := yaml.Unmarshal(f, &prefs); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("sysadminemail: %v¥n", prefs.sysadminemail)
+	log.Printf("notificationdelay: %v¥n", prefs.notificationDelay)
 
 	url := "amqp://" + user + ":" + password + "@" + host + ":" + port + "/" + vhost
 	conn, err := amqp.Dial(url)
