@@ -8,6 +8,7 @@ services:
       - DATABASE_URI=postgresql://admin:secret@db:5432/db
       - RABBITMQ_USER=user
       - RABBITMQ_PASS=password
+      - PREFERENCES_CONFIG=/prefs/preferences.yaml
     ports:
       - 5000:5000
     depends_on:
@@ -19,8 +20,8 @@ services:
         restart: true
       eventnotifier:
         condition: service_started
-      volumes:
-        - "prefs:/prefs"
+    volumes:
+      - "prefs:/prefs"
   rabbitmq:
     image: rabbitmq:4.3.6-management-alpine
     healthcheck:
@@ -42,6 +43,7 @@ services:
       - AMPQ_HOST=rabbitmq
       - AMPQ_PORT=5672
       - AMPQ_VHOST=rabbitmq
+      - PREFERENCES_CONFIG=/prefs/preferences.yaml
     depends_on:
       rabbitmq:
         condition: service_healthy
