@@ -14,7 +14,9 @@ class Prefs:
         else:
             self._create_parent_dir()
             with open(self.prefsConfig, 'w') as f:
-                return {} if yaml.dump(data, f) is None else data
+                data = {}
+                yaml.dump(data, f)
+                return data
 
     def write(self, data):
         self._create_parent_dir()
