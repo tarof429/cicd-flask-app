@@ -99,5 +99,16 @@ To run all the tests (rabbitmq must be running):
 MESSAGE_BROKER_TYPE=rabbitmq RABBITMQ_USER=user RABBITMQ_PASS=password RABBITMQ_HOST=localhost RABBITMQ_VHOST=rabbitmq python -m pytest
 ```
 
+## Upgrading packages
 
+Use sed to change requirements.txt so that == is replaced with >=.
 
+```sh
+sed -i 's/==/>=/g' requirements.txt
+```
+
+Then upgrade all the packages.
+
+```sh
+$ pip install -r requirements.txt --upgrade
+```
