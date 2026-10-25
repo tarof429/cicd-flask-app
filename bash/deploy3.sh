@@ -4,9 +4,9 @@ set -o pipefail
 
 IMAGE_TAG=${1:-latest}
 
-IMAGE_TAG=${IMAGE_TAG} docker compose pull app eventnotifier
+IMAGE_TAG=${IMAGE_TAG} docker compose pull app eventconsumer
 
-IMAGE_TAG=${IMAGE_TAG} docker compose up -d --force-recreate app eventnotifier
+IMAGE_TAG=${IMAGE_TAG} docker compose up -d --force-recreate app eventconsumer
 
 # By default, assume the application is not running successfully
 STATUS="1"
