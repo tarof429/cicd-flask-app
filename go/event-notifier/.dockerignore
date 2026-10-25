@@ -1,2 +1,6 @@
 event-notifier
+eventnotifier/testdata/
+eventnotifier/*_test.go
+.gitignore
+MakefilE
 README.md
