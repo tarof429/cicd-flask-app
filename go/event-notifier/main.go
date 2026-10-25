@@ -15,6 +15,36 @@ func failOnError(err error, msg string) {
 	}
 }
 
+func receiveFromQueue(ch *amqp.Channel, queueName string) (<-chan amqp.Delivery, error) {
+
+	q, err := ch.QueueDeclare(
+		queueName, // name
+		true,      // durability
+		false,     // delete when unused
+		false,     // exclusive
+		false,     // no-wait
+		amqp.Table{
+			amqp.QueueTypeArg: amqp.QueueTypeQuorum,
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	msgs, err := ch.Consume(
+		q.Name, // queue
+		"",     // consumer
+		true,   // auto-ack
+		false,  // exclusive
+		false,  // no-local
+		false,  // no-wait
+		nil,    // args
+	)
+
+	return msgs, err
+}
+
 func main() {
 	var user = os.Getenv("AMPQ_USER")
 	var password = os.Getenv("AMPQ_PASSWORD")
@@ -29,41 +59,6 @@ func main() {
 	if err != nil {
 		log.Printf("Failed to load preferences")
 	}
-
-	url := "amqp://" + user + ":" + password + "@" + host + ":" + port + "/" + vhost
-	conn, err := amqp.Dial(url)
-
-	failOnError(err, "Failed to connect to RabbitMQ")
-	defer conn.Close()
-
-	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
-
-	q, err := ch.QueueDeclare(
-		"event_confirmation", // name
-		true,                 // durability
-		false,                // delete when unused
-		false,                // exclusive
-		false,                // no-wait
-		amqp.Table{
-			amqp.QueueTypeArg: amqp.QueueTypeQuorum,
-		},
-	)
-	failOnError(err, "Failed to declare a queue")
-
-	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		true,   // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
-	failOnError(err, "Failed to register a consumer")
-
-	var forever chan struct{}
 
 	var notificationDelay int
 	var sysadminemail string
@@ -82,8 +77,50 @@ func main() {
 	log.Printf("NotificationDelay: %v\n", notificationDelay)
 	log.Printf("Sysadminemail: %v\n", sysadminemail)
 
+	url := "amqp://" + user + ":" + password + "@" + host + ":" + port + "/" + vhost
+	conn, err := amqp.Dial(url)
+
+	failOnError(err, "Failed to connect to RabbitMQ")
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	event_confirmation_msgs, err := receiveFromQueue(ch, "event_confirmation")
+
+	if err != nil {
+		failOnError(err, "Failed to receive from queue")
+	}
+
+	// q, err := ch.QueueDeclare(
+	// 	"event_confirmation", // name
+	// 	true,                 // durability
+	// 	false,                // delete when unused
+	// 	false,                // exclusive
+	// 	false,                // no-wait
+	// 	amqp.Table{
+	// 		amqp.QueueTypeArg: amqp.QueueTypeQuorum,
+	// 	},
+	// )
+	// failOnError(err, "Failed to declare event_confirmation queue")
+
+	// msgs, err := ch.Consume(
+	// 	q.Name, // queue
+	// 	"",     // consumer
+	// 	true,   // auto-ack
+	// 	false,  // exclusive
+	// 	false,  // no-local
+	// 	false,  // no-wait
+	// 	nil,    // args
+	// )
+
+	// failOnError(err, "Failed to register a consumer")
+
+	var forever chan struct{}
+
 	go func() {
-		for d := range msgs {
+		for d := range event_confirmation_msgs {
 			log.Printf("Received a message: (%s)", d.Body)
 			eventnotifier.SendNotification(string(d.Body))
 		}

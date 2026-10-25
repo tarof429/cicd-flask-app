@@ -143,7 +143,8 @@ def create_app(mode=None):
                 db.session.commit()
                 if app.config['MESSAGE_BROKER_TYPE'] == 'rabbitmq':
                     app.logger.info(f'Publishing message for event: {new_event.title}')
-                    publish_to_rabbitmq(f'Added new event: {new_event.title}!')
+                    publish_to_rabbitmq('event_confirmation', 
+                                        'event_confirmation',  f'Added new event: {new_event.title}!')
                     
                 flash('Added event', 'success')
             except IntegrityError:
@@ -207,7 +208,7 @@ def create_app(mode=None):
 
     return app
 
-def publish_to_rabbitmq(message):
+def publish_to_rabbitmq(qname, rkey, message):
     credentials = pika.PlainCredentials(
         os.environ["RABBITMQ_USER"],
         os.environ["RABBITMQ_PASS"]
@@ -225,10 +226,10 @@ def publish_to_rabbitmq(message):
         connection = pika.BlockingConnection(parameters)
 
         channel = connection.channel()
-        channel.queue_declare(queue='event_confirmation', durable=True, arguments={'x-queue-type': 'quorum'})
+        channel.queue_declare(queue=qname, durable=True, arguments={'x-queue-type': 'quorum'})
 
         channel.basic_publish(exchange='',
-                    routing_key='event_confirmation',
+                    routing_key=rkey,
                     body=message)
     finally:
         if connection is not None:
