@@ -101,14 +101,37 @@ MESSAGE_BROKER_TYPE=rabbitmq RABBITMQ_USER=user RABBITMQ_PASS=password RABBITMQ_
 
 ## Upgrading packages
 
-Use sed to change requirements.txt so that == is replaced with >=.
+Open 3 terminals.
+
+### Terminal 1
+
+Uppgrade one package in requirements.txt by running:
 
 ```sh
-sed -i 's/==/>=/g' requirements.txt
+pip install --upgrade package-name
 ```
 
-Then upgrade all the packages.
+Update requirements.txt.
 
 ```sh
-$ pip install -r requirements.txt --upgrade
+pip freeze > requirements.txt
 ```
+
+### Terminal 2
+
+Build the test image and push it to the local registry.
+
+```sh
+docker build -f docker/Dockerfile.test3 -t localhost:3000/events-app-test:latest .
+docker push localhost:3000/events-app-test:latest
+```
+
+### Terminal 3
+
+Run the tests.
+
+```sh
+PRIVATE_REGISTRY_SERVER=localhost PRIVATE_REGISTRY_PORT=3000 PRIVATE_REPOSITORY=events-app-test PRIVATE_EVENT_APP_REPOSITORY=events-app-test IMAGE_TAG=latest docker compose -f docker-compose-test5.yaml up --abort-on-container-exit --exit-code-from app
+ ```
+
+If that was so successful, then most likeley the upgrade was succesful!
