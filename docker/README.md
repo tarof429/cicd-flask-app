@@ -78,7 +78,7 @@ FAILED tests/test_event_db.py::test_false - assert False
 Or if we want to push to the local registry:
 
 ```sh
-docker build -f docker/Dockerfile.test2 -t localhost:3000/events-app-test:latest .
+docker build -f docker/Dockerfile.test3 -t localhost:3000/events-app-test:latest .
 ```
 
 To push the image:

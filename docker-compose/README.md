@@ -66,18 +66,19 @@ Container docker-compose-db-1 Stopped
 db-1 exited with code 0
 ```
 
-The *docker-compose-test2.yaml* script and beyond relies on docker registry. See [here](../docker-registry/README.md#private_registry). 
+The *docker-compose-test2.yaml* script and beyond relies on docker registry to be running. See [here](../docker-registry/README.md#private_registry). 
 
-Next build the test image. See [here](../docker/README.md#building_test_container).
+Next build the test image and push it to the docker registry. See [here](../docker/README.md#building_test_container).
 
-To run *docker-compose-test-4.yaml*:
+To run *docker-compose-test-5.yaml*:
 
 ```sh
 PRIVATE_REGISTRY_SERVER=localhost \
 PRIVATE_REGISTRY_PORT=3000 \
 PRIVATE_REPOSITORY=events-app-test \
+PRIVATE_EVENT_APP_REPOSITORY=events-app-test \
 IMAGE_TAG=latest \
-docker compose -f docker-compose-test4.yaml up \
+docker compose -f docker-compose-test5.yaml up \
 --abort-on-container-exit --exit-code-from app
 ```
 
