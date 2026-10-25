@@ -2,5 +2,6 @@ event-notifier
 eventnotifier/testdata/
 eventnotifier/*_test.go
 .gitignore
-MakefilE
+Dockerfile
+Makefile
 README.md
