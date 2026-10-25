@@ -1,26 +1,18 @@
 package main
 
 import (
+	"event-notifier/eventnotifier"
 	"log"
 	"os"
+	"strconv"
 
 	amqp "github.com/rabbitmq/amqp091-go"
-	"gopkg.in/yaml.v3"
 )
 
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Panicf("%s: %s", msg, err)
 	}
-}
-
-func sendNotification(msg string) {
-	log.Printf("Sending notification: (%v)", msg)
-}
-
-type Preferences struct {
-	sysadminemail     string `yaml:sysadminemail`
-	notificationDelay string `yaml:notificationDelay`
 }
 
 func main() {
@@ -31,19 +23,12 @@ func main() {
 	var vhost = os.Getenv("AMPQ_VHOST")
 	var prefsFile = os.Getenv("PREFERENCES_CONFIG")
 
-	f, err := os.ReadFile(prefsFile)
+	eventnotifier := eventnotifier.Notifier{}
+	unmarshalled, err := eventnotifier.Load(prefsFile)
+
 	if err != nil {
-		log.Fatal(err)
+		failOnError(err, "Failed to load preferences")
 	}
-
-	var prefs Preferences
-
-	if err := yaml.Unmarshal(f, &prefs); err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("sysadminemail: %v¥n", prefs.sysadminemail)
-	log.Printf("notificationdelay: %v¥n", prefs.notificationDelay)
 
 	url := "amqp://" + user + ":" + password + "@" + host + ":" + port + "/" + vhost
 	conn, err := amqp.Dial(url)
@@ -80,14 +65,23 @@ func main() {
 
 	var forever chan struct{}
 
+	if unmarshalled {
+		notificationDelay, err := strconv.Atoi(eventnotifier.Prefs.NotificationDelay)
+
+		if err != nil {
+			failOnError(err, "Invalid notificationDelay value")
+		}
+
+		log.Printf("Delaying notification by %v seconds\n", notificationDelay)
+	}
+
 	go func() {
 		for d := range msgs {
 			log.Printf("Received a message: (%s)", d.Body)
-			sendNotification(string(d.Body))
+			eventnotifier.SendNotification(string(d.Body))
 		}
 	}()
 
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
 	<-forever
-
 }

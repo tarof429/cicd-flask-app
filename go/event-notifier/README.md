@@ -17,7 +17,7 @@ To run the event notifier:
 ```sh
 AMPQ_USER=user AMPQ_PASSWORD=password \
    AMPQ_HOST=localhost AMPQ_PORT=5672 \
-   AMPQ_VHOST=rabbitmq ./event-notifier 
+   AMPQ_VHOST=rabbitmq PREFERENCES_CONFIG=preferences.yaml ./event-notifier 
  ```
 
 If the Flask application is run using docker compose, then the event notifier should be run as another service so that they can communicate with each other over the docker network.

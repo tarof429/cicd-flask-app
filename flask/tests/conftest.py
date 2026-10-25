@@ -7,7 +7,7 @@ from app import create_app
 def app():
     test_data_dir = 'tests/data'
 
-    shutil.rmtree(test_data_dir, ignore_errors = True)
+    # shutil.rmtree(test_data_dir, ignore_errors = True)
 
     app = create_app(mode='test')
 
