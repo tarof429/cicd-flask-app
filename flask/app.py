@@ -83,8 +83,8 @@ def create_app(mode=None):
 
                 prefs.write(data)
 
-                publish_to_rabbitmq('confirmation_prefs', 'confirmation_prefs')
-
+                publish_to_rabbitmq('confirmation_prefs', 'confirmation_prefs', data)
+                
                 return redirect(url_for('list_events', events = events))
 
         data = prefs.load()
