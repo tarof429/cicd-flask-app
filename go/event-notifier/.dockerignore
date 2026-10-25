@@ -1,7 +1,0 @@
-event-notifier
-eventnotifier/testdata/
-eventnotifier/*_test.go
-.gitignore
-Dockerfile
-Makefile
-README.md

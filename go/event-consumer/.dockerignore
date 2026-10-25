@@ -1,0 +1,7 @@
+event-consumer
+eventconsumer/testdata/
+eventconsumer/*_test.go
+.gitignore
+Dockerfile
+Makefile
+README.md

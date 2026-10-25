@@ -1,4 +1,4 @@
-package eventnotifier
+package eventconsumer
 
 import (
 	"bytes"
@@ -26,7 +26,7 @@ func TestLoad(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	notifier := Notifier{}
+	notifier := EventConsumer{}
 	notifier.Load("testdata/preferences_test.yaml")
 
 	if notifier.Prefs.NotificationDelay != "10" {

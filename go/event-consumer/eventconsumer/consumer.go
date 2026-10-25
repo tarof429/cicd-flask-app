@@ -1,4 +1,4 @@
-package eventnotifier
+package eventconsumer
 
 import (
 	"log"
@@ -7,16 +7,16 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Notifier struct {
+type EventConsumer struct {
 	Prefs Preferences
 }
 
-func (n *Notifier) SetPrefs(prefs Preferences) {
+func (n *EventConsumer) SetPrefs(prefs Preferences) {
 	n.Prefs.NotificationDelay = prefs.NotificationDelay
 	n.Prefs.Sysadminemail = prefs.Sysadminemail
 }
 
-func (n *Notifier) Load(prefsFile string) (bool, error) {
+func (n *EventConsumer) Load(prefsFile string) (bool, error) {
 	prefs := Preferences{
 		Sysadminemail:     "",
 		NotificationDelay: "0",
@@ -38,6 +38,6 @@ func (n *Notifier) Load(prefsFile string) (bool, error) {
 	}
 }
 
-func (n Notifier) SendNotification(msg string) {
+func (n EventConsumer) SendNotification(msg string) {
 	log.Printf("Sending notification: (%v) to %v", msg, n.Prefs.Sysadminemail)
 }

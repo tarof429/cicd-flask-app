@@ -18,7 +18,7 @@ services:
       rabbitmq:
         condition: service_healthy
         restart: true
-      eventnotifier:
+      eventconsumer:
         condition: service_started
     volumes:
       - "prefs:/prefs"
@@ -35,8 +35,8 @@ services:
       - RABBITMQ_DEFAULT_VHOST=rabbitmq
     ports:
       - 15672:15672
-  eventnotifier:
-    image: tarof429/event-notifier:${IMAGE_TAG}
+  eventconsumer:
+    image: tarof429/event-consumer:${IMAGE_TAG}
     environment:
       - AMPQ_USER=user
       - AMPQ_PASSWORD=password

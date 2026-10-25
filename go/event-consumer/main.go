@@ -1,7 +1,7 @@
 package main
 
 import (
-	"event-notifier/eventnotifier"
+	eventconsumer "event-consumer/eventconsumer"
 	"log"
 	"os"
 	"strconv"
@@ -53,8 +53,8 @@ func main() {
 	var vhost = os.Getenv("AMPQ_VHOST")
 	var prefsFile = os.Getenv("PREFERENCES_CONFIG")
 
-	eventnotifier := eventnotifier.Notifier{}
-	unmarshalled, err := eventnotifier.Load(prefsFile)
+	eventconsumer := eventconsumer.EventConsumer{}
+	unmarshalled, err := eventconsumer.Load(prefsFile)
 
 	if err != nil {
 		log.Printf("Failed to load preferences")
@@ -64,8 +64,8 @@ func main() {
 	var sysadminemail string
 
 	if unmarshalled {
-		notificationDelay, err := strconv.Atoi(eventnotifier.Prefs.NotificationDelay)
-		sysadminemail = eventnotifier.Prefs.Sysadminemail
+		notificationDelay, err := strconv.Atoi(eventconsumer.Prefs.NotificationDelay)
+		sysadminemail = eventconsumer.Prefs.Sysadminemail
 
 		if err != nil {
 			failOnError(err, "Invalid notificationDelay value")
@@ -122,7 +122,7 @@ func main() {
 	go func() {
 		for d := range event_confirmation_msgs {
 			log.Printf("Received a message: (%s)", d.Body)
-			eventnotifier.SendNotification(string(d.Body))
+			eventconsumer.SendNotification(string(d.Body))
 		}
 	}()
 

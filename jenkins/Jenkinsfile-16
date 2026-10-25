@@ -127,11 +127,11 @@ pipeline {
                         eventsAppImage.push('latest')
                     }
 
-                    dir('go/event-notifier') {
-                        def eventNotifierImage = docker.build("tarof429/event-notifier:${env.IMAGE_TAG}", ".")
+                    dir('go/event-consumer') {
+                        def eventConsumerImage = docker.build("tarof429/event-consumer:${env.IMAGE_TAG}", ".")
                         docker.withRegistry("${env.DOCKERHUB_REGISTRY}", "dockerhub") {
-                            eventNotifierImage.push()
-                            eventNotifierImage.push('latest')
+                            eventConsumerImage.push()
+                            eventConsumerImage.push('latest')
                         }           
                     }
      

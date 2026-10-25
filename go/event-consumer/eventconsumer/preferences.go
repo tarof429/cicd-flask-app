@@ -1,4 +1,4 @@
-package eventnotifier
+package eventconsumer
 
 type Preferences struct {
 	Sysadminemail     string `yaml:"sysadminemail"`

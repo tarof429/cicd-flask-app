@@ -6,7 +6,7 @@ help: ## Display this help
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 build: ## Build all targets
-	env GOOS=linux GOOARCH=amd64 go build -o event-notifier
+	env GOOS=linux GOOARCH=amd64 go build -o event-consumer
 
 clean:
-	@rm -f event-notifier
+	@rm -f event-consumer

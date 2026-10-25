@@ -1,4 +1,4 @@
-# Event Notifier
+# Event Consumer/Producer
 
 ## Introduction
 

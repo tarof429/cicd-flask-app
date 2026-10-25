@@ -1,4 +1,4 @@
-module event-notifier
+module event-consumer
 
 go 1.27.3
 
