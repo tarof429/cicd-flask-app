@@ -9,13 +9,13 @@ Docker can be used to containerize applications so that they can run in any kind
 To build the image:
 
 ```sh
-docker build -f docker/Dockerfile2 -t events-app .
+docker build -f docker/Dockerfile3 -t events-app .
 ```
 
 or build the image and tag it to push to the local docker registry:
 
 ```sh
-docker build -f docker/Dockerfile2 -t localhost:3000/events-app:latest .
+docker build -f docker/Dockerfile3 -t localhost:3000/events-app:latest .
 ```
 
 To push the image to a local docker registry:
@@ -48,7 +48,7 @@ Before building this container, build the main container.
 Next, build the test image; this Dockerfile points to `entrypoint_test.sh` which runs the tests. For example:
 
 ```sh
-docker build -f docker/Dockerfile.test2 -t events-app-test .
+docker build -f docker/Dockerfile.test3 -t events-app-test .
 ```
 
 If we run it with a failing tests, we'lll see:

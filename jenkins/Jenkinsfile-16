@@ -52,7 +52,7 @@ pipeline {
 
                     def imageName = "${env.PRIVATE_REGISTRY_SERVER}:${env.PRIVATE_REGISTRY_PORT}/${env.PRIVATE_EVENT_APP_REPOSITORY}:${env.IMAGE_TAG}"
 
-                    def customImage = docker.build(imageName, "-f docker/Dockerfile.test2 .")
+                    def customImage = docker.build(imageName, "-f docker/Dockerfile.test3 .")
 
                     def output = sh(returnStdout: true, script: "trivy image --severity HIGH,CRITICAL ${imageName}")
 
@@ -120,7 +120,7 @@ pipeline {
         stage ('Publish') {
             steps {
                 script {
-                    def eventsAppImage = docker.build("tarof429/events-app:${env.IMAGE_TAG}", "-f docker/Dockerfile .")
+                    def eventsAppImage = docker.build("tarof429/events-app:${env.IMAGE_TAG}", "-f docker/Dockerfile3 .")
 
                     docker.withRegistry("${env.DOCKERHUB_REGISTRY}", "dockerhub") {
                         eventsAppImage.push()
