@@ -27,7 +27,7 @@ func main() {
 	unmarshalled, err := eventnotifier.Load(prefsFile)
 
 	if err != nil {
-		failOnError(err, "Failed to load preferences")
+		log.Printf("Failed to load preferences")
 	}
 
 	url := "amqp://" + user + ":" + password + "@" + host + ":" + port + "/" + vhost
@@ -65,8 +65,12 @@ func main() {
 
 	var forever chan struct{}
 
+	var notificationDelay int
+	var sysadminemail string
+
 	if unmarshalled {
 		notificationDelay, err := strconv.Atoi(eventnotifier.Prefs.NotificationDelay)
+		sysadminemail = eventnotifier.Prefs.Sysadminemail
 
 		if err != nil {
 			failOnError(err, "Invalid notificationDelay value")
@@ -74,6 +78,9 @@ func main() {
 
 		log.Printf("Delaying notification by %v seconds\n", notificationDelay)
 	}
+
+	log.Printf("NotificationDelay: %v\n", notificationDelay)
+	log.Printf("Sysadminemail: %v\n", sysadminemail)
 
 	go func() {
 		for d := range msgs {
