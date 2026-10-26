@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	amqp "github.com/rabbitmq/amqp091-go"
 	"gopkg.in/yaml.v3"
 )
 
@@ -40,4 +41,34 @@ func (n *EventConsumer) Load(prefsFile string) error {
 
 func (n EventConsumer) SendNotification(msg string) {
 	log.Printf("Sending notification: (%v) to %v", msg, n.Prefs.Sysadminemail)
+}
+
+func (n EventConsumer) ReceiveFromQueue(ch *amqp.Channel, queueName string) (<-chan amqp.Delivery, error) {
+
+	q, err := ch.QueueDeclare(
+		queueName, // name
+		true,      // durability
+		false,     // delete when unused
+		false,     // exclusive
+		false,     // no-wait
+		amqp.Table{
+			amqp.QueueTypeArg: amqp.QueueTypeQuorum,
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	msgs, err := ch.Consume(
+		q.Name, // queue
+		"",     // consumer
+		true,   // auto-ack
+		false,  // exclusive
+		false,  // no-local
+		false,  // no-wait
+		nil,    // args
+	)
+
+	return msgs, err
 }

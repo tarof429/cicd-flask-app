@@ -15,36 +15,6 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func receiveFromQueue(ch *amqp.Channel, queueName string) (<-chan amqp.Delivery, error) {
-
-	q, err := ch.QueueDeclare(
-		queueName, // name
-		true,      // durability
-		false,     // delete when unused
-		false,     // exclusive
-		false,     // no-wait
-		amqp.Table{
-			amqp.QueueTypeArg: amqp.QueueTypeQuorum,
-		},
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		true,   // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
-
-	return msgs, err
-}
-
 func main() {
 	var user = os.Getenv("AMPQ_USER")
 	var password = os.Getenv("AMPQ_PASSWORD")
@@ -79,7 +49,7 @@ func main() {
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
-	event_confirmation_msgs, err := receiveFromQueue(ch, "event_confirmation")
+	event_confirmation_msgs, err := eventconsumer.ReceiveFromQueue(ch, "event_confirmation")
 
 	if err != nil {
 		failOnError(err, "Failed to receive from queue")
