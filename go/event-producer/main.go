@@ -2,6 +2,7 @@ package main
 
 import (
 	"event-producer/eventproducer"
+	"fmt"
 	"os"
 	"time"
 
@@ -15,33 +16,48 @@ func main() {
 	var port = os.Getenv("AMPQ_PORT")
 	var vhost = os.Getenv("AMPQ_VHOST")
 
-	eventproducer := eventproducer.EventProducer{}
+	producer := eventproducer.EventProducer{}
 
 	url := "amqp://" + user + ":" + password + "@" + host + ":" + port + "/" + vhost
 
 	conn, err := amqp.Dial(url)
-	eventproducer.FailOnError(err, "Failed to connect to RabbitMQ")
+	producer.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
 	ch, err := conn.Channel()
-	eventproducer.FailOnError(err, "Failed to open a channel")
+	producer.FailOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
-	func() {
-		// prefs := eventproducer.Preferences{
-		// 	Sysadminemail:     "admin@foo.com",
-		// 	NotificationDelay: "10",
-		// }
-
-		for {
-			//err2 := sendToQueue(ch, "event_confirmation", fmt.Sprintf("%q", prefs))
-
-			err2 := eventproducer.SendToQueue(ch, "event_confirmation", "Added new event: test")
-			if err2 != nil {
-				eventproducer.FailOnError(err2, "Failed to send message")
-			}
-			time.Sleep(5 * time.Second)
-
+	for i := range 3 {
+		err2 := producer.SendToQueue(ch, "event_confirmation", fmt.Sprintf("Added new event: test%v", i))
+		if err2 != nil {
+			producer.FailOnError(err2, "Failed to send message")
 		}
-	}()
+	}
+
+	time.Sleep(1 * time.Second)
+
+	producer.Prefs = eventproducer.Preferences{
+		NotificationDelay: "1",
+		Sysadminemail:     "admin@foo.com",
+	}
+
+	delay := 0
+
+	for i := range 3 {
+
+		producer.Prefs = eventproducer.Preferences{
+			Sysadminemail:     fmt.Sprintf("admin%v@foo.com", i),
+			NotificationDelay: fmt.Sprintf("%v", delay),
+		}
+
+		err2 := producer.SendToQueue(ch, "confirmation_prefs", fmt.Sprintf("%q", producer.Prefs))
+
+		if err2 != nil {
+			producer.FailOnError(err2, "Failed to send message")
+		}
+
+		delay = delay + 1
+	}
+
 }
