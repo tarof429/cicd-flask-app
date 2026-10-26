@@ -3,6 +3,8 @@ package eventconsumer
 import (
 	"log"
 	"os"
+	"strconv"
+	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	"gopkg.in/yaml.v3"
@@ -46,6 +48,13 @@ func (n *EventConsumer) Load(prefsFile string) error {
 }
 
 func (n EventConsumer) SendNotification(msg string) {
+	i, err := strconv.Atoi(n.Prefs.NotificationDelay)
+
+	if err != nil {
+		log.Printf("Unable to parse %v\n", i)
+	}
+	log.Printf("Sleeping for %v seconds", i)
+	time.Sleep(time.Second * time.Duration(i))
 	log.Printf("Sending notification: (%v) to %v", msg, n.Prefs.Sysadminemail)
 }
 

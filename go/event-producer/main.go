@@ -3,10 +3,12 @@ package main
 import (
 	"event-producer/eventproducer"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+	yaml "gopkg.in/yaml.v3"
 )
 
 func main() {
@@ -28,36 +30,39 @@ func main() {
 	producer.FailOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
-	for i := range 3 {
-		err2 := producer.SendToQueue(ch, "event_confirmation", fmt.Sprintf("Added new event: test%v", i))
-		if err2 != nil {
-			producer.FailOnError(err2, "Failed to send message")
-		}
+	// Send an event confirmation
+	err = producer.SendToQueue(ch, "event_confirmation", "Added new event: Celebrate Birthday!")
+	if err != nil {
+		producer.FailOnError(err, "Failed to send message")
 	}
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(5 * time.Second)
 
+	// Change preferences and send it to the queue
 	producer.Prefs = eventproducer.Preferences{
-		NotificationDelay: "1",
-		Sysadminemail:     "admin@foo.com",
+		Sysadminemail:     "hero@foo.com",
+		NotificationDelay: fmt.Sprintf("%v", 3),
 	}
 
-	delay := 0
+	body, err := yaml.Marshal(producer.Prefs)
 
-	for i := range 3 {
+	if err != nil {
+		log.Printf("Unable to encoce preferences")
+	}
 
-		producer.Prefs = eventproducer.Preferences{
-			Sysadminemail:     fmt.Sprintf("admin%v@foo.com", i),
-			NotificationDelay: fmt.Sprintf("%v", delay),
-		}
+	err = producer.SendToQueue(ch, "confirmation_prefs", string(body))
 
-		err2 := producer.SendToQueue(ch, "confirmation_prefs", fmt.Sprintf("%q", producer.Prefs))
+	if err != nil {
+		producer.FailOnError(err, "Failed to send message")
+	}
 
-		if err2 != nil {
-			producer.FailOnError(err2, "Failed to send message")
-		}
+	time.Sleep(5 * time.Second)
 
-		delay = delay + 1
+	// Send more event confirmations. The consumer should behave a little bit differently due
+	// to the modified preferences.
+	err = producer.SendToQueue(ch, "event_confirmation", "Added new event: Celebrate Holiday!")
+	if err != nil {
+		producer.FailOnError(err, "Failed to send message")
 	}
 
 }

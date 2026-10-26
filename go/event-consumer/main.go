@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+	"gopkg.in/yaml.v3"
 )
 
 func main() {
@@ -17,17 +18,17 @@ func main() {
 	var vhost = os.Getenv("AMPQ_VHOST")
 	var prefsFile = os.Getenv("PREFERENCES_CONFIG")
 
-	eventconsumer := eventconsumer.EventConsumer{}
-	err := eventconsumer.Load(prefsFile)
+	consumer := eventconsumer.EventConsumer{}
+	err := consumer.Load(prefsFile)
 
 	if err != nil {
 		log.Printf("Failed to load preferences")
 	}
-	notificationDelay, err := strconv.Atoi(eventconsumer.Prefs.NotificationDelay)
-	sysadminemail := eventconsumer.Prefs.Sysadminemail
+	notificationDelay, err := strconv.Atoi(consumer.Prefs.NotificationDelay)
+	sysadminemail := consumer.Prefs.Sysadminemail
 
 	if err != nil {
-		eventconsumer.FailOnError(err, "Invalid notificationDelay value")
+		consumer.FailOnError(err, "Invalid notificationDelay value")
 	}
 
 	log.Printf("NotificationDelay: %v\n", notificationDelay)
@@ -36,28 +37,46 @@ func main() {
 	url := "amqp://" + user + ":" + password + "@" + host + ":" + port + "/" + vhost
 	conn, err := amqp.Dial(url)
 
-	eventconsumer.FailOnError(err, "Failed to connect to RabbitMQ")
+	consumer.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
 	ch, err := conn.Channel()
-	eventconsumer.FailOnError(err, "Failed to open a channel")
+	consumer.FailOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
-	event_confirmation_msgs, err := eventconsumer.ReceiveFromQueue(ch, "event_confirmation")
+	event_confirmation_chan, err := consumer.ReceiveFromQueue(ch, "event_confirmation")
 
 	if err != nil {
-		eventconsumer.FailOnError(err, "Failed to receive from queue")
+		consumer.FailOnError(err, "Failed to receive from queue")
 	}
 
-	var forever chan struct{}
+	confirmation_prefs_chan, err := consumer.ReceiveFromQueue(ch, "confirmation_prefs")
+
+	if err != nil {
+		consumer.FailOnError(err, "Failed to receive from queue")
+	}
 
 	go func() {
-		for d := range event_confirmation_msgs {
-			log.Printf("Received a message: (%s)", d.Body)
-			eventconsumer.SendNotification(string(d.Body))
+		for d := range event_confirmation_chan {
+			log.Printf("Received a confirmation message: (%s)", d.Body)
+			consumer.SendNotification(string(d.Body))
+		}
+	}()
+
+	go func() {
+		for d := range confirmation_prefs_chan {
+			log.Printf("Received prefs message: (%s)", d.Body)
+
+			// Modify preferences
+			err := yaml.Unmarshal(d.Body, &consumer.Prefs)
+
+			if err != nil {
+				log.Printf("Unable to parse message: %v\n", err.Error())
+			}
 		}
 	}()
 
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-	<-forever
+	for {
+	}
 }
