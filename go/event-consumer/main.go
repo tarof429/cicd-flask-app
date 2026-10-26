@@ -9,12 +9,6 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Panicf("%s: %s", msg, err)
-	}
-}
-
 func main() {
 	var user = os.Getenv("AMPQ_USER")
 	var password = os.Getenv("AMPQ_PASSWORD")
@@ -33,7 +27,7 @@ func main() {
 	sysadminemail := eventconsumer.Prefs.Sysadminemail
 
 	if err != nil {
-		failOnError(err, "Invalid notificationDelay value")
+		eventconsumer.FailOnError(err, "Invalid notificationDelay value")
 	}
 
 	log.Printf("NotificationDelay: %v\n", notificationDelay)
@@ -42,17 +36,17 @@ func main() {
 	url := "amqp://" + user + ":" + password + "@" + host + ":" + port + "/" + vhost
 	conn, err := amqp.Dial(url)
 
-	failOnError(err, "Failed to connect to RabbitMQ")
+	eventconsumer.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
 	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
+	eventconsumer.FailOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
 	event_confirmation_msgs, err := eventconsumer.ReceiveFromQueue(ch, "event_confirmation")
 
 	if err != nil {
-		failOnError(err, "Failed to receive from queue")
+		eventconsumer.FailOnError(err, "Failed to receive from queue")
 	}
 
 	var forever chan struct{}

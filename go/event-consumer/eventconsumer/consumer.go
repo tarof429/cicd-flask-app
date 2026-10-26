@@ -12,6 +12,12 @@ type EventConsumer struct {
 	Prefs Preferences
 }
 
+func (n EventConsumer) FailOnError(err error, msg string) {
+	if err != nil {
+		log.Panicf("%s: %s", msg, err)
+	}
+}
+
 func (n *EventConsumer) SetPrefs(prefs Preferences) {
 	n.Prefs.NotificationDelay = prefs.NotificationDelay
 	n.Prefs.Sysadminemail = prefs.Sysadminemail

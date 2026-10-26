@@ -30,3 +30,10 @@ $ docker logs  -f admin-eventconsumer-1
 2026/10/22 05:46:10 Received a message: (Added new event: Celebrate events!!)
 2026/10/22 05:46:10 Sending notification: (Added new event: Celebrate events!!)
 ```
+
+You must have a preferences.yaml file to run the event consumer. The format of this file is:
+
+```sh
+notificationDelay: 1
+sysadminemail: admin@foo.com
+```
