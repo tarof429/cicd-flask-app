@@ -16,7 +16,7 @@ func (n *EventConsumer) SetPrefs(prefs Preferences) {
 	n.Prefs.Sysadminemail = prefs.Sysadminemail
 }
 
-func (n *EventConsumer) Load(prefsFile string) (bool, error) {
+func (n *EventConsumer) Load(prefsFile string) error {
 	prefs := Preferences{
 		Sysadminemail:     "",
 		NotificationDelay: "0",
@@ -25,15 +25,15 @@ func (n *EventConsumer) Load(prefsFile string) (bool, error) {
 	f, err := os.ReadFile(prefsFile)
 	if err != nil {
 		log.Println("No preferences file found")
-		return false, err
+		return err
 	} else {
 		if err := yaml.Unmarshal(f, &prefs); err != nil {
 			log.Println("Unmarshal failed")
-			return false, err
+			return err
 		} else {
 			log.Println("Successfully unmarshalled preferences")
 			n.Prefs = prefs
-			return true, nil
+			return nil
 		}
 	}
 }

@@ -54,24 +54,16 @@ func main() {
 	var prefsFile = os.Getenv("PREFERENCES_CONFIG")
 
 	eventconsumer := eventconsumer.EventConsumer{}
-	unmarshalled, err := eventconsumer.Load(prefsFile)
+	err := eventconsumer.Load(prefsFile)
 
 	if err != nil {
 		log.Printf("Failed to load preferences")
 	}
+	notificationDelay, err := strconv.Atoi(eventconsumer.Prefs.NotificationDelay)
+	sysadminemail := eventconsumer.Prefs.Sysadminemail
 
-	var notificationDelay int
-	var sysadminemail string
-
-	if unmarshalled {
-		notificationDelay, err := strconv.Atoi(eventconsumer.Prefs.NotificationDelay)
-		sysadminemail = eventconsumer.Prefs.Sysadminemail
-
-		if err != nil {
-			failOnError(err, "Invalid notificationDelay value")
-		}
-
-		log.Printf("Delaying notification by %v seconds\n", notificationDelay)
+	if err != nil {
+		failOnError(err, "Invalid notificationDelay value")
 	}
 
 	log.Printf("NotificationDelay: %v\n", notificationDelay)
@@ -92,30 +84,6 @@ func main() {
 	if err != nil {
 		failOnError(err, "Failed to receive from queue")
 	}
-
-	// q, err := ch.QueueDeclare(
-	// 	"event_confirmation", // name
-	// 	true,                 // durability
-	// 	false,                // delete when unused
-	// 	false,                // exclusive
-	// 	false,                // no-wait
-	// 	amqp.Table{
-	// 		amqp.QueueTypeArg: amqp.QueueTypeQuorum,
-	// 	},
-	// )
-	// failOnError(err, "Failed to declare event_confirmation queue")
-
-	// msgs, err := ch.Consume(
-	// 	q.Name, // queue
-	// 	"",     // consumer
-	// 	true,   // auto-ack
-	// 	false,  // exclusive
-	// 	false,  // no-local
-	// 	false,  // no-wait
-	// 	nil,    // args
-	// )
-
-	// failOnError(err, "Failed to register a consumer")
 
 	var forever chan struct{}
 
