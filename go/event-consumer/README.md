@@ -1,8 +1,8 @@
-# Event Consumer/Producer
+# Event Consumer
 
 ## Introduction
 
-The event notifier gets messages from the event queue.
+The event consumer gets messages from the queue.
 
 ## Usage
 
@@ -12,12 +12,12 @@ To build:
 make
 ```
 
-To run the event notifier:
+To run the event consumer:
 
 ```sh
 AMPQ_USER=user AMPQ_PASSWORD=password \
    AMPQ_HOST=localhost AMPQ_PORT=5672 \
-   AMPQ_VHOST=rabbitmq PREFERENCES_CONFIG=preferences.yaml ./event-notifier 
+   AMPQ_VHOST=rabbitmq PREFERENCES_CONFIG=preferences.yaml ./event-consumer 
  ```
 
 If the Flask application is run using docker compose, then the event notifier should be run as another service so that they can communicate with each other over the docker network.
@@ -25,7 +25,7 @@ If the Flask application is run using docker compose, then the event notifier sh
 When run as a service, it can be useful to see the log messages from the container:
 
 ```sh
-$ docker logs  -f admin-eventnotifier-1 
+$ docker logs  -f admin-eventconsumer-1 
 2026/10/22 05:43:59  [*] Waiting for messages. To exit press CTRL+C
 2026/10/22 05:46:10 Received a message: (Added new event: Celebrate events!!)
 2026/10/22 05:46:10 Sending notification: (Added new event: Celebrate events!!)
