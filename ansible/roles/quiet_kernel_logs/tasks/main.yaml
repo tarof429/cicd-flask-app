@@ -1,0 +1,6 @@
+- name: Create configuration file
+  lineinfile:
+    path: /etc/sysctl.d/99-console-loglevel.conf
+    line: kernel.printk = 3 4 1 3
+- name: Apply configuration
+  shell: sysctl --system

@@ -1,0 +1,5 @@
+- hosts: "{{ myhosts }}"
+  vars_files:
+    - myvault
+  roles:
+  - quiet_kernel_logs
