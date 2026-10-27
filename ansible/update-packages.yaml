@@ -1,3 +1,0 @@
-- hosts: "{{ myhosts }}"
-  roles:
-  - update_packages

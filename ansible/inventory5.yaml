@@ -1,0 +1,10 @@
+cicd_server:
+  hosts:
+    cicd_server_1:
+      ansible_host: 192.168.1.226
+      ansible_user: root
+web_server:
+  hosts:
+    web_server_1:
+      ansible_host: 192.168.1.30
+      ansible_user: ubuntu

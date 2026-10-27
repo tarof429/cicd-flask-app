@@ -1,0 +1,9 @@
+- hosts: "{{ myhosts }}"
+  vars_files:
+    - myvault
+  roles:
+  - patch
+  - git
+  - docker2
+  - docker_user
+  - registry2

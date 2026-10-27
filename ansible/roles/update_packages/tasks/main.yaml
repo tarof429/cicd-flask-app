@@ -1,21 +1,23 @@
-- name: Wait for apt locks
-  shell: |
-    while fuser /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock >/dev/null 2>&1; do
-      sleep 10
-    done
-  become: yes
+-- Deprecated role --
 
-- name: Update all packages
-  package:
-    update_cache: yes
-    state: latest
-    name:
-      - "*"
-  become: true
+# - name: Wait for apt locks
+#   shell: |
+#     while fuser /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock >/dev/null 2>&1; do
+#       sleep 10
+#     done
+#   become: yes
 
-- name: Install git
-  package:
-    state: present
-    name:
-      - git
-  become: true
+# - name: Update all packages
+#   package:
+#     update_cache: yes
+#     state: latest
+#     name:
+#       - "*"
+#   become: true
+
+# - name: Install git
+#   package:
+#     state: present
+#     name:
+#       - git
+#   become: true
