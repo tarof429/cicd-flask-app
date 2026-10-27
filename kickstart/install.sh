@@ -3,13 +3,13 @@
 VM_NAME=""
 ISO_FILE="/data/libvirt/default/boot/Rocky-10.2-x86_64-dvd1.iso"
 GENERIC_QCOW_FILE="/data/libvirt/default/images/Rocky-10-GenericCloud-Base.latest.x86_64.qcow2"
-DISK_SIZE="20"
+DISK_SIZE="50"
 KICKSTART_SERVER="192.168.1.20"
 ROOT_PASSWORD=""
 
 usage() {
-    echo "Usage: ./install.sh -n <vmname> -s <size> -p <password>"
-    echo "Example: ./install.sh -n web-server -s 20 -p secret"
+    echo "Usage: ./install.sh -n <vmname> -p <password>"
+    echo "Example: ./install.sh -n web-server -p secret"
 }
 
 validate() {
@@ -17,11 +17,6 @@ validate() {
 
     if [ "${VM_NAME}" = "" ]; then
         echo "Missing -n <VM name>"
-        error=1
-    fi
-
-    if [ "${SIZE}" = "" ]; then
-        echo "Missing -s <size>"
         error=1
     fi
 
@@ -37,16 +32,13 @@ validate() {
     
 }
 
-while getopts ":hn:s:p:" option; do
+while getopts ":hn:p:" option; do
     case $option in
         h)
             usage
             exit;;
         n)
             VM_NAME="${OPTARG}"
-            ;;
-        s)
-            SIZE="${OPTARG}"
             ;;
         p)
             ROOT_PASSWORD="${OPTARG}"
@@ -75,7 +67,7 @@ sudo cp -f $GENERIC_QCOW_FILE /data/libvirt/default/images/${VM_NAME}.qcow2
 cp anaconda-ks-template.cfg anaconda-ks.cfg
 sed -i "s|{{ password }}|${ROOT_PASSWORD}|g" anaconda-ks.cfg
 
-sudo qemu-img resize /data/libvirt/default/images/${VM_NAME}.qcow2 ${SIZE}G
+sudo qemu-img resize /data/libvirt/default/images/${VM_NAME}.qcow2 ${DISK_SIZE}G
 
 sudo virt-install \
   --virt-type=kvm \

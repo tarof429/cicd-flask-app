@@ -19,12 +19,15 @@ python -m http.server
 Run the install.sh script to install the web server. 
 
 ```sh
-sh ./install.sh -n web-server -s 20 -p verysecret
+sh ./install.sh -n web-server -p verysecret
 ```
 
-The `-p` parameter is the password for the root user (superuser). In a kickstart file this is usually stored as an encrypted string. However since storing passwords, even encrypted ones, isn't a good git practice, the install.sh script will copy `anaconda-ks-template.cfg` to `anaconda-ks.cfg` with the unencrypted password; this is never checked into git.
+The `-p` parameter is the password for the root user (superuser). In a kickstart file this is usually stored as an encrypted string. However since storing passwords, even encrypted ones, isn't a good git practice, the install.sh script will copy the kickstart template file `anaconda-ks-template.cfg` to `anaconda-ks.cfg` with the unencrypted password; this is never checked into git.
 
 Once installation has completed, the VM will reboot. This behavior is controlled by the kickstart file. In production environments with many VMs running on a server, changing reboot to shutdown may be preferable.
+
+> [!NOTE]
+> The kickstart template file creates a VM with a hardcoded value and then partitions the disk to ensure enough disk space for the system to function.
 
 ## How to use the kickstarted server
 
