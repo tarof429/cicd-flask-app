@@ -33,7 +33,8 @@ class UpdateEventForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class PreferencesForm(FlaskForm):
-    sysadminemail = EmailField('System Admin e-mail address')
+    fromEmail = EmailField('From e-mail address')
+    toEmail = EmailField('To e-mail address')
     notificationDelay = IntegerField('Notification delay',
                             default = 0,
                             validators = [

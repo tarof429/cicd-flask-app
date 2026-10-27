@@ -25,14 +25,16 @@ func main() {
 		log.Printf("Failed to load preferences")
 	}
 	notificationDelay, err := strconv.Atoi(consumer.Prefs.NotificationDelay)
-	sysadminemail := consumer.Prefs.Sysadminemail
+	from := consumer.Prefs.FromEmail
+	to := consumer.Prefs.ToEmail
 
 	if err != nil {
 		consumer.FailOnError(err, "Invalid notificationDelay value")
 	}
 
 	log.Printf("NotificationDelay: %v\n", notificationDelay)
-	log.Printf("Sysadminemail: %v\n", sysadminemail)
+	log.Printf("From: %v\n", from)
+	log.Printf("To: %v\n", to)
 
 	url := "amqp://" + user + ":" + password + "@" + host + ":" + port + "/" + vhost
 	conn, err := amqp.Dial(url)

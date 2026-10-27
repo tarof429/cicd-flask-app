@@ -1,6 +1,7 @@
 package eventproducer
 
 type Preferences struct {
-	Sysadminemail     string `yaml:"sysadminemail"`
+	FromEmail         string `yaml:"from"`
+	ToEmail           string `yaml:"to"`
 	NotificationDelay string `yaml:"notificationDelay"`
 }

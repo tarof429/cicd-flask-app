@@ -22,12 +22,14 @@ func (n EventConsumer) FailOnError(err error, msg string) {
 
 func (n *EventConsumer) SetPrefs(prefs Preferences) {
 	n.Prefs.NotificationDelay = prefs.NotificationDelay
-	n.Prefs.Sysadminemail = prefs.Sysadminemail
+	n.Prefs.FromEmail = prefs.FromEmail
+	n.Prefs.ToEmail = prefs.ToEmail
 }
 
 func (n *EventConsumer) Load(prefsFile string) error {
 	prefs := Preferences{
-		Sysadminemail:     "",
+		FromEmail:         "",
+		ToEmail:           "",
 		NotificationDelay: "0",
 	}
 
@@ -55,7 +57,8 @@ func (n EventConsumer) SendNotification(msg string) {
 	}
 	log.Printf("Sleeping for %v seconds", i)
 	time.Sleep(time.Second * time.Duration(i))
-	log.Printf("Sending notification: (%v) to %v", msg, n.Prefs.Sysadminemail)
+	log.Printf("Sending notification with subject: (%v) from: %v to: %v\n",
+		msg, n.Prefs.FromEmail, n.Prefs.ToEmail)
 }
 
 func (n EventConsumer) ReceiveFromQueue(ch *amqp.Channel, queueName string) (<-chan amqp.Delivery, error) {

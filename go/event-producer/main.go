@@ -40,7 +40,8 @@ func main() {
 
 	// Change preferences and send it to the queue
 	producer.Prefs = eventproducer.Preferences{
-		Sysadminemail:     "hero@foo.com",
+		FromEmail:         "hero@foo.com",
+		ToEmail:           "guest@foo.com",
 		NotificationDelay: fmt.Sprintf("%v", 3),
 	}
 

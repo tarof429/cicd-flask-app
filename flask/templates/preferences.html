@@ -14,8 +14,12 @@
                 {% endif %}
 
                 <div class="form-group">
-                    {{ form.sysadminemail.label(class="form-label") }}
-                    {{ form.sysadminemail(size=20, class="form-control", placeholder='admin@nowhere' )}}
+                    {{ form.fromEmail.label(class="form-label") }}
+                    {{ form.fromEmail(size=20, class="form-control", placeholder='admin@nowhere' )}}
+                </div>
+                <div class="form-group">
+                    {{ form.toEmail.label(class="form-label") }}
+                    {{ form.toEmail(size=20, class="form-control", placeholder='guest@nowhere' )}}
                 </div>
                 <div class="form-group">
                     {{ form.notificationDelay.label(class="form-label") }}

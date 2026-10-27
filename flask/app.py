@@ -70,14 +70,17 @@ def create_app(mode=None):
             if form.cancel.data:
                 return redirect(url_for('list_events', events = events))
             else:
-                sysadminemail = form.sysadminemail.data
+                fromEmail = form.fromEmail.data
+                toEmail = form.toEmail.data
                 notificationDelay = form.notificationDelay.data
 
-                app.logger.info(f'Sysadmin email: {sysadminemail}')
+                app.logger.info(f'From email: {fromEmail}')
+                app.logger.info(f'To email: {toEmail}')
                 app.logger.info(f'Notification delay: {notificationDelay}')
 
                 data = {
-                    'sysadminemail': sysadminemail,
+                    'from': fromEmail,
+                    'to': toEmail,
                     'notificationDelay': notificationDelay
                 }
 
@@ -91,11 +94,18 @@ def create_app(mode=None):
 
         app.logger.info(data)
 
-        sysadminemail = data.get("sysadminemail")
-        if sysadminemail is None:
-            form.sysadminemail.data = ''
+        fromEmail = data.get("from")
+        if fromEmail is None:
+            form.fromEmail.data = ''
         else:
-            form.sysadminemail.data = sysadminemail
+            form.fromEmail.data = fromEmail
+
+        toEmail = data.get("to")
+        if toEmail is None:
+            form.toEmail.data = ''
+        else:
+            form.toEmail.data = toEmail
+
 
         notificationDelay = data.get('notificationDelay')
         if notificationDelay is None:

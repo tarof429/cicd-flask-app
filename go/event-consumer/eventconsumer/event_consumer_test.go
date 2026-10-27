@@ -10,7 +10,8 @@ import (
 
 func TestLoad(t *testing.T) {
 	prefs := Preferences{
-		Sysadminemail:     "foo.com",
+		FromEmail:         "foo.com",
+		ToEmail:           "bar.com",
 		NotificationDelay: "10",
 	}
 
@@ -33,8 +34,12 @@ func TestLoad(t *testing.T) {
 		t.Fatalf("Notification delay was not 10")
 	}
 
-	if notifier.Prefs.Sysadminemail != "foo.com" {
-		t.Fatalf("Sysadminemail was not foo.com")
+	if notifier.Prefs.FromEmail != "foo.com" {
+		t.Fatalf("From email was not foo.com")
+	}
+
+	if notifier.Prefs.ToEmail != "bar.com" {
+		t.Fatalf("From email was not bar.com")
 	}
 
 }
