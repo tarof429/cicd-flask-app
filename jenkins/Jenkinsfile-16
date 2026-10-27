@@ -3,7 +3,7 @@ pipeline {
 
     environment {
             // KVM
-            KVM_PRIVATE_REGISTRY_SERVER = '192.168.1.133'
+            KVM_PRIVATE_REGISTRY_SERVER = '192.168.1.226'
             KVM_DEPLOYMENT_SERVER = "192.168.1.30"
 
             // Digital Ocean
