@@ -20,7 +20,7 @@ WORKDIR /app
 
 COPY --from=builder /app/event-consumer .
 
-COPY preferences.yaml .
+#COPY preferences.yaml .
 
 # Run
 CMD ["./event-consumer"]

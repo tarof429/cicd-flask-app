@@ -35,8 +35,9 @@ func (n *EventConsumer) Load(prefsFile string) error {
 
 	f, err := os.ReadFile(prefsFile)
 	if err != nil {
-		log.Println("No preferences file found")
-		return err
+		log.Println("No preferences file found, using defaults")
+		n.Prefs = prefs
+		return nil
 	} else {
 		if err := yaml.Unmarshal(f, &prefs); err != nil {
 			log.Println("Unmarshal failed")

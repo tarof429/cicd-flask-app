@@ -1,7 +1,7 @@
 package main
 
 import (
-	eventconsumer "event-consumer/eventconsumer"
+	"event-consumer/eventconsumer"
 	"log"
 	"os"
 	"strconv"

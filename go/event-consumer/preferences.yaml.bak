@@ -1,0 +1,3 @@
+notificationDelay: 1
+from: admin@foo.com
+to: guest@foo.com
