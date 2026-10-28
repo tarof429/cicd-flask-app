@@ -6,3 +6,5 @@ __pycache__/
 .pytest_cache/
 instance/
 tests/
+logs/
+README.md
