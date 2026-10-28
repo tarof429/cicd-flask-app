@@ -18,9 +18,9 @@ services:
       rabbitmq:
         condition: service_healthy
         restart: true
-      eventconsumer:
-        condition: service_started
       mailpit:
+        condition: service_healthy
+      eventconsumer:
         condition: service_started
     volumes:
       - "prefs:/prefs"
@@ -28,9 +28,11 @@ services:
     image: rabbitmq:4.3.6-management-alpine
     healthcheck:
       test: rabbitmq-diagnostics check_port_connectivity
-      interval: 5s
-      timeout: 30s
-      retries: 6
+      interval: 5s # check every 30 seconds
+      timeout: 10s # Fail if the check takes longer than 10 seconds
+      retries: 5 # Mark unhealthy after 3 consecutive failures
+      start_period: 5s # grace period for startup
+    restart: unless-stopped
     environment:
       - RABBITMQ_DEFAULT_USER=user
       - RABBITMQ_DEFAULT_PASS=password
@@ -68,10 +70,16 @@ services:
       - "data:/var/lib/postgresql/data"
   mailpit:
     image: axllent/mailpit
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider --server-response http://localhost:8025/readyz 2>&1  | grep \"HTTP/\" | grep OK 2>& 1 > /dev/null"]
+      interval: 5s # check every 30 seconds
+      timeout: 10s # Fail if the check takes longer than 10 seconds
+      retries: 5 # Mark unhealthy after 3 consecutive failures
+      start_period: 5s # grace period for startup
+    restart: unless-stopped
     ports:
       - 8025:8025
       - 1025:1025
-
 volumes:
   data:
   prefs:
