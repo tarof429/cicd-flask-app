@@ -22,9 +22,11 @@ services:
     image: rabbitmq:4.3.6-management-alpine
     healthcheck:
       test: rabbitmq-diagnostics check_port_connectivity
-      interval: 5s
-      timeout: 30s
-      retries: 6
+      interval: 5s # check every 30 seconds
+      timeout: 10s # Fail if the check takes longer than 10 seconds
+      retries: 5 # Mark unhealthy after 3 consecutive failures
+      start_period: 5s # grace period for startup
+    restart: unless-stopped
     environment:
       - RABBITMQ_DEFAULT_USER=user
       - RABBITMQ_DEFAULT_PASS=password
