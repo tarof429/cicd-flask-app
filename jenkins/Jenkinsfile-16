@@ -280,6 +280,7 @@ pipeline {
             script {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                     sh 'docker logout'
+                }
             }
             junit 'test-reports/*.xml'
              archiveArtifacts artifacts: 'test-reports/trivy_result.txt'
