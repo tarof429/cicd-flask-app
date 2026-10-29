@@ -156,11 +156,8 @@ pipeline {
             steps {
                 script {
                     sshagent(['cicd-server-key']) {
-                        // def previous_image_tag
                         
                         dir('docker-compose') {
-                            // previous_image_tag = readFile(file: "current_image_tag.txt").trim()
-                            
                             sh "scp -o StrictHostKeyChecking=no docker-compose6.yaml ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER}:docker-compose.yaml"
                         }
                         dir('bash') {
