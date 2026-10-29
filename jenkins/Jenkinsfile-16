@@ -1,3 +1,5 @@
+def previous_image_tag
+
 pipeline {
     agent any
 
@@ -72,8 +74,6 @@ pipeline {
                     sh "mkdir -p $WORKSPACE/test-reports"
                     sh "rm -f $WORKSPACE/test-reports/*"
 
-                    def previous_image_tag
-
                     dir('docker-compose') {
                         try {
                             previous_image_tag = readFile(file: "current_image_tag.txt").trim()
@@ -83,7 +83,9 @@ pipeline {
                         writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
 
                         testStatus = sh(returnStatus: true, script: "PRIVATE_REGISTRY_SERVER=${env.PRIVATE_REGISTRY_SERVER} \
-                            PRIVATE_REGISTRY_PORT=${env.PRIVATE_REGISTRY_PORT} PRIVATE_EVENT_APP_REPOSITORY=${env.PRIVATE_EVENT_APP_REPOSITORY} IMAGE_TAG=${env.IMAGE_TAG} \
+                            PRIVATE_REGISTRY_PORT=${env.PRIVATE_REGISTRY_PORT} \
+                            PRIVATE_EVENT_APP_REPOSITORY=${env.PRIVATE_EVENT_APP_REPOSITORY} \
+                            IMAGE_TAG=${env.IMAGE_TAG} \
                             docker compose -f docker-compose-test5.yaml up --abort-on-container-exit --exit-code-from app")
                     }
 
@@ -93,16 +95,18 @@ pipeline {
                     sh "mv $WORKSPACE/trivy_result.txt $WORKSPACE/test-reports/"
 
                     if (previous_image_tag) {
-                        echo "Removing docker image ${env.PRIVATE_REGISTRY_SERVER}:${env.PRIVATE_REGISTRY_PORT}/${env.PRIVATE_EVENT_APP_REPOSITORY}:${previous_image_tag}"
+                        def event_app_private_previous_image = "${env.PRIVATE_REGISTRY_SERVER}:${env.PRIVATE_REGISTRY_PORT}/${env.PRIVATE_EVENT_APP_REPOSITORY}:${previous_image_tag}"
+                        echo "Removing docker image ${event_app_private_previous_image}"
                         try {
-                            sh "docker rmi ${env.PRIVATE_REGISTRY_SERVER}:${env.PRIVATE_REGISTRY_PORT}/${env.PRIVATE_EVENT_APP_REPOSITORY}:${previous_image_tag}"
+                            sh "docker rmi ${event_app_private_previous_image}"
                         } catch (err) {
                             echo "Command failed: ${err}"
                         }
                         
-                        echo "Removing docker image ${env.PUBLIC_EVENT_APP_REPOSITORY}:${previous_image_tag}"
+                        def event_app_public_previous_image = "${env.PUBLIC_EVENT_APP_REPOSITORY}:${previous_image_tag}"
+                        echo "Removing docker image ${event_app_public_previous_image}"
                         try {
-                            sh "docker rmi ${env.PUBLIC_EVENT_APP_REPOSITORY}:${previous_image_tag}"
+                            sh "docker rmi ${event_app_public_previous_image}"
                         } catch (err) {
                             echo "Command failed: ${err}"
                         }
@@ -148,10 +152,10 @@ pipeline {
             steps {
                 script {
                     sshagent(['cicd-server-key']) {
-                        def previous_image_tag
+                        // def previous_image_tag
                         
                         dir('docker-compose') {
-                            previous_image_tag = readFile(file: "current_image_tag.txt").trim()
+                            // previous_image_tag = readFile(file: "current_image_tag.txt").trim()
                             
                             sh "scp -o StrictHostKeyChecking=no docker-compose6.yaml ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER}:docker-compose.yaml"
                         }
@@ -172,6 +176,11 @@ pipeline {
                             ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
                                 "echo 'docker rmi ${env.PUBLIC_EVENT_APP_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
                             """
+
+                            sh """
+                            ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
+                                "echo 'docker rmi ${env.PUBLIC_EVENT_NOTIFIER_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
+                            """
                         }
                     }
                 }
@@ -191,7 +200,7 @@ pipeline {
                             def previous_image_tag
                             
                             dir('bash') {
-                                sh "scp -o StrictHostKeyChecking=no app_is_up.sh ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER}:app_is_up.sh"
+                               sh "scp -o StrictHostKeyChecking=no app_is_up.sh ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER}:app_is_up.sh"
                             }
                             sh "ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} chmod +x app_is_up.sh"
 
