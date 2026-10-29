@@ -242,8 +242,8 @@ pipeline {
                                 echo "Removing old image"
 
                                 sh """
-                                ssh -o StrictHostKeyChecking=no ${env.$DEPLOYMENT_USER@$DEPLOYMENT_SERVER} \
-                                    "echo 'docker rmi ${PUBLIC_EVENT_APP_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
+                                ssh -o StrictHostKeyChecking=no ${env.$DEPLOYMENT_USER}@${env.$DEPLOYMENT_SERVER} \
+                                    "echo 'docker rmi ${env.PUBLIC_EVENT_APP_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
                                 """
 
                                 sh """
