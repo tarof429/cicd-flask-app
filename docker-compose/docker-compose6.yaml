@@ -6,8 +6,8 @@ services:
       - FLASK_DEBUG=False
       - RUNTIME_MODE=${RUNTIME_MODE:-dev}
       - DATABASE_URI=postgresql://admin:secret@db:5432/db
-      - RABBITMQ_USER=user
-      - RABBITMQ_PASS=password
+      - RABBITMQ_USER=rabbit
+      - RABBITMQ_PASS=secret
       - PREFERENCES_CONFIG=/prefs/preferences.yaml
     ports:
       - 5000:5000
@@ -34,16 +34,16 @@ services:
       start_period: 5s # grace period for startup
     restart: unless-stopped
     environment:
-      - RABBITMQ_DEFAULT_USER=user
-      - RABBITMQ_DEFAULT_PASS=password
+      - RABBITMQ_DEFAULT_USER=rabbit
+      - RABBITMQ_DEFAULT_PASS=secret
       - RABBITMQ_DEFAULT_VHOST=rabbitmq
     ports:
       - 15672:15672
   eventconsumer:
     image: tarof429/event-consumer:${IMAGE_TAG}
     environment:
-      - AMPQ_USER=user
-      - AMPQ_PASSWORD=password
+      - AMPQ_USER=rabbit
+      - AMPQ_PASSWORD=secret
       - AMPQ_HOST=rabbitmq
       - AMPQ_PORT=5672
       - AMPQ_VHOST=rabbitmq
