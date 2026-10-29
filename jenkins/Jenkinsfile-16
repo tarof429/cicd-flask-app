@@ -197,16 +197,16 @@ pipeline {
                 script {
                     timeout(time: 10) {
                         sshagent(['cicd-server-key']) {
-                            def previous_image_tag
+                            // def previous_image_tag
                             
                             dir('bash') {
                                sh "scp -o StrictHostKeyChecking=no app_is_up.sh ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER}:app_is_up.sh"
                             }
                             sh "ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} chmod +x app_is_up.sh"
 
-                            dir('docker-compose') {
-                                previous_image_tag = readFile(file: "current_image_tag.txt").trim()
-                            }
+                            // dir('docker-compose') {
+                            //     previous_image_tag = readFile(file: "current_image_tag.txt").trim()
+                            // }
 
 
                             // Stop and remove current container
@@ -251,6 +251,11 @@ pipeline {
                                 ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER@$DEPLOYMENT_SERVER" \
                                     "echo 'docker rmi ${PUBLIC_EVENT_APP_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
                                 '''
+
+                                sh """
+                                ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
+                                    "echo 'docker rmi ${env.PUBLIC_EVENT_NOTIFIER_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
+                                """
                             }
 
 
