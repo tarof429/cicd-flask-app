@@ -125,21 +125,21 @@ pipeline {
             steps {
                 script {
                     docker.build("${env.PUBLIC_EVENT_APP_REPOSITORY}:${env.IMAGE_TAG}", "-f docker/Dockerfile3 .")
-                    docker.build("${env.PUBLIC_EVENT_APP_REPOSITORY}:latest", "-f docker/Dockerfile3 .")
 
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                         sh 'echo $PASS | docker login -u $USER --password-stdin'
                         sh "docker push ${env.PUBLIC_EVENT_APP_REPOSITORY}:${env.IMAGE_TAG}"
+                        sh "docker tag ${env.PUBLIC_EVENT_APP_REPOSITORY}:${env.IMAGE_TAG} ${env.PUBLIC_EVENT_APP_REPOSITORY}:latest"
                         sh "docker push ${env.PUBLIC_EVENT_APP_REPOSITORY}:latest"
                     }   
 
                     dir('go/event-consumer') {
                         docker.build("${env.PUBLIC_EVENT_CONSUMER_REPOSITORY}:${env.IMAGE_TAG}", ".")
-                        docker.build("${env.PUBLIC_EVENT_CONSUMER_REPOSITORY}:latest", ".")
 
                         withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                             sh 'echo $PASS | docker login -u $USER --password-stdin'
                             sh "docker push ${env.PUBLIC_EVENT_CONSUMER_REPOSITORY}:${env.IMAGE_TAG}"
+                            sh "docker tag ${env.PUBLIC_EVENT_CONSUMER_REPOSITORY}:${env.IMAGE_TAG} ${env.PUBLIC_EVENT_CONSUMER_REPOSITORY}:latest"
                             sh "docker push ${env.PUBLIC_EVENT_CONSUMER_REPOSITORY}:latest"
                         }
                     }
