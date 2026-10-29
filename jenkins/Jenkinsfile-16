@@ -124,19 +124,23 @@ pipeline {
         stage ('Publish') {
             steps {
                 script {
-                    def eventsAppImage = docker.build("tarof429/events-app:${env.IMAGE_TAG}", "-f docker/Dockerfile3 .")
+                    docker.build("tarof429/events-app:${env.IMAGE_TAG}", "-f docker/Dockerfile3 .")
 
-                    docker.withRegistry("${env.DOCKERHUB_REGISTRY}", "dockerhub") {
-                        eventsAppImage.push()
-                        eventsAppImage.push('latest')
-                    }
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                        sh 'echo $PASS | docker login -u $USER --password-stdin'
+                        sh "docker push tarof429/events-app:${IMAGE_NAME}"
+                        sh "docker push tarof429/events-app:latest"
+                    }   
 
                     dir('go/event-consumer') {
-                        def eventConsumerImage = docker.build("tarof429/event-consumer:${env.IMAGE_TAG}", ".")
-                        docker.withRegistry("${env.DOCKERHUB_REGISTRY}", "dockerhub") {
-                            eventConsumerImage.push()
-                            eventConsumerImage.push('latest')
-                        }           
+                        docker.build("tarof429/event-consumer:${env.IMAGE_TAG}", ".")   
+
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                            sh "docker build -t tarof429/event-consumer:${env.IMAGE_TAG} ."
+                            sh 'echo $PASS | docker login -u $USER --password-stdin'
+                            sh "docker push tarof429/event-consumer:${IMAGE_NAME}"
+                            sh "docker push tarof429/event-consumer:latest"
+                        }
                     }
      
                 }
@@ -273,6 +277,10 @@ pipeline {
 
     post {
         always {
+            script {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                    sh 'docker logout'
+            }
             junit 'test-reports/*.xml'
              archiveArtifacts artifacts: 'test-reports/trivy_result.txt'
         }
