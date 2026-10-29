@@ -128,7 +128,7 @@ pipeline {
 
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                         sh 'echo $PASS | docker login -u $USER --password-stdin'
-                        sh "docker push tarof429/events-app:${IMAGE_NAME}"
+                        sh "docker push tarof429/events-app:${env.IMAGE_TAG}"
                         sh "docker push tarof429/events-app:latest"
                     }   
 
@@ -138,7 +138,7 @@ pipeline {
                         withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                             sh "docker build -t tarof429/event-consumer:${env.IMAGE_TAG} ."
                             sh 'echo $PASS | docker login -u $USER --password-stdin'
-                            sh "docker push tarof429/event-consumer:${IMAGE_NAME}"
+                            sh "docker push tarof429/event-consumer:${env.IMAGE_TAG}"
                             sh "docker push tarof429/event-consumer:latest"
                         }
                     }
