@@ -128,7 +128,7 @@ pipeline {
 
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                         sh 'echo $PASS | docker login -u $USER --password-stdin'
-                        sh "docker push ${${env.PUBLIC_EVENT_APP_REPOSITORY}}:${env.IMAGE_TAG}"
+                        sh "docker push ${env.PUBLIC_EVENT_APP_REPOSITORY}:${env.IMAGE_TAG}"
                         sh "docker push ${env.PUBLIC_EVENT_APP_REPOSITORY}:latest"
                     }   
 
