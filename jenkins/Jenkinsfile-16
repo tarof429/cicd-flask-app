@@ -18,8 +18,8 @@ pipeline {
             PRIVATE_EVENT_APP_REPOSITORY = "events-app"
             PUBLIC_EVENT_APP_REPOSITORY="tarof429/events-app"
 
-            PRIVATE_EVENT_NOTIFIER_REPOSITORY = "events-notifier"
-            PUBLIC_EVENT_NOTIFIER_REPOSITORY = "tarof429/events-notifier"
+            PRIVATE_EVENT_CONSUMER_REPOSITORY = "event-consumer"
+            PUBLIC_EVENT_CONSUMER_REPOSITORY = "tarof429/event-consumer"
 
             DOCKERHUB_REGISTRY = "https://index.docker.io/v1/"
             DEPLOYMENT_USER = "admin"
@@ -124,22 +124,21 @@ pipeline {
         stage ('Publish') {
             steps {
                 script {
-                    docker.build("tarof429/events-app:${env.IMAGE_TAG}", "-f docker/Dockerfile3 .")
+                    docker.build("${env.PUBLIC_EVENT_APP_REPOSITORY}:${env.IMAGE_TAG}", "-f docker/Dockerfile3 .")
 
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                         sh 'echo $PASS | docker login -u $USER --password-stdin'
-                        sh "docker push tarof429/events-app:${env.IMAGE_TAG}"
-                        sh "docker push tarof429/events-app:latest"
+                        sh "docker push ${${env.PUBLIC_EVENT_APP_REPOSITORY}}:${env.IMAGE_TAG}"
+                        sh "docker push ${env.PUBLIC_EVENT_APP_REPOSITORY}:latest"
                     }   
 
                     dir('go/event-consumer') {
-                        docker.build("tarof429/event-consumer:${env.IMAGE_TAG}", ".")   
+                        docker.build("${env.PUBLIC_EVENT_CONSUMER_REPOSITORY}:${env.IMAGE_TAG}", ".")
 
                         withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
-                            sh "docker build -t tarof429/event-consumer:${env.IMAGE_TAG} ."
                             sh 'echo $PASS | docker login -u $USER --password-stdin'
-                            sh "docker push tarof429/event-consumer:${env.IMAGE_TAG}"
-                            sh "docker push tarof429/event-consumer:latest"
+                            sh "docker push ${env.PUBLIC_EVENT_CONSUMER_REPOSITORY}:${env.IMAGE_TAG}"
+                            sh "docker push ${env.PUBLIC_EVENT_CONSUMER_REPOSITORY}:latest"
                         }
                     }
      
@@ -180,7 +179,7 @@ pipeline {
 
                             sh """
                             ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
-                                "echo 'docker rmi ${env.PUBLIC_EVENT_NOTIFIER_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
+                                "echo 'docker rmi ${env.PUBLIC_EVENT_CONSUMER_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
                             """
                         }
                     }
@@ -198,17 +197,11 @@ pipeline {
                 script {
                     timeout(time: 10) {
                         sshagent(['cicd-server-key']) {
-                            // def previous_image_tag
                             
                             dir('bash') {
                                sh "scp -o StrictHostKeyChecking=no app_is_up.sh ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER}:app_is_up.sh"
                             }
                             sh "ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} chmod +x app_is_up.sh"
-
-                            // dir('docker-compose') {
-                            //     previous_image_tag = readFile(file: "current_image_tag.txt").trim()
-                            // }
-
 
                             // Stop and remove current container
                             try {
@@ -248,14 +241,14 @@ pipeline {
                             if (previous_image_tag) {
                                 echo "Removing old image"
 
-                                sh '''
-                                ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER@$DEPLOYMENT_SERVER" \
+                                sh """
+                                ssh -o StrictHostKeyChecking=no ${env.$DEPLOYMENT_USER@$DEPLOYMENT_SERVER} \
                                     "echo 'docker rmi ${PUBLIC_EVENT_APP_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
-                                '''
+                                """
 
                                 sh """
                                 ssh -o StrictHostKeyChecking=no ${env.DEPLOYMENT_USER}@${env.DEPLOYMENT_SERVER} \
-                                    "echo 'docker rmi ${env.PUBLIC_EVENT_NOTIFIER_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
+                                    "echo 'docker rmi ${env.PUBLIC_EVENT_CONSUMER_REPOSITORY}:${previous_image_tag}' | at now + 5 minutes"
                                 """
                             }
 

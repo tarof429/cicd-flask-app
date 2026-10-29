@@ -305,3 +305,7 @@ The script *Jenkinsfile-14* uses the updated cicd-server-key credential that is 
 ## Adding support for RabbitMQ
 
 The script *Jenkinsfile-15* uses an updated docker compose file that includes RabbitMQ as a service. Tests have also been expanded to include RabbitMQ integration.
+
+## Adding support for event-consumer
+
+The script *Jenkinsfile-16* add support for the event-consumer, a service that consumes RabbitMQ messages. Email is sent to the mailpit service.
