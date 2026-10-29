@@ -33,7 +33,7 @@ func main() {
 	// Send an event confirmation
 	err = producer.SendToQueue(ch, "event_confirmation", "Added new event: Celebrate Birthday!")
 	if err != nil {
-		producer.FailOnError(err, "Failed to send message")
+		log.Printf("Failed to send message: %v\n", err.Error())
 	}
 
 	time.Sleep(5 * time.Second)

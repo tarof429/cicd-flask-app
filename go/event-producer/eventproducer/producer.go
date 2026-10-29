@@ -30,7 +30,12 @@ func (n *EventProducer) SendToQueue(ch *amqp.Channel, queueName string, msg stri
 			amqp.QueueTypeArg: amqp.QueueTypeQuorum,
 		},
 	)
-	n.FailOnError(err, "Failed to declare a queue")
+
+	if err != nil {
+		log.Printf("Failed to declare a queue: %v", err.Error())
+		//n.FailOnError(err, "Failed to declare a queue")
+		return err
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -45,8 +50,14 @@ func (n *EventProducer) SendToQueue(ch *amqp.Channel, queueName string, msg stri
 			ContentType: "text/plain",
 			Body:        []byte(body),
 		})
-	n.FailOnError(err, "Failed to publish a message")
+
+	if err != nil {
+		//n.FailOnError(err, "Failed to publish a message")
+		log.Printf("Failed to publish a message: %v\n", err.Error())
+		return err
+
+	}
 	log.Printf(" [x] Sent %s\n", body)
 
-	return err
+	return nil
 }

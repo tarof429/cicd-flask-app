@@ -2,6 +2,7 @@ package main
 
 import (
 	"event-consumer/eventconsumer"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -61,7 +62,10 @@ func main() {
 	go func() {
 		for d := range event_confirmation_chan {
 			log.Printf("Received a confirmation message: (%s)", d.Body)
-			consumer.SendNotification(string(d.Body))
+			if err := consumer.SendNotification(string(d.Body)); err != nil {
+				fmt.Printf("Will not send notification due to error: %v \n", err.Error())
+			}
+
 		}
 	}()
 

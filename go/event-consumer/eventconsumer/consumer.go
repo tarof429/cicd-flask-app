@@ -7,6 +7,7 @@ import (
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/wneessen/go-mail"
 	"gopkg.in/yaml.v3"
 )
 
@@ -50,7 +51,7 @@ func (n *EventConsumer) Load(prefsFile string) error {
 	}
 }
 
-func (n EventConsumer) SendNotification(msg string) {
+func (n EventConsumer) SendNotification(msg string) error {
 	i, err := strconv.Atoi(n.Prefs.NotificationDelay)
 
 	if err != nil {
@@ -60,6 +61,40 @@ func (n EventConsumer) SendNotification(msg string) {
 	time.Sleep(time.Second * time.Duration(i))
 	log.Printf("Sending notification with subject: (%v) from: %v to: %v\n",
 		msg, n.Prefs.FromEmail, n.Prefs.ToEmail)
+
+	m := mail.NewMsg()
+
+	if err := m.From(n.Prefs.FromEmail); err != nil {
+		log.Println("Failed to set from address")
+		return err
+	}
+
+	if err := m.To(n.Prefs.ToEmail); err != nil {
+		log.Println("Failed to set from address")
+		return err
+	}
+
+	m.Subject("Notification from Event App")
+	m.SetBodyString(mail.TypeTextPlain, msg)
+
+	// May want the mail server to be configurable
+	c, err := mail.NewClient("mailpit",
+		mail.WithPort(1025),
+		mail.WithTLSPolicy(mail.TLSOpportunistic))
+
+	if err != nil {
+		log.Printf("Failed to create mail client %v\n", err)
+		return err
+	}
+
+	if err := c.DialAndSend(m); err != nil {
+		log.Printf("Failed to send email %v\n", err)
+		return err
+	}
+	log.Println("SMTP send succeeded")
+
+	return nil
+
 }
 
 func (n EventConsumer) ReceiveFromQueue(ch *amqp.Channel, queueName string) (<-chan amqp.Delivery, error) {
