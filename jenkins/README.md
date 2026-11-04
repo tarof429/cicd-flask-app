@@ -309,3 +309,7 @@ The script *Jenkinsfile-15* uses an updated docker compose file that includes Ra
 ## Adding support for event-consumer
 
 The script *Jenkinsfile-16* add support for the event-consumer, a service that consumes RabbitMQ messages. Email is sent to the mailpit service.
+
+# Use a file credential secret
+
+The script *Jenkinsfile-17* uses a file credential secret set environment variables. Secrets such as usernames, IPs and the like are injected during build time and are no longer baked into the script. 
