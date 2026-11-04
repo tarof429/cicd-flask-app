@@ -106,6 +106,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Build') {
             steps {
                 script {
@@ -141,12 +142,12 @@ pipeline {
                                     error("Push failed")
                                 }
                             }
-                        }
                     }
                 }
             }
-        }
-
+        }   
+    
+    
         // stage ('Test') {
         //     steps {
         //         script {
@@ -314,104 +315,104 @@ pipeline {
         //     }
         // }
 
-        stage ('Deploy to KVM') {
-            when {
-                expression {
-                    cloudProvider == 'KVM'
-                }
-            }
-            steps {
-                script {
-                    sshagent(['cicd-server-key']) {
+        // stage ('Deploy to KVM') {
+        //     when {
+        //         expression {
+        //             cloudProvider == 'KVM'
+        //         }
+        //     }
+        //     steps {
+        //         script {
+        //             sshagent(['cicd-server-key']) {
                         
-                        withCredentials([file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')]) {
-                            withEnv([
-                            "IMAGE_TAG=${env.IMAGE_TAG}", 
-                            "DEPLOYMENT_USER=${env.DEPLOYMENT_USER}", 
-                            "DEPLOYMENT_SERVER=${env.DEPLOYMENT_SERVER}",
-                            "PUBLIC_EVENT_APP_REPOSITORY=${env.PUBLIC_EVENT_APP_REPOSITORY}",
-                            "PUBLIC_EVENT_CONSUMER_REPOSITORY=${env.PUBLIC_EVENT_CONSUMER_REPOSITORY}"
-                            ]) {
+        //                 withCredentials([file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')]) {
+        //                     withEnv([
+        //                     "IMAGE_TAG=${env.IMAGE_TAG}", 
+        //                     "DEPLOYMENT_USER=${env.DEPLOYMENT_USER}", 
+        //                     "DEPLOYMENT_SERVER=${env.DEPLOYMENT_SERVER}",
+        //                     "PUBLIC_EVENT_APP_REPOSITORY=${env.PUBLIC_EVENT_APP_REPOSITORY}",
+        //                     "PUBLIC_EVENT_CONSUMER_REPOSITORY=${env.PUBLIC_EVENT_CONSUMER_REPOSITORY}"
+        //                     ]) {
 
-                                def deploymentUser = sh(returnStdout: true, script: '''
-                                    set +x
-                                    set -eu
-                                    . "$ENV_FILE"
+        //                         def deploymentUser = sh(returnStdout: true, script: '''
+        //                             set +x
+        //                             set -eu
+        //                             . "$ENV_FILE"
 
-                                    echo "$DEPLOYMENT_USER"
-                                ''').trim()
+        //                             echo "$DEPLOYMENT_USER"
+        //                         ''').trim()
 
-                                def deploymentServer = sh(returnStdout: true, script: '''
-                                    set +x
-                                    set -eu
-                                    . "$ENV_FILE"
+        //                         def deploymentServer = sh(returnStdout: true, script: '''
+        //                             set +x
+        //                             set -eu
+        //                             . "$ENV_FILE"
 
-                                    echo "$DEPLOYMENT_SERVER"
-                                ''').trim()
+        //                             echo "$DEPLOYMENT_SERVER"
+        //                         ''').trim()
 
-                                def eventAppRepository = sh(returnStdout: true, script: '''
-                                    set +x
-                                    set -eu
-                                    . "$ENV_FILE"
+        //                         def eventAppRepository = sh(returnStdout: true, script: '''
+        //                             set +x
+        //                             set -eu
+        //                             . "$ENV_FILE"
 
-                                    echo "$PUBLIC_EVENT_APP_REPOSITORY"
-                                ''').trim()
+        //                             echo "$PUBLIC_EVENT_APP_REPOSITORY"
+        //                         ''').trim()
 
-                                def eventConsumerRepository = sh(returnStdout: true, script: '''
-                                    set +x
-                                    set -eu
-                                    . "$ENV_FILE"
+        //                         def eventConsumerRepository = sh(returnStdout: true, script: '''
+        //                             set +x
+        //                             set -eu
+        //                             . "$ENV_FILE"
 
-                                    echo "$PUBLIC_EVENT_CONSUMER_REPOSITORY"
-                                ''').trim()
+        //                             echo "$PUBLIC_EVENT_CONSUMER_REPOSITORY"
+        //                         ''').trim()
 
-                                withEnv([
-                                    "IMAGE_TAG=${env.IMAGE_TAG}",
-                                    "DEPLOYMENT_USER=${deploymentUser}",
-                                    "DEPLOYMENT_SERVER=${deploymentServer}",
-                                    "EVENT_APP_REPOSITORY=${eventAppRepository}",
-                                    "EVENT_CONSUMER_REPOSITORY=${eventConsumerRepository}"
-                                ]) {
+        //                         withEnv([
+        //                             "IMAGE_TAG=${env.IMAGE_TAG}",
+        //                             "DEPLOYMENT_USER=${deploymentUser}",
+        //                             "DEPLOYMENT_SERVER=${deploymentServer}",
+        //                             "EVENT_APP_REPOSITORY=${eventAppRepository}",
+        //                             "EVENT_CONSUMER_REPOSITORY=${eventConsumerRepository}"
+        //                         ]) {
 
-                                    dir('docker-compose') {
-                                        sh 'scp -o StrictHostKeyChecking=no docker-compose6.yaml "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER":docker-compose.yaml'
-                                    }
+        //                             dir('docker-compose') {
+        //                                 sh 'scp -o StrictHostKeyChecking=no docker-compose6.yaml "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER":docker-compose.yaml'
+        //                             }
 
-                                    dir('bash') {
-                                        sh 'scp -o StrictHostKeyChecking=no deploy3.sh "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER":deploy.sh'
-                                    }
+        //                             dir('bash') {
+        //                                 sh 'scp -o StrictHostKeyChecking=no deploy3.sh "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER":deploy.sh'
+        //                             }
                                 
-                                    sh 'ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" chmod +x deploy.sh'
+        //                             sh 'ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" chmod +x deploy.sh'
                                     
-                                    sh 'ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" ./deploy.sh "$IMAGE_TAG"'
+        //                             sh 'ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" ./deploy.sh "$IMAGE_TAG"'
 
-                                    dir('docker-compose') {
-                                        writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
-                                    }
+        //                             dir('docker-compose') {
+        //                                 writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
+        //                             }
 
-                                    // Queue removal on the deployment server
-                                    if (env.PREVIOUS_IMAGE_TAG) {
+        //                             // Queue removal on the deployment server
+        //                             if (env.PREVIOUS_IMAGE_TAG) {
 
-                                        sh '''
-                                        ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" \
-                                            "echo 'docker rmi "$EVENT_APP_REPOSITORY:$PREVIOUS_IMAGE_TAG"' | at now + 5 minutes"
-                                        '''
+        //                                 sh '''
+        //                                 ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" \
+        //                                     "echo 'docker rmi "$EVENT_APP_REPOSITORY:$PREVIOUS_IMAGE_TAG"' | at now + 5 minutes"
+        //                                 '''
 
-                                        sh '''
-                                        ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" \
-                                            "echo 'docker rmi "$EVENT_CONSUMER_REPOSITORY":"$PREVIOUS_IMAGE_TAG"' | at now + 5 minutes"
-                                        '''
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        //                                 sh '''
+        //                                 ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" \
+        //                                     "echo 'docker rmi "$EVENT_CONSUMER_REPOSITORY":"$PREVIOUS_IMAGE_TAG"' | at now + 5 minutes"
+        //                                 '''
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
             
-        }
+        // }
 
-    }
+
 
     post {
         always {
