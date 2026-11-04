@@ -208,7 +208,7 @@ pipeline {
 
                                 dir('go/event-consumer') {
         
-                                    def buildStatus2 = sh(returnStatus: true, script: 'docker build -t "$EVENT_CONSUMER_IMAGE ."')
+                                    def buildStatus2 = sh(returnStatus: true, script: 'docker build -t "$EVENT_CONSUMER_IMAGE" .')
 
                                     if (buildStatus2 != 0) {
                                         error("Unable to tag $EVENT_CONSUMER_IMAGE")
