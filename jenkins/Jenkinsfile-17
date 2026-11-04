@@ -319,7 +319,7 @@ pipeline {
 
                                         sh '''
                                         ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" \
-                                            "echo 'docker rmi "$EVENT_APP_REPOSITORY:$PREVIOUS_IMAGE_TAG" | at now + 5 minutes"
+                                            "echo 'docker rmi "$EVENT_APP_REPOSITORY:$PREVIOUS_IMAGE_TAG"' | at now + 5 minutes"
                                         '''
 
                                         sh '''
