@@ -74,9 +74,9 @@ pipeline {
                         publicEventConsumerRepository = values[3]
                         runtimeMode = values[4]
 
-                        // imageName = "${$privateRegistryServer}:${privateRegistryPort}/${privateEventAppRepository}"
+                        imageName = "${privateRegistryServer}:${privateRegistryPort}/${privateEventAppRepository}"
 
-                        // echo "imageName: ${imageName}"
+                        echo "imageName: ${imageName}"
 
                         echo "privateEventAppRepository: ${privateEventAppRepository}"
                         echo "publicEventAppRepository: ${publicEventAppRepository}"
@@ -114,41 +114,41 @@ pipeline {
             }
         }
         
-        // stage('Build') {
-        //     steps {
-        //         script {
-        //             def COMMIT_HASH = sh(
-        //                 script: 'git rev-parse --short HEAD',
-        //                 returnStdout: true
-        //             ).trim()
+        stage('Build') {
+            steps {
+                script {
+                    def COMMIT_HASH = sh(
+                        script: 'git rev-parse --short HEAD',
+                        returnStdout: true
+                    ).trim()
 
-        //             env.IMAGE_TAG = "${COMMIT_HASH}-${env.BUILD_NUMBER}"
+                    env.IMAGE_TAG = "${COMMIT_HASH}-${env.BUILD_NUMBER}"
 
-        //             withEnv([
-        //                 "IMAGE_NAME=${imageName}", 
-        //             ]) {
-        //                     def buildResult = sh(returnStatus: true, 
-        //                         script: 'docker build -t  "${IMAGE_NAME}:${IMAGE_TAG}" -f docker/Dockerfile.test3 .')
-        //                     if (buildResult != 0) {
-        //                         error("Docker build failed")
-        //                     }                            
+                    withEnv([
+                        "IMAGE_NAME=${imageName}", 
+                    ]) {
+                            def buildResult = sh(returnStatus: true, 
+                                script: 'docker build -t  "${IMAGE_NAME}:${IMAGE_TAG}" -f docker/Dockerfile.test3 .')
+                            if (buildResult != 0) {
+                                error("Docker build failed")
+                            }                            
                             
-        //                     scanResult = sh(returnStatus: true, 
-        //                         script: 'trivy image --severity HIGH,CRITICAL "${IMAGE_NAME}:${IMAGE_TAG}" > trivy_result.txt')
-        //                     if (scanResult != 0) {
-        //                         error("Scan failed")
-        //                     }
+                            scanResult = sh(returnStatus: true, 
+                                script: 'trivy image --severity HIGH,CRITICAL "${IMAGE_NAME}:${IMAGE_TAG}" > trivy_result.txt')
+                            if (scanResult != 0) {
+                                error("Scan failed")
+                            }
 
-        //                     def pushResult = sh(returnStatus: true, 
-        //                         script: 'docker push "${IMAGE_NAME}:${IMAGE_TAG}"')
-        //                     if (pushResult != 0) {
-        //                            error("Push failed")
-        //                     }
-        //             }
+                            def pushResult = sh(returnStatus: true, 
+                                script: 'docker push "${IMAGE_NAME}:${IMAGE_TAG}"')
+                            if (pushResult != 0) {
+                                   error("Push failed")
+                            }
+                    }
                     
-        //         }
-        //     }
-        // }
+                }
+            }
+        }
     
     
         // stage ('Test') {
