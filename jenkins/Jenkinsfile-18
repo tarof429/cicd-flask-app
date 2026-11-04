@@ -1,0 +1,432 @@
+#!/usr/bin/groovy
+
+def cloudProvider
+def privateRegistryServer
+def privateRegistryPort
+def deploymentUser
+def deploymentServer
+
+def privateEventAppRepository
+def publicEventAppRepository
+def privateEventConsumerRepository
+def publicEventConsumerRepository
+def runtimeMode
+
+def dbUser
+def dbPass
+def dbHost
+def dbPort
+def dbName
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Pre') {
+            steps {
+                script {
+                    withCredentials([file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')]) {
+                        def values = sh(
+                            returnStdout: true,
+                            script: '''
+                                set +x
+                                set -eu
+                                . "$ENV_FILE"
+                                printf '%s\\t%s\\t%s\\t%s\\t%s' \
+                                    "${CLOUD_PROVIDER}" \
+                                    "${PRIVATE_REGISTRY_SERVER}" \
+                                    "${PRIVATE_REGISTRY_PORT}" \
+                                    "${DEPLOYMENT_USER}" \
+                                    "${DEPLOYMENT_SERVER}"
+                            ''').trim().split('\\t')
+                        cloudProvider = values[0]
+                        privateRegistryServer = values[1]
+                        privateRegistryPort = values[2]
+                        deploymentUser = values[3]
+                        deploymentServer = values[4]
+
+                        echo "cloudProvider: ${cloudProvider}"
+                        echo "privateRegistryServer: ${privateRegistryServer}"
+                        echo "privateRegistryPort: ${privateRegistryPort}"
+                        echo "deploymentUser: ${deploymentUser}"
+                        echo "deploymentServer: ${deploymentServer}"
+
+                        values = sh(
+                            returnStdout: true,
+                            script: '''
+                                set +x
+                                set -eu
+                                . "$ENV_FILE"
+                                printf '%s\\t%s\\t%s\\t%s\\t%s' \
+                                    "${PRIVATE_EVENT_APP_REPOSITORY}" \
+                                    "${PUBLIC_EVENT_APP_REPOSITORY}" \
+                                    "${PRIVATE_EVENT_CONSUMER_REPOSITORY}" \
+                                    "${PUBLIC_EVENT_CONSUMER_REPOSITORY}" \
+                                    "${RUNTIME_MODE}"
+                            ''').trim().split('\\t')
+
+                            privateEventAppRepository = values[0]
+                            publicEventAppRepository = values[1]
+                            privateEventConsumerRepository = values[2]
+                            publicEventConsumerRepository = values[3]
+                            runtimeMode = values[4]
+
+                            echo "privateEventAppRepository: ${privateEventAppRepository}"
+                            echo "publicEventAppRepository: ${publicEventAppRepository}"
+                            echo "privateEventConsumerRepository: ${privateEventConsumerRepository}"
+                            echo "publicEventConsumerRepository: ${publicEventConsumerRepository}"
+                            echo "runtimeMode: ${runtimeMode}"
+
+                       values = sh(
+                            returnStdout: true,
+                            script: '''
+                                set +x
+                                set -eu
+                                . "$ENV_FILE"
+                                printf '%s\\t%s\\t%s\\t%s\\t%s' \
+                                    "${DB_USER}" \
+                                    "${DB_PASS}" \
+                                    "${DB_HOST}" \
+                                    "${DB_PORT}" \
+                                    "${DB_NAME}"
+                            ''').trim().split('\\t')
+
+                            dbUser = values[0]
+                            dbPass = values[1]
+                            dbHost = values[2]
+                            dbPort = values[3]
+                            dbName = values[4]
+
+                            echo "dbUser: ${dbUser}"
+                            echo "dbPass: ${dbPass}"
+                            echo "dbHost: ${dbHost}"
+                            echo "dbPort: ${dbPort}"
+                            echo "dbName: ${dbName}"
+                    }
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                script {
+                    def COMMIT_HASH = sh(
+                        script: 'git rev-parse --short HEAD',
+                        returnStdout: true
+                    ).trim()
+
+                    env.IMAGE_TAG = "${COMMIT_HASH}-${env.BUILD_NUMBER}"
+
+                    withCredentials([file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')]) {
+                            withEnv([
+                                "IMAGE_NAME=${imageName}", 
+                                "PRIVATE_REGISTRY_SERVER=${privateRegistryServer}",
+                                "PRIVATE_REGISTRY_PORT=${privateRegistryPort}",
+                                "PRIVATE_EVENT_APP_REPOSITORY=${privateEventAppRepository}"
+                            ]) {
+                                def buildResult = sh(returnStatus: true, 
+                                    script: 'docker build -t "${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_EVENT_APP_REPOSITORY}:${IMAGE_TAG}" -f docker/Dockerfile.test3 .')
+                                if (buildResult != 0) {
+                                    error("Docker build failed")
+                                }                            
+
+                                def scanResult = sh(returnStatus: true, 
+                                    script: 'trivy image --severity HIGH,CRITICAL "${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_EVENT_APP_REPOSITORY}:${IMAGE_TAG}" > trivy_result.txt')
+                                if (scanResult != 0) {
+                                    error("Scan failed")
+                                }
+
+                                def pushResult = sh(returnStatus: true, 
+                                    script: 'docker push "$IMAGE_NAME"')
+                                if (pushResult != 0) {
+                                    error("Push failed")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // stage ('Test') {
+        //     steps {
+        //         script {
+        //             sh 'mkdir -p "$WORKSPACE/test-reports"'
+        //             sh 'rm -f "$WORKSPACE/test-reports/*"'
+
+        //             dir('docker-compose') {
+        //                 try {
+        //                     env.PREVIOUS_IMAGE_TAG = readFile(file: "current_image_tag.txt").trim()
+        //                 } catch(err) {
+        //                     echo "Unable to read current_image_tag.txt: ${err}"
+        //                 }
+        //                 writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
+
+        //                 withCredentials([file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')]) {
+        //                     withEnv(["IMAGE_TAG=${env.IMAGE_TAG}"]) {
+        //                         def imageName = sh(returnStdout: true, script: '''
+        //                             set +x
+        //                             set -eu
+        //                             . "$ENV_FILE"
+
+        //                             echo "${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_EVENT_APP_REPOSITORY}:${IMAGE_TAG}"
+        //                         ''').trim()
+
+        //                         withEnv(["IMAGE_NAME=${imageName}"]) {
+        //                             def buildResult = sh(returnStatus: true, 
+        //                                 script: 'docker compose --env-file "$ENV_FILE" -f docker-compose-test5.yaml up \
+        //                                 --abort-on-container-exit --exit-code-from app')
+                                    
+        //                             if (buildResult != 0) {
+        //                                 error("Docker compose failed")
+        //                             } 
+        //                         }
+
+        //                         withEnv(["IMAGE_NAME=${imageName}"]) {
+        //                             if (env.PREVIOUS_IMAGE_TAG) {
+        //                                 def event_app_private_previous_image = sh(returnStdout: true, script: '''
+        //                                     set +x
+        //                                     set -eu
+        //                                     . "$ENV_FILE" 
+                                            
+        //                                     echo "${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_EVENT_APP_REPOSITORY}:${PREVIOUS_IMAGE_TAG}"
+        //                                 ''').trim()
+
+        //                                 withEnv(["EVENT_APP_PRIVATE_PREVIOUS_IMAGE=${event_app_private_previous_image}"]) {
+        //                                     def buildResult = sh(returnStatus: true, script: 'docker rmi "$EVENT_APP_PRIVATE_PREVIOUS_IMAGE"')
+                                        
+        //                                     if (buildResult != 0) {
+        //                                         echo("Unable to delete image, ignoring.")
+        //                                     }
+        //                                 }
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
+        // stage ('Publish') {
+        //     steps {
+        //         script {
+        //             withCredentials([
+        //                 usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER'),
+        //                 file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')
+        //             ]){
+        //                 withEnv(["IMAGE_TAG=${env.IMAGE_TAG}"]) {
+        //                     def image = sh(returnStdout: true, script: '''
+        //                         set +x
+        //                         set -eu
+        //                         . "$ENV_FILE"
+        //                         echo $PUBLIC_EVENT_APP_REPOSITORY:${IMAGE_TAG}
+        //                         ''').trim()
+            
+
+        //                     def latestImage = sh(returnStdout: true, script: '''
+        //                         set +x
+        //                         set -eu
+        //                         . "$ENV_FILE"
+        //                         echo $PUBLIC_EVENT_APP_REPOSITORY:latest
+        //                         ''').trim()
+
+        //                     def eventConsumerImage =  sh(returnStdout: true, script: '''
+        //                         set +x
+        //                         set -eu
+        //                         . "$ENV_FILE"
+        //                         echo $PUBLIC_EVENT_CONSUMER_REPOSITORY:${IMAGE_TAG}
+        //                         ''').trim()
+                            
+        //                     def latestEventConsumerImage =  sh(returnStdout: true, script: '''
+        //                         set +x
+        //                         set -eu
+        //                         . "$ENV_FILE"
+        //                         echo $PUBLIC_EVENT_CONSUMER_REPOSITORY:latest
+        //                         ''').trim()
+
+        //                     withEnv([
+        //                         "IMAGE=${image}", 
+        //                         "LATEST_IMAGE=${latestImage}",
+        //                         "EVENT_CONSUMER_IMAGE=${eventConsumerImage}",
+        //                         "LATEST_EVENT_CONSUMER_IMAGE=${latestEventConsumerImage}"
+        //                         ]) {
+                            
+        //                         def buildStatus = sh(returnStatus: true, script: 'docker build -t "$IMAGE" -f docker/Dockerfile3 .')
+
+        //                         if (buildStatus != 0) {
+        //                             error("Unable to build '$IMAGE'")
+        //                         }
+
+        //                         def loginStatus = sh(returnStatus: true, script: 'echo $PASS | docker login -u "$USER" --password-stdin')
+
+        //                         if (loginStatus != 0) {
+        //                             error("Unable to login to dockerhub")
+        //                         }
+
+        //                         def pushStatus = sh(returnStatus: true, script: 'docker push "$IMAGE"')
+
+        //                         if (pushStatus != 0) {
+        //                             error("Unable to push $IMAGE")
+        //                         }
+
+        //                         def tagStatus = sh(returnStatus: true, script: 'docker tag "$IMAGE" "$LATEST_IMAGE"')
+
+        //                         if (tagStatus != 0) {
+        //                             error("Unable to create $LATEST_IMAGE")
+        //                         }
+
+        //                         def pushStatus2 = sh(returnStatus: true, script: 'docker push "$LATEST_IMAGE"')
+
+        //                         if (pushStatus2 != 0) {
+        //                             error("Unable to push $LATEST_IMAGE")    
+        //                         }
+
+        //                         dir('go/event-consumer') {
+        
+        //                             def buildStatus2 = sh(returnStatus: true, script: 'docker build -t "$EVENT_CONSUMER_IMAGE" .')
+
+        //                             if (buildStatus2 != 0) {
+        //                                 error("Unable to tag $EVENT_CONSUMER_IMAGE")
+        //                             }
+
+        //                             def pushStatus3 = sh(returnStatus: true, script: 'docker push "$EVENT_CONSUMER_IMAGE"')
+
+        //                             if (pushStatus3 != 0) {
+        //                                 error("Unable to push $EVENT_CONSUMER_IMAGE")
+        //                             }
+
+        //                             def tagStatus2 = sh(returnStatus: true, script: 'docker tag "$EVENT_CONSUMER_IMAGE" "$LATEST_EVENT_CONSUMER_IMAGE"')
+
+        //                             if (tagStatus2 != 0) {
+        //                                 error("Unable to tag $LATEST_EVENT_CONSUMER_IMAGE")
+        //                             }
+
+        //                             def pushStatus4 = sh(returnStatus: true, script: 'docker push "$LATEST_EVENT_CONSUMER_IMAGE"')
+
+        //                             if (pushStatus4 != 0) {
+        //                                 error("Unable to push '$LATEST_EVENT_CONSUMER_IMAGE'")
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
+        stage ('Deploy to KVM') {
+            when {
+                expression {
+                    cloudProvider == 'KVM'
+                }
+            }
+            steps {
+                script {
+                    sshagent(['cicd-server-key']) {
+                        
+                        withCredentials([file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')]) {
+                            withEnv([
+                            "IMAGE_TAG=${env.IMAGE_TAG}", 
+                            "DEPLOYMENT_USER=${env.DEPLOYMENT_USER}", 
+                            "DEPLOYMENT_SERVER=${env.DEPLOYMENT_SERVER}",
+                            "PUBLIC_EVENT_APP_REPOSITORY=${env.PUBLIC_EVENT_APP_REPOSITORY}",
+                            "PUBLIC_EVENT_CONSUMER_REPOSITORY=${env.PUBLIC_EVENT_CONSUMER_REPOSITORY}"
+                            ]) {
+
+                                def deploymentUser = sh(returnStdout: true, script: '''
+                                    set +x
+                                    set -eu
+                                    . "$ENV_FILE"
+
+                                    echo "$DEPLOYMENT_USER"
+                                ''').trim()
+
+                                def deploymentServer = sh(returnStdout: true, script: '''
+                                    set +x
+                                    set -eu
+                                    . "$ENV_FILE"
+
+                                    echo "$DEPLOYMENT_SERVER"
+                                ''').trim()
+
+                                def eventAppRepository = sh(returnStdout: true, script: '''
+                                    set +x
+                                    set -eu
+                                    . "$ENV_FILE"
+
+                                    echo "$PUBLIC_EVENT_APP_REPOSITORY"
+                                ''').trim()
+
+                                def eventConsumerRepository = sh(returnStdout: true, script: '''
+                                    set +x
+                                    set -eu
+                                    . "$ENV_FILE"
+
+                                    echo "$PUBLIC_EVENT_CONSUMER_REPOSITORY"
+                                ''').trim()
+
+                                withEnv([
+                                    "IMAGE_TAG=${env.IMAGE_TAG}",
+                                    "DEPLOYMENT_USER=${deploymentUser}",
+                                    "DEPLOYMENT_SERVER=${deploymentServer}",
+                                    "EVENT_APP_REPOSITORY=${eventAppRepository}",
+                                    "EVENT_CONSUMER_REPOSITORY=${eventConsumerRepository}"
+                                ]) {
+
+                                    dir('docker-compose') {
+                                        sh 'scp -o StrictHostKeyChecking=no docker-compose6.yaml "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER":docker-compose.yaml'
+                                    }
+
+                                    dir('bash') {
+                                        sh 'scp -o StrictHostKeyChecking=no deploy3.sh "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER":deploy.sh'
+                                    }
+                                
+                                    sh 'ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" chmod +x deploy.sh'
+                                    
+                                    sh 'ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" ./deploy.sh "$IMAGE_TAG"'
+
+                                    dir('docker-compose') {
+                                        writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
+                                    }
+
+                                    // Queue removal on the deployment server
+                                    if (env.PREVIOUS_IMAGE_TAG) {
+
+                                        sh '''
+                                        ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" \
+                                            "echo 'docker rmi "$EVENT_APP_REPOSITORY:$PREVIOUS_IMAGE_TAG"' | at now + 5 minutes"
+                                        '''
+
+                                        sh '''
+                                        ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" \
+                                            "echo 'docker rmi "$EVENT_CONSUMER_REPOSITORY":"$PREVIOUS_IMAGE_TAG"' | at now + 5 minutes"
+                                        '''
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+        }
+
+    }
+
+    post {
+        always {
+            script {
+                docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
+                    sh 'cp /source/*.xml "$WORKSPACE/test-reports/"'
+                }
+                sh 'mv "$WORKSPACE/trivy_result.txt" "$WORKSPACE/test-reports/"'
+
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                    sh 'docker logout'
+                }
+            }
+            junit 'test-reports/*.xml'
+             archiveArtifacts artifacts: 'test-reports/trivy_result.txt'
+        }
+    }
+}
