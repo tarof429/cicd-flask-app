@@ -106,15 +106,14 @@ pipeline {
                                     } 
                                 }
 
-                                withEnv([
-                                    "IMAGE_NAME=${imageName}"]) {
+                                withEnv(["IMAGE_NAME=${imageName}"]) {
                                     if (env.PREVIOUS_IMAGE_TAG) {
                                         def event_app_private_previous_image = sh(returnStdout: true, script: '''
                                             set +x
                                             set -eu
                                             . "$ENV_FILE" 
                                             
-                                            echo "${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_EVENT_APP_REPOSITORY}:${env.PREVIOUS_IMAGE_TAG}"
+                                            echo "${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_EVENT_APP_REPOSITORY}:${PREVIOUS_IMAGE_TAG}"
                                         ''').trim()
 
                                         withEnv(["EVENT_APP_PRIVATE_PREVIOUS_IMAGE=${event_app_private_previous_image}"]) {
