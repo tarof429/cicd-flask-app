@@ -209,27 +209,27 @@ pipeline {
 
                                 dir('go/event-consumer') {
         
-                                    def buildStatus = sh(returnStatus: true, script: 'docker build -t "$EVENT_CONSUMER_IMAGE ."')
+                                    def buildStatus2 = sh(returnStatus: true, script: 'docker build -t "$EVENT_CONSUMER_IMAGE ."')
 
-                                    if (buildStatus != 0) {
+                                    if (buildStatus2 != 0) {
                                         error("Unable to tag $EVENT_CONSUMER_IMAGE")
                                     }
 
-                                    def pushStatus2 = sh(returnStatus: true, script: 'docker push "$EVENT_CONSUMER_IMAGE"')
+                                    def pushStatus3 = sh(returnStatus: true, script: 'docker push "$EVENT_CONSUMER_IMAGE"')
 
-                                    if (pushStatus2 != 0) {
+                                    if (pushStatus3 != 0) {
                                         error("Unable to push $EVENT_CONSUMER_IMAGE")
                                     }
 
-                                    def tagStatus = sh(returnStatus: true, script: 'docker tag "$EVENT_CONSUMER_IMAGE" "$LATEST_EVENT_CONSUMER_IMAGE"')
+                                    def tagStatus2 = sh(returnStatus: true, script: 'docker tag "$EVENT_CONSUMER_IMAGE" "$LATEST_EVENT_CONSUMER_IMAGE"')
 
-                                    if (tagStatus != 0) {
+                                    if (tagStatus2 != 0) {
                                         error("Unable to tag $LATEST_EVENT_CONSUMER_IMAGE")
                                     }
 
-                                    def pushStatus3 = sh(returnStatus: true, script: 'docker push "$LATEST_EVENT_CONSUMER_IMAGE"')
+                                    def pushStatus4 = sh(returnStatus: true, script: 'docker push "$LATEST_EVENT_CONSUMER_IMAGE"')
 
-                                    if (pushStatus3 != 0) {
+                                    if (pushStatus4 != 0) {
                                         error("Unable to push '$LATEST_EVENT_CONSUMER_IMAGE'")
                                     }
                                 }
