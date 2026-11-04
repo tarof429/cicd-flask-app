@@ -74,9 +74,9 @@ pipeline {
                         publicEventConsumerRepository = values[3]
                         runtimeMode = values[4]
 
-                        imageName = "${$privateRegistryServer}:${privateRegistryPort}/${privateEventAppRepository}"
+                        // imageName = "${$privateRegistryServer}:${privateRegistryPort}/${privateEventAppRepository}"
 
-                        echo "imageName: ${imageName}"
+                        // echo "imageName: ${imageName}"
 
                         echo "privateEventAppRepository: ${privateEventAppRepository}"
                         echo "publicEventAppRepository: ${publicEventAppRepository}"
