@@ -296,40 +296,41 @@ pipeline {
                                     "DEPLOYMENT_SERVER=${deploymentServer}"
                                 ]) {
 
-                                dir('docker-compose') {
-                                    sh 'scp -o StrictHostKeyChecking=no docker-compose6.yaml "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER":docker-compose.yaml'
-                                }
+                                    dir('docker-compose') {
+                                        sh 'scp -o StrictHostKeyChecking=no docker-compose6.yaml "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER":docker-compose.yaml'
+                                    }
 
-                                dir('bash') {
-                                    sh 'scp -o StrictHostKeyChecking=no deploy3.sh "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER":deploy.sh'
-                                }
-                            
-                                sh 'ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" chmod +x deploy.sh'
+                                    dir('bash') {
+                                        sh 'scp -o StrictHostKeyChecking=no deploy3.sh "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER":deploy.sh'
+                                    }
                                 
-                                sh 'ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" ./deploy.sh "$IMAGE_TAG"'
+                                    sh 'ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" chmod +x deploy.sh'
+                                    
+                                    sh 'ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" ./deploy.sh "$IMAGE_TAG"'
 
-                                dir('docker-compose') {
-                                    writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
-                                }
+                                    dir('docker-compose') {
+                                        writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
+                                    }
 
-                                // Queue removal on the deployment server
-                                if (env.PREVIOUS_IMAGE_TAG) {
+                                    // Queue removal on the deployment server
+                                    if (env.PREVIOUS_IMAGE_TAG) {
 
-                                    sh '''
-                                    ssh -o StrictHostKeyChecking=no '$deploymentUser'@'$deploymentServer' \
-                                        "echo 'docker rmi "$eventAppRepository}:$PREVIOUS_IMAGE_TAG" | at now + 5 minutes"
-                                    '''
+                                        sh '''
+                                        ssh -o StrictHostKeyChecking=no '$deploymentUser'@'$deploymentServer' \
+                                            "echo 'docker rmi "$eventAppRepository}:$PREVIOUS_IMAGE_TAG" | at now + 5 minutes"
+                                        '''
 
-                                    sh '''
-                                    ssh -o StrictHostKeyChecking=no '$deploymentUser'@'$deploymentServer' \
-                                        "echo 'docker rmi $eventConsumerRepository:$PREVIOUS_IMAGE_TAG' | at now + 5 minutes"
-                                    '''
+                                        sh '''
+                                        ssh -o StrictHostKeyChecking=no '$deploymentUser'@'$deploymentServer' \
+                                            "echo 'docker rmi $eventConsumerRepository:$PREVIOUS_IMAGE_TAG' | at now + 5 minutes"
+                                        '''
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
+            
         }
     }
 
