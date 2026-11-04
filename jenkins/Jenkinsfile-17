@@ -239,10 +239,10 @@ pipeline {
             }
         }
 
-        stage ('Deploy to Digital Ocean') {
+        stage ('Deploy to KVM') {
             when {
                 expression {
-                    cloudProvider == 'DO'
+                    cloudProvider == 'kvm'
                 }
             }
             steps {
