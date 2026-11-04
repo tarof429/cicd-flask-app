@@ -49,13 +49,17 @@ pipeline {
                                 if (buildResult != 0) {
                                     error("Docker build failed")
                                 }                            
-                            
+                            }
+
+                            withEnv(["IMAGE_NAME=${imageName}"]) {
                                 def scanResult = sh(returnStatus: true, 
                                     script: 'trivy image --severity HIGH,CRITICAL "$IMAGE_NAME" > trivy_result.txt')
                                 if (scanResult != 0) {
                                     error("Scan failed")
                                 }
-                            
+                            }
+
+                            withEnv(["IMAGE_NAME=${imageName}"]) {
                                 def pushResult = sh(returnStatus: true, 
                                     script: 'docker push "$IMAGE_NAME"')
                                 if (pushResult != 0) {
@@ -100,7 +104,9 @@ pipeline {
                                     if (buildResult != 0) {
                                         error("Docker compose failed")
                                     } 
+                                }
 
+                                withEnv(["IMAGE_NAME=${imageName}"]) {
                                     if (env.PREVIOUS_IMAGE_TAG) {
                                         def event_app_private_previous_image = sh(returnStdout: true, script: '''
                                             set +x
