@@ -18,6 +18,9 @@ def dbHost
 def dbPort
 def dbName
 
+def imageName
+def imageTag
+
 pipeline {
     agent any
 
@@ -65,17 +68,19 @@ pipeline {
                                     "${RUNTIME_MODE}"
                             ''').trim().split('\\t')
 
-                            privateEventAppRepository = values[0]
-                            publicEventAppRepository = values[1]
-                            privateEventConsumerRepository = values[2]
-                            publicEventConsumerRepository = values[3]
-                            runtimeMode = values[4]
+                        privateEventAppRepository = values[0]
+                        publicEventAppRepository = values[1]
+                        privateEventConsumerRepository = values[2]
+                        publicEventConsumerRepository = values[3]
+                        runtimeMode = values[4]
 
-                            echo "privateEventAppRepository: ${privateEventAppRepository}"
-                            echo "publicEventAppRepository: ${publicEventAppRepository}"
-                            echo "privateEventConsumerRepository: ${privateEventConsumerRepository}"
-                            echo "publicEventConsumerRepository: ${publicEventConsumerRepository}"
-                            echo "runtimeMode: ${runtimeMode}"
+                        imageName = "${$privateEventAppRepository}:${privateRegistryPort}/${privateEventAppRepository}"
+
+                        echo "privateEventAppRepository: ${privateEventAppRepository}"
+                        echo "publicEventAppRepository: ${publicEventAppRepository}"
+                        echo "privateEventConsumerRepository: ${privateEventConsumerRepository}"
+                        echo "publicEventConsumerRepository: ${publicEventConsumerRepository}"
+                        echo "runtimeMode: ${runtimeMode}"
 
                        values = sh(
                             returnStdout: true,
@@ -91,17 +96,17 @@ pipeline {
                                     "${DB_NAME}"
                             ''').trim().split('\\t')
 
-                            dbUser = values[0]
-                            dbPass = values[1]
-                            dbHost = values[2]
-                            dbPort = values[3]
-                            dbName = values[4]
+                        dbUser = values[0]
+                        dbPass = values[1]
+                        dbHost = values[2]
+                        dbPort = values[3]
+                        dbName = values[4]
 
-                            echo "dbUser: ${dbUser}"
-                            echo "dbPass: ${dbPass}"
-                            echo "dbHost: ${dbHost}"
-                            echo "dbPort: ${dbPort}"
-                            echo "dbName: ${dbName}"
+                        echo "dbUser: ${dbUser}"
+                        echo "dbPass: ${dbPass}"
+                        echo "dbHost: ${dbHost}"
+                        echo "dbPort: ${dbPort}"
+                        echo "dbName: ${dbName}"
                     }
                 }
             }
@@ -117,35 +122,31 @@ pipeline {
 
                     env.IMAGE_TAG = "${COMMIT_HASH}-${env.BUILD_NUMBER}"
 
-                    withCredentials([file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')]) {
-                            withEnv([
-                                "IMAGE_NAME=${imageName}", 
-                                "PRIVATE_REGISTRY_SERVER=${privateRegistryServer}",
-                                "PRIVATE_REGISTRY_PORT=${privateRegistryPort}",
-                                "PRIVATE_EVENT_APP_REPOSITORY=${privateEventAppRepository}"
-                            ]) {
-                                def buildResult = sh(returnStatus: true, 
-                                    script: 'docker build -t "${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_EVENT_APP_REPOSITORY}:${IMAGE_TAG}" -f docker/Dockerfile.test3 .')
-                                if (buildResult != 0) {
-                                    error("Docker build failed")
-                                }                            
+                    withEnv([
+                        "IMAGE_NAME=${imageName}", 
+                    ]) {
+                            def buildResult = sh(returnStatus: true, 
+                                script: 'docker build -t  "${IMAGE_NAME}:${IMAGE_TAG}" -f docker/Dockerfile.test3 .')
+                            if (buildResult != 0) {
+                                error("Docker build failed")
+                            }                            
+                            
+                            scanResult = sh(returnStatus: true, 
+                                script: 'trivy image --severity HIGH,CRITICAL "${IMAGE_NAME}:${IMAGE_TAG}" > trivy_result.txt')
+                            if (scanResult != 0) {
+                                error("Scan failed")
+                            }
 
-                                def scanResult = sh(returnStatus: true, 
-                                    script: 'trivy image --severity HIGH,CRITICAL "${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_EVENT_APP_REPOSITORY}:${IMAGE_TAG}" > trivy_result.txt')
-                                if (scanResult != 0) {
-                                    error("Scan failed")
-                                }
-
-                                def pushResult = sh(returnStatus: true, 
-                                    script: 'docker push "$IMAGE_NAME"')
-                                if (pushResult != 0) {
-                                    error("Push failed")
-                                }
+                            def pushResult = sh(returnStatus: true, 
+                                script: 'docker push "${IMAGE_NAME}:${IMAGE_TAG}"')
+                            if (pushResult != 0) {
+                                   error("Push failed")
                             }
                     }
+                    
                 }
             }
-        }   
+        }
     
     
         // stage ('Test') {
