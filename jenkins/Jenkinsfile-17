@@ -301,7 +301,7 @@ pipeline {
                         
                             sh 'ssh -o StrictHostKeyChecking=no "$deploymentUser"@"$deploymentServer" chmod +x deploy.sh'
                             
-                            sh "ssh -o StrictHostKeyChecking=no "$deploymentUser"@"$deploymentServer" ./deploy.sh ${env.IMAGE_TAG}'
+                            sh 'ssh -o StrictHostKeyChecking=no "$deploymentUser"@"$deploymentServer" ./deploy.sh ${env.IMAGE_TAG}'
 
                             dir('docker-compose') {
                                 writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
