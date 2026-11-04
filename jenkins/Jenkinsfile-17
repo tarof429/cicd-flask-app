@@ -293,7 +293,9 @@ pipeline {
                                 withEnv([
                                     "IMAGE_TAG=${env.IMAGE_TAG}",
                                     "DEPLOYMENT_USER=${deploymentUser}",
-                                    "DEPLOYMENT_SERVER=${deploymentServer}"
+                                    "DEPLOYMENT_SERVER=${deploymentServer}",
+                                    "EVENT_APP_REPOSITORY=${eventAppRepository}",
+                                    "EVENT_CONSUMER_REPOSITORY=${eventConsumerRepository}"
                                 ]) {
 
                                     dir('docker-compose') {
@@ -316,13 +318,13 @@ pipeline {
                                     if (env.PREVIOUS_IMAGE_TAG) {
 
                                         sh '''
-                                        ssh -o StrictHostKeyChecking=no '$deploymentUser'@'$deploymentServer' \
-                                            "echo 'docker rmi "$eventAppRepository}:$PREVIOUS_IMAGE_TAG" | at now + 5 minutes"
+                                        ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" \
+                                            "echo 'docker rmi "$EVENT_APP_REPOSITORY:$PREVIOUS_IMAGE_TAG" | at now + 5 minutes"
                                         '''
 
                                         sh '''
-                                        ssh -o StrictHostKeyChecking=no '$deploymentUser'@'$deploymentServer' \
-                                            "echo 'docker rmi $eventConsumerRepository:$PREVIOUS_IMAGE_TAG' | at now + 5 minutes"
+                                        ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" \
+                                            "echo 'docker rmi "$EVENT_CONSUMER_REPOSITORY":"$PREVIOUS_IMAGE_TAG"' | at now + 5 minutes"
                                         '''
                                     }
                                 }
