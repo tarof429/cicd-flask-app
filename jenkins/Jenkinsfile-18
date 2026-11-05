@@ -292,12 +292,14 @@ pipeline {
                                     
                                     tmpCredFile = tmpCredFile.trim()
 
-                                    sh 'scp "$ENV_FILE" "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":"${tmpCredFile}"'
+                                    withEnv([TMPCREDFILE=${tmpCredFile}]) {
+                                        sh 'scp "$ENV_FILE" "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":"${TMPCREDFILE}"'
 
-                                    def buildResult = sh(returnStatus: true, 
-                                        script: 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" \
-                                            IMAGE_TAG="${IMAGE_TAG}" docker compose --env-file "${tmpCredFile}" -f docker-compose.yaml up \
-                                            -d --force-recreate app eventconsumer')
+                                        def buildResult = sh(returnStatus: true, 
+                                            script: 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" \
+                                                IMAGE_TAG="${IMAGE_TAG}" docker compose --env-file "${TMPCREDFILE}" -f docker-compose.yaml up \
+                                                -d --force-recreate app eventconsumer')
+                                    }
 
                                     if (buildResult != 0) {
                                         error("Docker compose failed")
@@ -344,9 +346,11 @@ pipeline {
             script {
                 // Delete remote credentials file so it's not exposed for long!
                 if (tmpCredFile) {
-                    sh 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" rm -f "${tmpCredFile}"'
+                    withEnv([TMPCREDFILE=${tmpCredFile}]) {
+                        sh 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" rm -f "${TMPCREDFILE}"'
+                    }
                 }
-                
+
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                     sh 'docker logout'
                 }
