@@ -281,50 +281,49 @@ pipeline {
                             "DEPLOYMENT_USER=${deploymentUser}",
                             "DEPLOYMENT_SERVER=${deploymentServer}"
                         ]) {
-                            dir('docker-compose') {
-                                sh 'scp -o StrictHostKeyChecking=no docker-compose6.yaml "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":docker-compose.yaml'
-                            
-                                def buildResult = sh(returnStatus: true, 
-                                    script: 'docker compose --env-file "$ENV_FILE" -f docker-compose6.yaml up \
-                                        -d --force-recreate app eventconsumer')
+                                dir('docker-compose') {
+                                    sh 'scp -o StrictHostKeyChecking=no docker-compose6.yaml "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":docker-compose.yaml'
+                                
+                                    def buildResult = sh(returnStatus: true, 
+                                        script: 'docker compose --env-file "$ENV_FILE" -f docker-compose6.yaml up \
+                                            -d --force-recreate app eventconsumer')
 
-                                if (buildResult != 0) {
-                                    error("Docker compose failed")
+                                    if (buildResult != 0) {
+                                        error("Docker compose failed")
+                                    }
+
+                                    writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
                                 }
 
-                                writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
-                            }
+                                dir('bash') {
+                                    sh 'scp -o StrictHostKeyChecking=no app_is_up.sh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":app_is_up.sh'
+                                }
 
-                            dir('bash') {
-                                sh 'scp -o StrictHostKeyChecking=no app_is_up.sh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":app_is_up.sh'
-                            }
+                                sh 'ssh -o StrictHostKeyChecking=no "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" chmod +x app_is_up.sh'
 
-                            sh 'ssh -o StrictHostKeyChecking=no "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" chmod +x app_is_up.sh'
+                                def status = sh(returnStatus: true, script: 'ssh -o StrictHostKeyChecking=no "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" ./app_is_up.sh')
 
-                            def status = sh(returnStatus: true, script: 'ssh -o StrictHostKeyChecking=no "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" ./app_is_up.sh')
+                                if (status != 0) {
+                                    error("App is not running!")
+                                }
+                                
+                                // Queue removal on the deployment server
+                                if (env.PREVIOUS_IMAGE_TAG) {
+                                    sh '''
+                                        ssh -o StrictHostKeyChecking=no "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" \
+                                            "echo 'docker rmi "${EVENT_APP_REPOSITORY}:${PREVIOUS_IMAGE_TAG}"' | at now + 5 minutes"
+                                        '''
 
-                            if (status != 0) {
-                                error("App is not running!")
-                            }
-                            
-                             // Queue removal on the deployment server
-                            if (env.PREVIOUS_IMAGE_TAG) {
-                                sh '''
-                                    ssh -o StrictHostKeyChecking=no "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" \
-                                        "echo 'docker rmi "${EVENT_APP_REPOSITORY}:${PREVIOUS_IMAGE_TAG}"' | at now + 5 minutes"
-                                    '''
-
-                                sh '''
-                                    ssh -o StrictHostKeyChecking=no "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" \
-                                         "echo 'docker rmi "${EVENT_CONSUMER_REPOSITORY}":"${PREVIOUS_IMAGE_TAG}"' | at now + 5 minutes"
-                                    '''
+                                    sh '''
+                                        ssh -o StrictHostKeyChecking=no "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" \
+                                            "echo 'docker rmi "${EVENT_CONSUMER_REPOSITORY}":"${PREVIOUS_IMAGE_TAG}"' | at now + 5 minutes"
+                                        '''
+                                }
                             }
                         }
-                        
                     }
                 }
             }
-            
         }
     }
 
