@@ -18,7 +18,7 @@ def dbHost
 def dbPort
 def dbName
 
-def imageName
+def eventAppPrivateImageName
 def imageTag
 
 pipeline {
@@ -74,10 +74,6 @@ pipeline {
                         publicEventConsumerRepository = values[3]
                         runtimeMode = values[4]
 
-                        imageName = "${privateRegistryServer}:${privateRegistryPort}/${privateEventAppRepository}"
-
-                        echo "imageName: ${imageName}"
-
                         echo "privateEventAppRepository: ${privateEventAppRepository}"
                         echo "publicEventAppRepository: ${publicEventAppRepository}"
                         echo "privateEventConsumerRepository: ${privateEventConsumerRepository}"
@@ -109,6 +105,10 @@ pipeline {
                         echo "dbHost: ${dbHost}"
                         echo "dbPort: ${dbPort}"
                         echo "dbName: ${dbName}"
+
+                        eventAppPrivateImageName = "${privateRegistryServer}:${privateRegistryPort}/${privateEventAppRepository}"
+                        echo "eventAppPrivateImageName: ${eventAppPrivateImageName}"
+
                     }
                 }
             }
@@ -125,7 +125,7 @@ pipeline {
                     env.IMAGE_TAG = "${COMMIT_HASH}-${env.BUILD_NUMBER}"
 
                     withEnv([
-                        "IMAGE_NAME=${imageName}", 
+                        "IMAGE_NAME=${eventAppPrivateImageName}", 
                     ]) {
                             def buildResult = sh(returnStatus: true, 
                                 script: 'docker build -t  "${IMAGE_NAME}:${IMAGE_TAG}" -f docker/Dockerfile.test3 .')
@@ -133,7 +133,7 @@ pipeline {
                                 error("Docker build failed")
                             }                            
                             
-                            scanResult = sh(returnStatus: true, 
+                            def scanResult = sh(returnStatus: true, 
                                 script: 'trivy image --severity HIGH,CRITICAL "${IMAGE_NAME}:${IMAGE_TAG}" > trivy_result.txt')
                             if (scanResult != 0) {
                                 error("Scan failed")
@@ -151,65 +151,44 @@ pipeline {
         }
     
     
-        // stage ('Test') {
-        //     steps {
-        //         script {
-        //             sh 'mkdir -p "$WORKSPACE/test-reports"'
-        //             sh 'rm -f "$WORKSPACE/test-reports/*"'
+        stage ('Test') {
+            steps {
+                script {
+                    sh 'mkdir -p "$WORKSPACE/test-reports"'
+                    sh 'rm -f "$WORKSPACE/test-reports/*"'
 
-        //             dir('docker-compose') {
-        //                 try {
-        //                     env.PREVIOUS_IMAGE_TAG = readFile(file: "current_image_tag.txt").trim()
-        //                 } catch(err) {
-        //                     echo "Unable to read current_image_tag.txt: ${err}"
-        //                 }
-        //                 writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
+                    dir('docker-compose') {
+                        try {
+                            env.PREVIOUS_IMAGE_TAG = readFile(file: "current_image_tag.txt").trim()
+                        } catch(err) {
+                            echo "Unable to read current_image_tag.txt: ${err}"
+                        }
+                        writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
 
-        //                 withCredentials([file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')]) {
-        //                     withEnv(["IMAGE_TAG=${env.IMAGE_TAG}"]) {
-        //                         def imageName = sh(returnStdout: true, script: '''
-        //                             set +x
-        //                             set -eu
-        //                             . "$ENV_FILE"
-
-        //                             echo "${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_EVENT_APP_REPOSITORY}:${IMAGE_TAG}"
-        //                         ''').trim()
-
-        //                         withEnv(["IMAGE_NAME=${imageName}"]) {
-        //                             def buildResult = sh(returnStatus: true, 
-        //                                 script: 'docker compose --env-file "$ENV_FILE" -f docker-compose-test5.yaml up \
-        //                                 --abort-on-container-exit --exit-code-from app')
+                        withCredentials([file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')]) {
+                            withEnv(["IMAGE_NAME=${eventAppPrivateImageName}"]) {
+                                def buildResult = sh(returnStatus: true, 
+                                    script: 'docker compose --env-file "$ENV_FILE" -f docker-compose-test5.yaml up \
+                                    --abort-on-container-exit --exit-code-from app')
                                     
-        //                             if (buildResult != 0) {
-        //                                 error("Docker compose failed")
-        //                             } 
-        //                         }
+                                if (buildResult != 0) {
+                                    error("Docker compose failed")
+                                } 
 
-        //                         withEnv(["IMAGE_NAME=${imageName}"]) {
-        //                             if (env.PREVIOUS_IMAGE_TAG) {
-        //                                 def event_app_private_previous_image = sh(returnStdout: true, script: '''
-        //                                     set +x
-        //                                     set -eu
-        //                                     . "$ENV_FILE" 
-                                            
-        //                                     echo "${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_EVENT_APP_REPOSITORY}:${PREVIOUS_IMAGE_TAG}"
-        //                                 ''').trim()
-
-        //                                 withEnv(["EVENT_APP_PRIVATE_PREVIOUS_IMAGE=${event_app_private_previous_image}"]) {
-        //                                     def buildResult = sh(returnStatus: true, script: 'docker rmi "$EVENT_APP_PRIVATE_PREVIOUS_IMAGE"')
+                                if (env.PREVIOUS_IMAGE_TAG) {
+                                    def buildResult = sh(returnStatus: true, script: 'docker rmi "${IMAGE_NAME:${PREVIOUS_IMAGE_TAG}"')
                                         
-        //                                     if (buildResult != 0) {
-        //                                         echo("Unable to delete image, ignoring.")
-        //                                     }
-        //                                 }
-        //                             }
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+                                    if (buildResult != 0) {
+                                        echo("Unable to delete image, ignoring.")
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         // stage ('Publish') {
         //     steps {
