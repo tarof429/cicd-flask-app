@@ -257,7 +257,7 @@ pipeline {
                                         error("Unable to push ${EVENT_CONSUMER_IMAGE}:latest")
                                     }
                                 }
-                            }
+                            
                         }
                     }
                 }
