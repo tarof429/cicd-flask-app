@@ -284,11 +284,11 @@ pipeline {
                                 dir('docker-compose') {
                                     sh 'scp docker-compose7.yaml "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":docker-compose.yaml'
 
-                                    sh 'scp "$ENV_FILE" "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":"${ENV_FILE}"'
+                                    sh 'scp "$ENV_FILE" "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":cicd-credentials.sh'
 
                                     def buildResult = sh(returnStatus: true, 
-                                        script: 'ssh "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" \
-                                            docker compose --env-file "$ENV_FILE" -f docker-compose.yaml up \
+                                        script: 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" \
+                                            IMAGE_TAG="${IMAGE_TAG}" docker compose --env-file cicd-credentials.sh -f docker-compose.yaml up \
                                             -d --force-recreate app eventconsumer')
 
                                     if (buildResult != 0) {
