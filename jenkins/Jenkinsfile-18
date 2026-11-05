@@ -282,10 +282,12 @@ pipeline {
                             "DEPLOYMENT_SERVER=${deploymentServer}"
                         ]) {
                                 dir('docker-compose') {
-                                    sh 'scp -o StrictHostKeyChecking=no docker-compose7.yaml "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":docker-compose.yaml'
+                                    sh 'scp docker-compose7.yaml "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":docker-compose.yaml'
+
+                                    sh 'scp "$ENV_FILE" "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":"${ENV_FILE}"'
 
                                     def buildResult = sh(returnStatus: true, 
-                                        script: 'ssh -o StrictHostKeyChecking=no "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" \
+                                        script: 'ssh "$DEPLOYMENT_USER"@"$DEPLOYMENT_SERVER" \
                                             docker compose --env-file "$ENV_FILE" -f docker-compose.yaml up \
                                             -d --force-recreate app eventconsumer')
 
