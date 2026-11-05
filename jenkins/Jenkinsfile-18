@@ -344,19 +344,16 @@ pipeline {
     post {
         always {
             script {
-                // Delete remote credentials file so it's not exposed for long!
-                if (tmpCredFile) {
-                    withCredentials([
-                        file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')
-                    ]){
-                        withEnv([
-                            "DEPLOYMENT_USER=${deploymentUser}",
-                            "DEPLOYMENT_SERVER=${deploymentServer}"
-                        ]) {
-                             withEnv(["TMPCREDFILE=${tmpCredFile}"]) {
-                                sh 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" rm -f "${TMPCREDFILE}"'
-                            }
-                        }
+                sshagent(['cicd-server-key']) {
+                    // Delete remote credentials file so it's not exposed for long!
+                    if (tmpCredFile) {
+                            withEnv([
+                                "DEPLOYMENT_USER=${deploymentUser}",
+                                "DEPLOYMENT_SERVER=${deploymentServer}",
+                                "TMPCREDFILE=${tmpCredFile}"]) {
+                                    sh 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" rm -f "${TMPCREDFILE}"'
+                                }
+                            
                     }
                 }
 
