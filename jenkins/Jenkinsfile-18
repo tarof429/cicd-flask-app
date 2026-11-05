@@ -176,7 +176,7 @@ pipeline {
                                 } 
 
                                 if (env.PREVIOUS_IMAGE_TAG) {
-                                    def buildResult = sh(returnStatus: true, script: 'docker rmi "${IMAGE_NAME:${PREVIOUS_IMAGE_TAG}"')
+                                    buildResult = sh(returnStatus: true, script: 'docker rmi "${IMAGE_NAME:${PREVIOUS_IMAGE_TAG}"')
                                         
                                     if (buildResult != 0) {
                                         echo("Unable to delete image, ignoring.")
