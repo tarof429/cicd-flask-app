@@ -292,7 +292,7 @@ pipeline {
                                     
                                     tmpCredFile = tmpCredFile.trim()
 
-                                    withEnv([TMPCREDFILE=${tmpCredFile}]) {
+                                    withEnv(["TMPCREDFILE=${tmpCredFile}"]) {
                                         sh 'scp "$ENV_FILE" "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":"${TMPCREDFILE}"'
 
                                         def buildResult = sh(returnStatus: true, 
@@ -346,7 +346,7 @@ pipeline {
             script {
                 // Delete remote credentials file so it's not exposed for long!
                 if (tmpCredFile) {
-                    withEnv([TMPCREDFILE=${tmpCredFile}]) {
+                    withEnv(["TMPCREDFILE=${tmpCredFile}"]) {
                         sh 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" rm -f "${TMPCREDFILE}"'
                     }
                 }
