@@ -21,6 +21,8 @@ def dbName
 def eventAppPrivateImageName
 def imageTag
 
+def tmpCredFile
+
 pipeline {
     agent any
 
@@ -284,11 +286,17 @@ pipeline {
                                 dir('docker-compose') {
                                     sh 'scp docker-compose7.yaml "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":docker-compose.yaml'
 
-                                    sh 'scp "$ENV_FILE" "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":cicd-credentials.sh'
+                                    tmpCredFile = sh(returnStdout: true,
+                                        script: 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" \
+                                            mktemp cicd-credentials-XXXX')
+                                    
+                                    tmpCredFile = tmpCredFile.trim()
+
+                                    sh 'scp "$ENV_FILE" "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":"${tmpCredFile}"'
 
                                     def buildResult = sh(returnStatus: true, 
                                         script: 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" \
-                                            IMAGE_TAG="${IMAGE_TAG}" docker compose --env-file cicd-credentials.sh -f docker-compose.yaml up \
+                                            IMAGE_TAG="${IMAGE_TAG}" docker compose --env-file "${tmpCredFile}" -f docker-compose.yaml up \
                                             -d --force-recreate app eventconsumer')
 
                                     if (buildResult != 0) {
@@ -334,14 +342,20 @@ pipeline {
     post {
         always {
             script {
+                // Delete remote credentials file so it's not exposed for long!
+                if (tmpCredFile) {
+                    sh 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" rm -f "${tmpCredFile}"'
+                }
+                
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                    sh 'docker logout'
+                }
+
                 docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
                     sh 'cp -f /source/*.xml "$WORKSPACE/test-reports/"'
                 }
                 sh 'mv -f "$WORKSPACE/trivy_result.txt" "$WORKSPACE/test-reports/"'
 
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
-                    sh 'docker logout'
-                }
             }
             junit allowEmptyResults: true, testResults: 'test-reports/*.xml'
             archiveArtifacts allowEmptyArchive: true, artifacts: 'test-reports/trivy_result.txt', followSymlinks: false
