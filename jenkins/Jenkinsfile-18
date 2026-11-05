@@ -108,7 +108,6 @@ pipeline {
 
                         eventAppPrivateImageName = "${privateRegistryServer}:${privateRegistryPort}/${privateEventAppRepository}"
                         echo "eventAppPrivateImageName: ${eventAppPrivateImageName}"
-
                     }
                 }
             }
@@ -190,112 +189,80 @@ pipeline {
             }
         }
 
-        // stage ('Publish') {
-        //     steps {
-        //         script {
-        //             withCredentials([
-        //                 usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER'),
-        //                 file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')
-        //             ]){
-        //                 withEnv(["IMAGE_TAG=${env.IMAGE_TAG}"]) {
-        //                     def image = sh(returnStdout: true, script: '''
-        //                         set +x
-        //                         set -eu
-        //                         . "$ENV_FILE"
-        //                         echo $PUBLIC_EVENT_APP_REPOSITORY:${IMAGE_TAG}
-        //                         ''').trim()
-            
-
-        //                     def latestImage = sh(returnStdout: true, script: '''
-        //                         set +x
-        //                         set -eu
-        //                         . "$ENV_FILE"
-        //                         echo $PUBLIC_EVENT_APP_REPOSITORY:latest
-        //                         ''').trim()
-
-        //                     def eventConsumerImage =  sh(returnStdout: true, script: '''
-        //                         set +x
-        //                         set -eu
-        //                         . "$ENV_FILE"
-        //                         echo $PUBLIC_EVENT_CONSUMER_REPOSITORY:${IMAGE_TAG}
-        //                         ''').trim()
+        stage ('Publish') {
+            steps {
+                script {
+                    withCredentials([
+                        usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER'),
+                        file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')
+                    ]){
+                        withEnv([
+                                "IMAGE=${publicEventAppRepository}", 
+                                "EVENT_CONSUMER_IMAGE=${publicEventConsumerRepository}"
+                                ]) {
                             
-        //                     def latestEventConsumerImage =  sh(returnStdout: true, script: '''
-        //                         set +x
-        //                         set -eu
-        //                         . "$ENV_FILE"
-        //                         echo $PUBLIC_EVENT_CONSUMER_REPOSITORY:latest
-        //                         ''').trim()
+                                def buildStatus = sh(returnStatus: true, script: 'docker build -t "${IMAGE}:${IMAGE_TAG}" -f docker/Dockerfile3 .')
 
-        //                     withEnv([
-        //                         "IMAGE=${image}", 
-        //                         "LATEST_IMAGE=${latestImage}",
-        //                         "EVENT_CONSUMER_IMAGE=${eventConsumerImage}",
-        //                         "LATEST_EVENT_CONSUMER_IMAGE=${latestEventConsumerImage}"
-        //                         ]) {
-                            
-        //                         def buildStatus = sh(returnStatus: true, script: 'docker build -t "$IMAGE" -f docker/Dockerfile3 .')
+                                if (buildStatus != 0) {
+                                    error("Unable to build '$IMAGE'")
+                                }
 
-        //                         if (buildStatus != 0) {
-        //                             error("Unable to build '$IMAGE'")
-        //                         }
+                                def loginStatus = sh(returnStatus: true, script: 'echo $PASS | docker login -u "$USER" --password-stdin')
 
-        //                         def loginStatus = sh(returnStatus: true, script: 'echo $PASS | docker login -u "$USER" --password-stdin')
+                                if (loginStatus != 0) {
+                                    error("Unable to login to dockerhub")
+                                }
 
-        //                         if (loginStatus != 0) {
-        //                             error("Unable to login to dockerhub")
-        //                         }
+                                def pushStatus = sh(returnStatus: true, script: 'docker push "$IMAGE"')
 
-        //                         def pushStatus = sh(returnStatus: true, script: 'docker push "$IMAGE"')
+                                if (pushStatus != 0) {
+                                    error("Unable to push $IMAGE")
+                                }
 
-        //                         if (pushStatus != 0) {
-        //                             error("Unable to push $IMAGE")
-        //                         }
+                                def tagStatus = sh(returnStatus: true, script: 'docker tag "${IMAGE}:${IMAGE_TAG}" "${IMAGE}:latest"')
 
-        //                         def tagStatus = sh(returnStatus: true, script: 'docker tag "$IMAGE" "$LATEST_IMAGE"')
+                                if (tagStatus != 0) {
+                                    error("Unable to create ${IMAGE}:latest")
+                                }
 
-        //                         if (tagStatus != 0) {
-        //                             error("Unable to create $LATEST_IMAGE")
-        //                         }
+                                pushStatus = sh(returnStatus: true, script: 'docker push "${IMAGE}:latest"')
 
-        //                         def pushStatus2 = sh(returnStatus: true, script: 'docker push "$LATEST_IMAGE"')
+                                if (pushStatus != 0) {
+                                    error("Unable to push ${IMAGE}:latest")
+                                }
 
-        //                         if (pushStatus2 != 0) {
-        //                             error("Unable to push $LATEST_IMAGE")    
-        //                         }
-
-        //                         dir('go/event-consumer') {
+                                dir('go/event-consumer') {
         
-        //                             def buildStatus2 = sh(returnStatus: true, script: 'docker build -t "$EVENT_CONSUMER_IMAGE" .')
+                                    buildStatus = sh(returnStatus: true, script: 'docker build -t "${EVENT_CONSUMER_IMAGE}:${IMAGE_TAG}" .')
 
-        //                             if (buildStatus2 != 0) {
-        //                                 error("Unable to tag $EVENT_CONSUMER_IMAGE")
-        //                             }
+                                    if (buildStatus != 0) {
+                                        error("Unable to tag ${EVENT_CONSUMER_IMAGE}:${IMAGE_TAG}")
+                                    }
 
-        //                             def pushStatus3 = sh(returnStatus: true, script: 'docker push "$EVENT_CONSUMER_IMAGE"')
+                                    pushStatus = sh(returnStatus: true, script: 'docker push "${EVENT_CONSUMER_IMAGE}:${IMAGE_TAG}"')
 
-        //                             if (pushStatus3 != 0) {
-        //                                 error("Unable to push $EVENT_CONSUMER_IMAGE")
-        //                             }
+                                    if (pushStatus != 0) {
+                                        error("Unable to push ${EVENT_CONSUMER_IMAGE}:${IMAGE_TAG}")
+                                    }
 
-        //                             def tagStatus2 = sh(returnStatus: true, script: 'docker tag "$EVENT_CONSUMER_IMAGE" "$LATEST_EVENT_CONSUMER_IMAGE"')
+                                    tagStatus = sh(returnStatus: true, script: 'docker tag "${EVENT_CONSUMER_IMAGE}:${IMAGE_TAG}" "${EVENT_CONSUMER_IMAGE}:latest"')
 
-        //                             if (tagStatus2 != 0) {
-        //                                 error("Unable to tag $LATEST_EVENT_CONSUMER_IMAGE")
-        //                             }
+                                    if (tagStatus != 0) {
+                                        error("Unable to tag ${EVENT_CONSUMER_IMAGE}:latest")
+                                    }
 
-        //                             def pushStatus4 = sh(returnStatus: true, script: 'docker push "$LATEST_EVENT_CONSUMER_IMAGE"')
+                                    pushStatus = sh(returnStatus: true, script: 'docker push "${EVENT_CONSUMER_IMAGE}:latest"')
 
-        //                             if (pushStatus4 != 0) {
-        //                                 error("Unable to push '$LATEST_EVENT_CONSUMER_IMAGE'")
-        //                             }
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+                                    if (pushStatus != 0) {
+                                        error("Unable to push ${EVENT_CONSUMER_IMAGE}:latest")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         // stage ('Deploy to KVM') {
         //     when {
