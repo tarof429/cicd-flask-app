@@ -213,7 +213,7 @@ pipeline {
                                     error("Unable to login to dockerhub")
                                 }
 
-                                def pushStatus = sh(returnStatus: true, script: 'docker push "$IMAGE"')
+                                def pushStatus = sh(returnStatus: true, script: 'docker push "${IMAGE}:${IMAGE_TAG}"')
 
                                 if (pushStatus != 0) {
                                     error("Unable to push $IMAGE")
