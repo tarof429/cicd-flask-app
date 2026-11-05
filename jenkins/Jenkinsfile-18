@@ -299,10 +299,10 @@ pipeline {
                                             script: 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" \
                                                 IMAGE_TAG="${IMAGE_TAG}" docker compose --env-file "${TMPCREDFILE}" -f docker-compose.yaml up \
                                                 -d --force-recreate app eventconsumer')
-                                    }
 
-                                    if (buildResult != 0) {
-                                        error("Docker compose failed")
+                                        if (buildResult != 0) {
+                                            error("Docker compose failed")
+                                        }
                                     }
 
                                     writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
@@ -346,8 +346,17 @@ pipeline {
             script {
                 // Delete remote credentials file so it's not exposed for long!
                 if (tmpCredFile) {
-                    withEnv(["TMPCREDFILE=${tmpCredFile}"]) {
-                        sh 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" rm -f "${TMPCREDFILE}"'
+                    withCredentials([
+                        file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')
+                    ]){
+                        withEnv([
+                            "DEPLOYMENT_USER=${deploymentUser}",
+                            "DEPLOYMENT_SERVER=${deploymentServer}"
+                        ]) {
+                             withEnv(["TMPCREDFILE=${tmpCredFile}"]) {
+                                sh 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" rm -f "${TMPCREDFILE}"'
+                            }
+                        }
                     }
                 }
 
