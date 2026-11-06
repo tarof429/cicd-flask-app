@@ -65,3 +65,4 @@ flowchart LR
 - Jenkins/Trivy
 - RabbitMQ
 - Go
+- Kanboard
