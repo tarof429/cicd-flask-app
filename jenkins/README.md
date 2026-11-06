@@ -313,3 +313,7 @@ The script *Jenkinsfile-16* add support for the event-consumer, a service that c
 # Use a file credential secret
 
 The script *Jenkinsfile-17* uses a file credential secret set environment variables. Secrets such as usernames, IPs and the like are injected during build time and are no longer baked into the script. 
+
+# Centralize file secret extraction
+
+The script *Jenkinsfile-18* goes one step further and sets all the variables in the file credential secret to global groovy variables. This simplifies the code per stage. Furthermore, we copy this file secret to a temporary file on the remote server and pass it to docker compose during the deploy stage.
