@@ -60,13 +60,13 @@ flask db upgrade
 To run the application (whith no message broker):
 
 ```sh
-MESSAGE_BROKER_TYPE=none flask run
+FLASK_APP=main MESSAGE_BROKER_TYPE=none flask run
 ```
 
 Use the following command if you need to runthe application and access the application from another host:
 
 ```sh
-MESSAGE_BROKER_TYPE=none flask run --host=0.0.0.0
+FLASK_APP=main MESSAGE_BROKER_TYPE=none flask run --host=0.0.0.0
 ```
 
 To access the application, point your browser to:
@@ -78,7 +78,7 @@ http://localhost:5000
 To run the application with an external rabbitmq (for example, rabbitmq running in a container):
 
 ```sh
-MESSAGE_BROKER_TYPE=rabbitmq RABBITMQ_USER=user RABBITMQ_PASS=password RABBITMQ_HOST=localhost RABBITMQ_VHOST=rabbitmq flask run --host=0.0.0.0
+FLASK_APP=main MESSAGE_BROKER_TYPE=rabbitmq RABBITMQ_USER=user RABBITMQ_PASS=password RABBITMQ_HOST=localhost RABBITMQ_VHOST=rabbitmq flask run --host=0.0.0.0
  ```
 
 If the application is configured to send messages to rabbitmq, then after adding an event, the following will show up in the log:

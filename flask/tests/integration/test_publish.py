@@ -1,7 +1,5 @@
-import app
-
 import os
-from app import publish_to_rabbitmq
+from routes import publish_to_rabbitmq
 
 def test_publish_to_rabbitmq(app):
     with app.app_context():
