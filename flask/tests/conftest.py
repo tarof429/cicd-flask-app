@@ -1,7 +1,6 @@
 import pytest, shutil
 
-from models import db
-from main import create_app
+from events_app import db, create_app
 
 @pytest.fixture
 def app():

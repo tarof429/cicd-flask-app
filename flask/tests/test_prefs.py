@@ -1,5 +1,4 @@
-from prefs import Prefs
-import yaml
+from events_app.prefs import Prefs
 
 def test_write_then_load_prefs(app):
     with app.app_context():

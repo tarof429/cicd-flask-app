@@ -23,6 +23,24 @@ The *docker-compose6.yaml* script integrates with the event-notifier.
 
 Access the application at http://localhost:5000.
 
+The *docker-compose7.yaml* script enables more customization of credentials. It was created in conjunction with *Jenkinsfile-18*.
+
+The *docker-compose-local.yaml* script provides local deployment. You can run it like:
+
+```sh
+ docker compose --env-file ./cicd-credentials.sh  -f docker-compose-local.yaml up -d
+```
+
+Where cicd-credentals.sh may look something like this:
+
+```sh
+RUNTIME_MODE=dev
+DB_USER=admin
+DB_PASS=verysecret
+DB_HOST=db
+DB_NAME=mydb
+```
+
 ## Tests
 
 To run the tests:

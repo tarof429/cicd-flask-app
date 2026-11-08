@@ -1,14 +1,13 @@
 import os, logging
-from flask import Flask, render_template, request, flash, redirect, url_for, abort
+from flask import Flask
 from flask_migrate import Migrate
-from sqlalchemy.exc import IntegrityError, DataError
+from flask_sqlalchemy import SQLAlchemy
+
 from logging.handlers import RotatingFileHandler
-import yaml
-import pika
-from models import db, Event
-from forms import *
-from prefs import Prefs
-from routes import main_bp
+
+from .config import *
+
+db = SQLAlchemy()
 
 def configure_logging():
     logs_dir = 'logs'
@@ -38,17 +37,18 @@ def create_app(mode=None):
         mode = os.environ.get('RUNTIME_MODE', 'dev')
 
     if mode == 'test':
-        app.config.from_object('config.TestConfig')
+        app.config.from_object(TestConfig)
         app.config["WTF_CSRF_ENABLED"] = False
     elif mode == 'dev':
-        app.config.from_object('config.DevConfig')
+        app.config.from_object(DevConfig)
     elif mode == 'prod':
-        app.config.from_object('config.ProdConfig')
+        app.config.from_object(ProdConfig)
 
     db.init_app(app)
 
     Migrate(app, db)
 
-    app.register_blueprint(main_bp)
+    from .events import events_bp
+    app.register_blueprint(events_bp)
 
     return app

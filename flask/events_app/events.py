@@ -5,23 +5,23 @@ from sqlalchemy.exc import IntegrityError, DataError
 from logging.handlers import RotatingFileHandler
 import yaml
 import pika
-from models import db, Event
-from forms import *
-from prefs import Prefs
+from .models import db, Event
+from .forms import *
+from .prefs import Prefs
 
-main_bp = Blueprint('main', __name__)
+events_bp = Blueprint('events', __name__)
     
-@main_bp.route('/')
+@events_bp.route('/')
 def index():
     current_app.logger.info("Home page accessed")
 
     return render_template('index.html')
 
-@main_bp.route('/test')
+@events_bp.route('/test')
 def test():
     return '<html><body>This is a test</body></html>'
 
-@main_bp.route('/preferences',  methods=['GET', 'POST'])
+@events_bp.route('/preferences',  methods=['GET', 'POST'])
 def preferences():
     prefs = Prefs(os.getenv('PREFERENCES_CONFIG', 'preferences.yaml'))
 
@@ -31,7 +31,7 @@ def preferences():
         events = Event.query.all()
 
         if form.cancel.data:
-            return redirect(url_for('main.list_events', events = events))
+            return redirect(url_for('events.list_events', events = events))
         else:
             fromEmail = form.fromEmail.data
             toEmail = form.toEmail.data
@@ -51,7 +51,7 @@ def preferences():
 
             publish_to_rabbitmq('confirmation_prefs', 'confirmation_prefs', yaml.safe_dump(data))
             
-            return redirect(url_for('main.list_events', events = events))
+            return redirect(url_for('events.list_events', events = events))
 
     data = prefs.load()
 
@@ -78,17 +78,17 @@ def preferences():
 
     return render_template('preferences.html', form = form, page_title = 'Preferences')
 
-@main_bp.errorhandler(404)
+@events_bp.errorhandler(404)
 def page_not_found(error):
     return render_template('page_not_found.html'), 404
 
-@main_bp.route('/list_events')
+@events_bp.route('/list_events')
 def list_events():
         events = Event.query.all()
 
         return render_template('events.html', events=events)
 
-@main_bp.route('/event_action', methods=['POST'])
+@events_bp.route('/event_action', methods=['POST'])
 def event_action():
 
     event_id = request.form.get('event_id')
@@ -96,17 +96,17 @@ def event_action():
 
     if not event_id:
         flash('Please select an event', 'warning')
-        return redirect(url_for('main.list_events'))
+        return redirect(url_for('events.list_events'))
     
     if action == 'update':
-        return redirect(url_for('main.update_event', id=event_id))
+        return redirect(url_for('events.update_event', id=event_id))
     elif action == 'delete':
-        return redirect(url_for('main.delete_event', id=event_id))
+        return redirect(url_for('events.delete_event', id=event_id))
     else:
         flash('Invalid action', 'danger')
-        return redirect(url_for('main.list_events'))
+        return redirect(url_for('events.list_events'))
 
-@main_bp.route('/add_event', methods=['GET', 'POST'])
+@events_bp.route('/add_event', methods=['GET', 'POST'])
 def add_event():
     form = AddEventForm()
 
@@ -140,7 +140,7 @@ def add_event():
 
     return render_template('add_event_form.html', form=form, page_title='Add Event')
 
-@main_bp.route('/update_event/<int:id>', methods=['GET', 'POST'])
+@events_bp.route('/update_event/<int:id>', methods=['GET', 'POST'])
 def update_event(id):
     event = db.session.get(Event, id)
     if event is None:
@@ -154,7 +154,7 @@ def update_event(id):
         try:
             db.session.commit()
             flash('Event updated', 'success')
-            return redirect(url_for('main.list_events'))
+            return redirect(url_for('events.list_events'))
         except IntegrityError:
             db.session.rollback()
             flash('Event name must be unique!', 'danger')
@@ -163,13 +163,13 @@ def update_event(id):
             flash('Invalid data submitted', 'danger')
         except Exception as e:
             db.session.rollback()
-            flash('An unhandled exception hmain_bpened when calling update_event()', 'danger')
+            flash('An unhandled exception hevents_bpened when calling update_event()', 'danger')
             flash(str(e), 'danger')
 
     return render_template('update_event_form.html', 
         form=form, page_title='Update event')
     
-@main_bp.route('/delete_event/<int:id>')
+@events_bp.route('/delete_event/<int:id>')
 def delete_event(id):
     event = db.session.get(Event, id)
     if event is None:
@@ -179,7 +179,7 @@ def delete_event(id):
     db.session.commit()
     
     flash('Event deleted', 'success')
-    return redirect(url_for('main.list_events')) 
+    return redirect(url_for('events.list_events')) 
 
 def publish_to_rabbitmq(qname, rkey, message):
     credentials = pika.PlainCredentials(

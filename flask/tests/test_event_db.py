@@ -1,4 +1,4 @@
-from models import db, Event
+from events_app.models import db, Event
 from datetime import date, time
 from sqlalchemy import select
 

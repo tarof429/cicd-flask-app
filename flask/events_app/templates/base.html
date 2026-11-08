@@ -30,13 +30,13 @@
     <header class="bg-info text-white py-3 mb-4 d-flex align-items-center position-relative">
         <ul class="nav justify-content-center mx-auto">
             <li class="nav-item">
-                <a class="nav-link text-white" href="{{ url_for('main.index') }}">Home</a>
+                <a class="nav-link text-white" href="{{ url_for('events.index') }}">Home</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white" href="{{ url_for('main.list_events') }}">Events</a>
+                <a class="nav-link text-white" href="{{ url_for('events.list_events') }}">Events</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white py-0" href="{{ url_for('main.add_event') }}">
+                <a class="nav-link text-white py-0" href="{{ url_for('events.add_event') }}">
                     <i class="bi bi-plus-circle fs-4"></i>
                 </a>
             </li>
@@ -44,7 +44,7 @@
 
         <ul class="nav position-absolute end-0 me-2">
             <li class="nav-item">
-                <a class="nav-link text-white" href="{{ url_for('main.preferences') }}">Preferences</a>
+                <a class="nav-link text-white" href="{{ url_for('events.preferences') }}">Preferences</a>
             </li>
         </ul>
     </header>
@@ -60,9 +60,9 @@
         </div>
     {% endif %}
     
-    <main class="container mt-4">
+    <events class="container mt-4">
         {% block content %}{%endblock %}
-    </main>
+    </events>
 </body>
 
 </html>

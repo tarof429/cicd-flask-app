@@ -1,5 +1,5 @@
 import os
-from routes import publish_to_rabbitmq
+from events_app.events import publish_to_rabbitmq
 
 def test_publish_to_rabbitmq(app):
     with app.app_context():

@@ -2,10 +2,10 @@ services:
   app:
     image: tarof429/events-app:${IMAGE_TAG}
     environment:
-      - FLASK_APP=app.py
+      - FLASK_APP=events_app
       - FLASK_DEBUG=False
       - RUNTIME_MODE=${RUNTIME_MODE:-dev}
-      - DATABASE_URI=postgresql://${DB_USER:-admin}:${DB_PASS:-secret}@${DB_HOST:-db}:${DB_PORT:-5432}/${DB_NAME:-db}
+      - DATABASE_URI=postgresql://${DB_USER:-admin}:${DB_PASS:-secret}@${DB_HOST:-db}:5432/${DB_NAME:-db}
       - RABBITMQ_USER=rabbit
       - RABBITMQ_PASS=secret
       - PREFERENCES_CONFIG=/prefs/preferences.yaml
