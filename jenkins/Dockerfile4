@@ -1,0 +1,17 @@
+ARG IMAGE_TAG="2.589"
+
+FROM jenkins/jenkins:${IMAGE_TAG}
+
+USER root
+
+RUN curl -fsSL https://get.docker.com -o get-docker.sh && \
+    sh ./get-docker.sh
+
+RUN apt-get update \
+ && apt-get install -y sudo \
+ && apt-get install -y --no-install-recommends curl ca-certificates \
+ && curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | \
+    sudo sh -s -- -b /usr/local/bin v0.76.1 \
+ && rm -rf /var/lib/apt/lists/*
+ 
+USER jenkins

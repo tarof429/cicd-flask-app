@@ -184,13 +184,13 @@ After some more investigation, I found that the vulnerability came from the base
 Let's bulid a new docker image for Jenkins that contains trivy.
 
 ```sh
-docker build -t myjenkins:b6ba347 -f Dockerfile3 .
+ docker build -t myjenkins:f3f2358 -f Dockerfile4 .
 ```
 
 Bring it up (taking care to stop the old one first).
 
 ```sh
-DOCKER_GID="$(stat -c '%g' /var/run/docker.sock)" IMAGE_TAG=b6ba347 docker compose -f docker-compose4.yaml up -d 
+DOCKER_GID="$(stat -c '%g' /var/run/docker.sock)" IMAGE_TAG=f3f2358 docker compose -f docker-compose4.yaml up -d 
 ```
 
 Confirm that trivy is now installed.
