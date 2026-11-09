@@ -354,23 +354,24 @@ pipeline {
 
                             file(credentialsId: 'ansible-vault-password',
                                 variable: 'VAULT_PASSWORD_FILE')
-                        ])
+                        ]) {
                         withEnv([
                             "IMAGE_TAG=${env.IMAGE_TAG}",
                         ]) {
-                            dir('ansible') {
-                                def buildResult = sh(returnStatus: true, 
-                                    script: 'ansible-playbook \
-                                        -i inventory-do2.yaml \
-                                        deploy_app.yaml \
-                                        --vault-password-file "$VAULT_PASSWORD_FILE" \
-                                        -e "@$VAULT_FILE"')
-                                if (buildResult != 0) {
-                                    error("Ansible script failed")
+                                dir('ansible') {
+                                    def buildResult = sh(returnStatus: true, 
+                                        script: 'ansible-playbook \
+                                            -i inventory-do2.yaml \
+                                            deploy_app.yaml \
+                                            --vault-password-file "$VAULT_PASSWORD_FILE" \
+                                            -e "@$VAULT_FILE"')
+                                    if (buildResult != 0) {
+                                        error("Ansible script failed")
+                                    }
                                 }
-                            }
 
-                            writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
+                                writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
+                            }
                         }
                     }
                 }
