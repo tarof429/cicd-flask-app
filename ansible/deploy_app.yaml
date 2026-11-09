@@ -1,0 +1,7 @@
+- hosts: web_server
+  vars_files:
+    - myvault
+  become: true
+  become_user: admin
+  roles:
+    - deploy_app
