@@ -448,6 +448,50 @@ ansible-playbook -i inventory4.yaml \
 jenkins_cicd_server_key.yaml
 ```
 
+## [Deploy App using Ansible](#deploy_app_using_ansible)
+
+The *deploy_app* role deploys the application to DigitalOcean using Ansible. Its use begins with Jenkinsfile-20 and invokes an Ansible role that copies a Jinja2 template of the docker composefile to the deployment server. Using Ansible for deployment means we have less code in the Jenkinsfile to maintain. However, troubleshooting failed deployments is much harder compared with the more tedious method of using the shell in the Jenkinsfile.
+
+Steps:
+
+1. First create a text file containing a password that will be used with the vault:
+
+```sh
+# ansible-vault-password
+reacted
+```
+
+2. Next create a vault called *ansible-vault-file* with the following content:
+
+```sh
+EDITOR=vim ansible-vault create ansible-vault-file --vault-password-file ansible-vault-password
+DEPLOYMENT_SERVER: redacted
+RUNTIME_MODE: prod
+DB_USER: redacted
+DB_PASS: redacted
+DB_HOST: redacted
+DB_PORT: redacted
+DB_NAME: redacted
+MESSAGE_BROKER_TYPE: rabbitmq
+docker_user: redacted
+docker_pass: redacted
+```
+
+To edit this file, run:
+
+```sh
+EDITOR=vim ansible-vault edit ansible-vault-file --vault-password-file /home/taro/Downloads/ansible-vault-password
+```
+
+3. Upload both as secret files to Jenkins.
+
+For troubleshooting,
+
+- Verify the generated docker compose file.
+- Look at the proceses in the container.
+- Check application logs.
+
+
 ## References
 
 https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_vars_facts.html

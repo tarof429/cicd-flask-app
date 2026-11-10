@@ -314,10 +314,58 @@ The script *Jenkinsfile-16* add support for the event-consumer, a service that c
 
 The script *Jenkinsfile-17* uses a file credential secret set environment variables. Secrets such as usernames, IPs and the like are injected during build time and are no longer baked into the script. 
 
-# Centralize file secret extraction
+The format of this file looks like this:
+
+```sh
+# KVM secret file
+CLOUD_PROVIDER=KVM
+PRIVATE_REGISTRY_SERVER=redacted
+PRIVATE_REGISTRY_PORT=3000
+DEPLOYMENT_SERVER=redacted
+DEPLOYMENT_USER=admin
+PRIVATE_EVENT_APP_REPOSITORY=events-app
+PUBLIC_EVENT_APP_REPOSITORY=tarof429/events-app
+PRIVATE_EVENT_CONSUMER_REPOSITORY=event-consumer
+PUBLIC_EVENT_CONSUMER_REPOSITORY=tarof429/event-consumer
+RUNTIME_MODE=dev
+DB_USER=admin
+DB_PASS=secret
+DB_HOST=db
+DB_PORT=5432
+DB_NAME=db
+```
+
+Incidentally, it is invalid to change the value of DB_PORT because PostgresSQL is a docker compose service.
+
+## Centralize file secret extraction
 
 The script *Jenkinsfile-18* goes one step further and sets all the variables in the file credential secret to global groovy variables. This simplifies the code per stage. Furthermore, we copy this file secret to a temporary file on the remote server and pass it to docker compose during the deploy stage.
 
-# Use the new blueprint
+## Use the new blueprint
 
 The script *Jenkinsfile-19* integrates with changes needed to enable blueprint.
+
+## Deploy to DigitalOcean using Ansible
+
+The script *Jenkinsfile-20* uses Ansible to deploy the app to DigitalOcean. 
+
+Create a text file called *cicd-credentials-do.sh* with the following content and upload to Jenkins, overwriting the existing *cicd-credentials* secret. See [here](../../ansible/README.md#deploy_app_using_ansible) for more information.
+
+```sh
+# Digital Ocean secret file
+CLOUD_PROVIDER=DO
+PRIVATE_REGISTRY_SERVER=reacted
+PRIVATE_REGISTRY_PORT=3000
+DEPLOYMENT_SERVER=redacted
+DEPLOYMENT_USER=admin
+PRIVATE_EVENT_APP_REPOSITORY=events-app
+PUBLIC_EVENT_APP_REPOSITORY=tarof429/events-app
+PRIVATE_EVENT_CONSUMER_REPOSITORY=event-consumer
+PUBLIC_EVENT_CONSUMER_REPOSITORY=tarof429/event-consumer
+RUNTIME_MODE=prod
+DB_USER=dummy
+DB_PASS=dummy
+DB_HOST=dummy
+DB_PORT=dummy
+DB_NAME=dummy
+```
