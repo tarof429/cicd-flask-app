@@ -7,23 +7,23 @@
     username: "{{ docker_user }}"
     password: "{{ docker_pass }}"
 
-# - name: Copy docker-compose file
-#   template:
-#     src: docker-compose.yaml.j2
-#     dest: docker-compose.yaml
-# - name: Run docker compose file
-#   shell: IMAGE_TAG="{{ IMAGE_TAG }}" docker compose up -d --force-recreate app eventconsumer
+- name: Copy docker-compose file
+  template:
+    src: docker-compose.yaml.j2
+    dest: docker-compose.yaml
+- name: Run docker compose file
+  shell: IMAGE_TAG="{{ IMAGE_TAG }}" docker compose up -d --force-recreate app eventconsumer
+
+- name: Ping app
+  ansible.builtin.uri:
+    url: "http://localhost:5000"
+    follow_redirects: none
+    method: GET
+  register: _result
+  until: _result.status == 200
+  retries: 12 # 12 * 5 seconds = 1 minute
+  delay: 5 # Every 5 seconds
 
 - name: Logout from docker registry
   community.docker.docker_login:
     state: absent
-
-# - name: Ping app
-#   ansible.builtin.uri:
-#     url: "http://localhost:5000"
-#     follow_redirects: none
-#     method: GET
-#   register: _result
-#   until: _result.status == 200
-#   retries: 12 # 12 * 5 seconds = 1 minute
-#   delay: 5 # Every 5 seconds
