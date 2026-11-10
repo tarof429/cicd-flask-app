@@ -276,12 +276,15 @@ pipeline {
                 script {
                     sshagent(['cicd-server-key']) {
                     withCredentials([
+                        usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER'),
                         file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')
                     ]){
                         withEnv([
                             "IMAGE_TAG=${env.IMAGE_TAG}",
                             "DEPLOYMENT_USER=${deploymentUser}",
-                            "DEPLOYMENT_SERVER=${deploymentServer}"
+                            "DEPLOYMENT_SERVER=${deploymentServer}",
+                            "docker_user=${USER}",
+                            "docker_pass=${PASS}"
                         ]) {
                                 dir('docker-compose') {
                                     sh 'scp docker-compose7.yaml "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":docker-compose.yaml'
