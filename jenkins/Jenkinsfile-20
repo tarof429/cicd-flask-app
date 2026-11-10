@@ -358,6 +358,7 @@ pipeline {
                         withEnv([
                             "IMAGE_TAG=${env.IMAGE_TAG}",
                             "DEPLOYMENT_SERVER=${deploymentServer}",
+                            "PREVIOUS_IMAGE_TAG=${env.PREVIOUS_IMAGE_TAG}"
                         ]) {
                                 dir('ansible') {
                                     def buildResult = sh(returnStatus: true, 
@@ -366,6 +367,7 @@ pipeline {
                                             deploy_app.yaml \
                                             -e "IMAGE_TAG=${IMAGE_TAG}" \
                                             -e "DEPLOYMENT_SERVER=${DEPLOYMENT_SERVER}" \
+                                            -e PREVIOUS_IMAGE_TAG=${PREVIOUS_IMAGE_TAG}" \
                                             --vault-password-file "${VAULT_PASSWORD_FILE}"')
                                     if (buildResult != 0) {
                                         error("Ansible script failed")
