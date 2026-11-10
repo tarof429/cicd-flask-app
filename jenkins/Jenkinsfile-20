@@ -364,7 +364,7 @@ pipeline {
                                         script: 'ansible-playbook \
                                             -i inventory-do2.yaml \
                                             deploy_app.yaml \
-                                            --vault-password-file "$VAULT_PASSWORD_FILE"')
+                                            --vault-password-file "${VAULT_PASSWORD_FILE}"')
                                     if (buildResult != 0) {
                                         error("Ansible script failed")
                                     }
