@@ -368,7 +368,7 @@ pipeline {
                                             deploy_app.yaml \
                                             --vault-password-file "$VAULT_PASSWORD_FILE" \
                                             -e "@$VAULT_FILE" \
-                                            -e "docker_user=$USER",
+                                            -e "docker_user=$USER", \
                                             -e "docker_pass=$PASS"')
                                     if (buildResult != 0) {
                                         error("Ansible script failed")
