@@ -122,7 +122,7 @@ pip freeze > requirements.txt
 Build the test image and push it to the local registry.
 
 ```sh
-docker build -f docker/Dockerfile.test3 -t localhost:3000/events-app-test:latest .
+docker build -f docker/Dockerfile.test4 -t localhost:3000/events-app-test:latest .
 docker push localhost:3000/events-app-test:latest
 ```
 
