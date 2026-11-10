@@ -357,8 +357,7 @@ pipeline {
                                 variable: 'VAULT_PASSWORD_FILE')
                         ]) {
                         withEnv([
-                            "IMAGE_TAG=${env.IMAGE_TAG}",
-                            "DEPLOYMENT_SERVER=${deploymentServer}"
+                            "IMAGE_TAG=${env.IMAGE_TAG}"
                         ]) {
                                 dir('ansible') {
                                     def buildResult = sh(returnStatus: true, 
