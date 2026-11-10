@@ -349,8 +349,7 @@ pipeline {
                 script {
                     sshagent(['cicd-server-key']) {
                         withCredentials([
-                            usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER'),
-     
+
                             file(credentialsId: 'ansible-vault-file',
                                 variable: 'VAULT_FILE'),
 
@@ -367,9 +366,7 @@ pipeline {
                                             -i inventory-do2.yaml \
                                             deploy_app.yaml \
                                             --vault-password-file "$VAULT_PASSWORD_FILE" \
-                                            -e "@$VAULT_FILE" \
-                                            -e "docker_user=$USER", \
-                                            -e "docker_pass=$PASS"')
+                                            -e "@$VAULT_FILE"')
                                     if (buildResult != 0) {
                                         error("Ansible script failed")
                                     }
