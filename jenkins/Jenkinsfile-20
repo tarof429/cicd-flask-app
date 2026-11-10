@@ -361,10 +361,10 @@ pipeline {
                         ]) {
                                 dir('ansible') {
                                     def buildResult = sh(returnStatus: true, 
-                                        script: '"IMAGE_TAG=${IMAGE_TAG}" \
-                                            ansible-playbook \
+                                        script: 'ansible-playbook \
                                             -i inventory-do2.yaml \
                                             deploy_app.yaml \
+                                            -e "IMAGE_TAG=${IMAGE_TAG}" \
                                             --vault-password-file "${VAULT_PASSWORD_FILE}"')
                                     if (buildResult != 0) {
                                         error("Ansible script failed")
