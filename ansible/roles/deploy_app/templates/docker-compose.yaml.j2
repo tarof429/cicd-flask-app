@@ -5,7 +5,7 @@ services:
       - FLASK_APP=events_app
       - FLASK_DEBUG=False
       - RUNTIME_MODE={{ RUNTIME_MODE }}
-      - DATABASE_URI=postgresql://{{ DB_USER }}:{{ DB_PASS }}@{{ DB_HOST }}:5432/{{ DB_NAME }}
+      - DATABASE_URI=postgresql://{{ DB_USER }}:{{ DB_PASS }}@{{ DB_HOST }}:{{ DB_PORT }}/{{ DB_NAME }}
       - RABBITMQ_USER=rabbit
       - RABBITMQ_PASS=secret
       - PREFERENCES_CONFIG=/prefs/preferences.yaml
