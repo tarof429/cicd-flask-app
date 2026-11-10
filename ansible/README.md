@@ -487,9 +487,20 @@ EDITOR=vim ansible-vault edit ansible-vault-file --vault-password-file /home/tar
 
 For troubleshooting,
 
-- Verify the generated docker compose file.
-- Look at the proceses in the container.
+- Verify the generated docker compose file on the deployment server. Verify the database host, name, port and password are correct. If not, fix the file secret, upload it to Jenkins, and run the build again.
+- Look at the proceses in the container. They can offer information about the runtime environment.
 - Check application logs.
+
+Still having trouble running the Ansible playbook from Jenkins?
+
+If you see an error from Jenkins like:
+
+```sh
+[ERROR]: Task failed: Failed to connect to the host via ssh: Host key verification failed.
+fatal: [web_server_1]: UNREACHABLE! => {"changed": false, "msg": "Task failed: Failed to connect to the host via ssh: Host key verification failed.", "unreachable": true}
+```
+
+This isn't an Ansible error, really. Make sure the jenkins user from the jenkins container can SSH to the Droplet as admin!
 
 
 ## References

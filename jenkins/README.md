@@ -314,7 +314,7 @@ The script *Jenkinsfile-16* add support for the event-consumer, a service that c
 
 The script *Jenkinsfile-17* uses a file credential secret set environment variables. Secrets such as usernames, IPs and the like are injected during build time and are no longer baked into the script. 
 
-The format of this file looks like this:
+The format of this file (which I call cicd-credentials-kvm.sh) looks like this:
 
 ```sh
 # KVM secret file
@@ -349,7 +349,7 @@ The script *Jenkinsfile-19* integrates with changes needed to enable blueprint.
 
 The script *Jenkinsfile-20* uses Ansible to deploy the app to DigitalOcean. 
 
-Create a text file called *cicd-credentials-do.sh* with the following content and upload to Jenkins, overwriting the existing *cicd-credentials* secret. See [here](../../ansible/README.md#deploy_app_using_ansible) for more information.
+Create a text file called *cicd-credentials-do.sh* with the following content and upload to Jenkins, overwriting the existing *cicd-credentials* secret (which should be used to deploy the app to KVM). See [here](../../ansible/README.md#deploy_app_using_ansible) for more information.
 
 ```sh
 # Digital Ocean secret file
@@ -370,13 +370,3 @@ DB_PORT=dummy
 DB_NAME=dummy
 ```
 
-Have trouble running the Ansible playbook from Jenkins?
-
-If you see an error from Jenkins like:
-
-```sh
-[ERROR]: Task failed: Failed to connect to the host via ssh: Host key verification failed.
-fatal: [web_server_1]: UNREACHABLE! => {"changed": false, "msg": "Task failed: Failed to connect to the host via ssh: Host key verification failed.", "unreachable": true}
-```
-
-This isn't an Ansible error, really. Make sure the jenkins user from the jenkins container can SSH to the Droplet as admin!
