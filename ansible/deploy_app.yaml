@@ -1,6 +1,6 @@
 - hosts: web_server
   vars_files:
-    - myvault
+    - "{{ lookup('env', 'VAULT_FILE') }}"
   become: true
   become_user: admin
   roles:
