@@ -1,4 +1,4 @@
-# Deployed!
+# Deployed! An exploratory CI/CD project
 
 ## Intro
 
