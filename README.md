@@ -1,68 +1,56 @@
-# CI/CD Flask Application
+# Deployed!
 
-This is a Python Flask task manager application that we can build, test and deploy using CI/CD.
+## Intro
+
+This is a fun project where:
+
+- Servers are provisioned
+- Code/Tests get written
+- Scripts automate repetitive tasks
+- Pipelines deploy services
+
+## Why I wrote this
+
+This project involves many languages, tools and platforms as you can see from the folder layout. What you can't see is the motivation behind everything. Why I bothered provisioning servers on my Linux box. Why I spent so much time with docker compose instead of jumping into Kubernetes. Why I didn't just use an AI prompt to write all the code for my microservices.
+
+The primary motivation is that I like learning. I also like to improve processes. Even if some tools are downright frustrating to use (like Jenkins), they're still indispensible for many people, including me! I dedicated many iterations to develop an optimal pipeline script. I ended up finding a no-code method that switches between local and cloud deployments.
+
+## Highlights of the project
+
+- Developed a web app for an events calendar using Python. 🗓️
+- Tracked tasks including backlog using Kanban. 📋
+- Wrote unit/integration tests to validate code before committing to git. ✅
+- Wrote Ansible scripts to provision VMs and servers. ⚙️
+- Wrote Jenkins pipeline scripts to poll github for changes and deploy microservices. 🚀
+- Troubleshooted and fixed faulty deployments due to networking and configuration issues. 🔧
+
+## What the app looks like from the outside
+
+Below is a screenshot of the app early in development. It's basically an events calandar, the kind that you find on community websites. 
 
 <img src="images/events.png" />
 
-## What is CI/CD
+## What the app looks like from the inside
 
-CI/CD is a practice where code gets committed, tested and deployed in a continuous loop. Containers are used to package components of the application as microservices, and these components are updated fequently through polling or commit hooks. 
+The main app is written in Python and uses the Flask web framework. When a user creates a new event, a message is sent to a queue. This is consumed by the Event Consumer, which uses the message to send an email message to Mailpit. The asynchronous communcation between the Flask app and the Event Consumer means if one service goes down, it doesn't affect the other.
 
-To demonstrate CI/CD, this source repository takes a Python Flask application, packages it as a docker container, and deploys it to environments like VMs and cloud servers. Orchestrating multiple containers can become complicated due to numerous dependencies between them so we can use Docker Compose for a small, local dev/test environment.
 ```mermaid
 flowchart LR
-    CI[CI/CD Pipeline] --> Image[Container Image]
-    Image --> Compose[Docker Compose]
-    Compose --> Flask[Flask Application]
-    Compose --> DB[(PostgreSQL)]
+    A[Flask app] -->|Save event|B[PostgresSQL]
+    A -->|Send message|C[RabbitMQ]
+    D[Event Consumer] -->|Readfrom queue|C
+    D -->|Send Email| E[Mailpit]
 ```
 
-But if we introduce virtual or physical servers running Docker, the task of provisioning and configuring these can be very time consuming and error prone. Tools such as Kickstart, Terraform and Ansible make these repetitive tasks easier.
+## How the app is deployed
+
+The Jenkins pipeline takes care of polling git for changes, running tests and deploying images/containers.
 
 ```mermaid
-flowchart LR
-    Kickstart --> Server
-    Terraform --> Server
-    Ansible --> Server
-```
-
-Updating servers with the latest code in a continuous loop involves a CI/CD pipeline. With the pipeline in place, developers simply commit code to source repositories. The pipeline will take that code and push it to production.
-
-```mermaid
-flowchart LR
-    Git --> CICD[CI/CD Service]
-    CICD --> Test
-    Test --> Build[Build container]
+flowchart TD
+    Git --> Pipeline[Jenkins]
+    Pipeline --> Tests
+    Tests --> Build[Build container]
     Build --> Registry[Docker Registry]
     Registry --> Server[Deployment Server]
 ```
-
-Finally, if our application is a collection of microservices and requires scalabilty, fault tolerance, observability and high availability, we can to deploy it to a Kubernetes cluster. While Kubernetes is very popular as a production environment, it has a very high learning curve and maintenance overhead. Often dev/test teams may still prefer to deploy containers -- specific to their domain -- directly to VMs and servers. 
-
-```mermaid
-flowchart LR
-    Git --> CICD[CI/CD Service]
-    CICD --> K8S[Kubernetes Cluster]
-```
-
-## Technology Stack
-
-- Python
-- Flask
-- SQLAlchemy
-- PostgreSQL
-- Docker
-- Docker Compose
-- Pytest
-- Alembic/Flask-Migrate
-- KVM
-- Kickstart
-- Cloud-init
-- Ansible
-- Bash
-- Docker Registry
-- Cloud/Digital Ocean/AWS
-- Jenkins/Trivy
-- RabbitMQ
-- Go
-- Kanboard
