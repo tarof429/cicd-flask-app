@@ -24,9 +24,15 @@ The primary motivation is that I like learning. I also like to improve processes
 - Wrote Jenkins pipeline scripts to poll github for changes and deploy microservices. 🚀
 - Troubleshooted and fixed faulty deployments due to networking and configuration issues. 🔧
 
-## What the app looks like from the outside
+## Some things I'm proud of
 
-Below is a screenshot of the app early in development. It's basically an events calandar, the kind that you find on community websites. 
+- Wrote microservices using Python and Go, two of my favorite languages, and in the process learned the importance of decoupled services. 🪐
+- Completely removed sensitive information including credentials and IPs from Jenkins pipeline scripts. 🔐
+- Deployed the microservices to the cloud ☁️ in only 2 days. 🎉
+
+## What the app looks like
+
+Below is a screenshot of the app. It's basically an events calandar, the kind that you'll find on community websites. 
 
 <img src="images/events.png" />
 
