@@ -13,7 +13,7 @@ This is a fun project where:
 
 This project involves many languages, tools and platforms as you can see from the folder layout. What you can't see is the motivation behind everything. Why I bothered provisioning servers on my Linux box. Why I spent so much time with docker compose instead of jumping into Kubernetes. Why I didn't just use an AI prompt to write all the code for my microservices.
 
-The primary motivation is that I like learning. I also like to improve processes. Even if some tools are downright frustrating to use (like Jenkins), they're still indispensible for many people, including me! I dedicated many iterations to develop an optimal pipeline script. I ended up finding a no-code method that switches between local and cloud deployments.
+The primary motivation is that I like learning. I also like to improve processes. Even if some tools are downright frustrating to use, they're still indispensible for many people, including me! For example, I spent weeks developing an optimal Jenkins pipeline script. At that time, I was still using docker compose because I think docker compose is still useful for container orchestration. I ended up finding a no-code method that easily switches between local and cloud deployments. 
 
 ## Highlights of the project
 
