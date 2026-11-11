@@ -4,22 +4,24 @@ FROM jenkins/jenkins:${IMAGE_TAG}
 
 USER root
 
+# Update cache
+RUN apt update
+
 # Install Docker
 RUN curl -fsSL https://get.docker.com -o get-docker.sh && \
     sh ./get-docker.sh
 
 # Install trivy
-RUN apt update \
-    && apt install -y sudo \
+RUN apt install -y sudo \
     && apt install -y --no-install-recommends curl ca-certificates \
     && curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | \
         sudo sh -s -- -b /usr/local/bin v0.76.1
 
 # Install ansible
-RUN apt update \
-    && apt install -y ansible
+RUN apt install -y ansible
  
- # Cleanup apt cache
-RUN rm -rf /var/lib/apt/lists/*
+ # Cleanup apt cache and other files
+RUN rm -rf /var/lib/apt/lists/* && \
+    rm -f get-docker.sh
 
 USER jenkins
