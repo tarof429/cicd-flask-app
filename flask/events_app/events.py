@@ -49,7 +49,9 @@ def preferences():
 
             prefs.write(data)
 
-            publish_to_rabbitmq('confirmation_prefs', 'confirmation_prefs', yaml.safe_dump(data))
+            msg = "Preferences changed:\n\n" + yaml.safe_dump(data)
+
+            publish_to_rabbitmq('confirmation_prefs', 'confirmation_prefs', msg)
             
             return redirect(url_for('events.list_events', events = events))
 
