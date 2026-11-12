@@ -187,13 +187,13 @@ Let's bulid a new docker image for Jenkins that contains trivy.
 > This section has been updated to include the latest Dockerfile use to build a custom Jenkins image.
 
 ```sh
-docker build -f Dockerfile5 --build-arg IMAGE_TAG=2.590 -t myjenkins:2590 .
+docker build -f Dockerfile5 --build-arg IMAGE_TAG=2.590-jdk21 -t myjenkins:2590-jdk21 .
 ```
 
 Bring it up (taking care to stop the old one first).
 
 ```sh
-DOCKER_GID="$(stat -c '%g' /var/run/docker.sock)" IMAGE_TAG=2589 docker compose -f docker-compose4.yaml up -d
+DOCKER_GID="$(stat -c '%g' /var/run/docker.sock)" IMAGE_TAG=2590-jdk21 docker compose -f docker-compose4.yaml up -d
 ```
 
 Confirm that trivy is now installed.
