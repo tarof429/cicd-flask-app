@@ -20,6 +20,10 @@
             background-color: #cccccc;
             border-color: #cccccc;
         }
+        .events-area {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
     </style>
 
 
@@ -61,7 +65,9 @@
     {% endif %}
     
     <events class="container mt-4">
+        <div class="events-area">
         {% block content %}{%endblock %}
+        </div>
     </events>
 </body>
 
