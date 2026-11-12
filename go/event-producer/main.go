@@ -8,7 +8,7 @@ import (
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
-	yaml "gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v3"
 )
 
 func main() {
@@ -51,7 +51,7 @@ func main() {
 		log.Printf("Unable to encoce preferences")
 	}
 
-	err = producer.SendToQueue(ch, "confirmation_prefs", string(body))
+	err = producer.SendToQueue(ch, "confirmation_prefs", fmt.Sprintf("Preferences changed:\n\n%v", string(body)))
 
 	if err != nil {
 		producer.FailOnError(err, "Failed to send message")

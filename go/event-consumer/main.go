@@ -75,10 +75,14 @@ func main() {
 
 			// Modify preferences
 			err := yaml.Unmarshal(d.Body, &consumer.Prefs)
-
 			if err != nil {
 				log.Printf("Unable to parse message: %v\n", err.Error())
 			}
+
+			if err := consumer.SendNotification(string(d.Body)); err != nil {
+				fmt.Printf("Will not send notification due to error: %v \n", err.Error())
+			}
+
 		}
 	}()
 
