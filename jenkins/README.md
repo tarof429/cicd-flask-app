@@ -187,7 +187,7 @@ Let's bulid a new docker image for Jenkins that contains trivy.
 > This section has been updated to include the latest Dockerfile use to build a custom Jenkins image.
 
 ```sh
-docker build -f Dockerfile4 --build-arg IMAGE_TAG=2.589 -t myjenkins:2589 .
+docker build -f Dockerfile5 --build-arg IMAGE_TAG=2.590 -t myjenkins:2590 .
 ```
 
 Bring it up (taking care to stop the old one first).
