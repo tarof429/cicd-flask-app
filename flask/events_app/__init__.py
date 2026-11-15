@@ -58,7 +58,9 @@ def create_app(mode=None):
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-
+    from .auth import auth as auth_bp
+    app.register_blueprint(auth_bp)
+    
     from .events import events_bp
     app.register_blueprint(events_bp)
 
