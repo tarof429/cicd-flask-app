@@ -2,6 +2,7 @@ import os, logging
 from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 
 from logging.handlers import RotatingFileHandler
 
@@ -47,6 +48,10 @@ def create_app(mode=None):
     db.init_app(app)
 
     Migrate(app, db)
+
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
 
     from .events import events_bp
     app.register_blueprint(events_bp)

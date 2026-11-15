@@ -55,6 +55,44 @@ Create the events table:
 flask db upgrade
 ```
 
+If the migration fails, an easy workaround is:
+
+1. Backup the database.
+
+```sh
+cp instance/events.db instance/event.db.backup
+```
+
+2. Delete the database.
+
+```sh
+rm instance/events.db
+```
+
+3. Migrate the database.
+
+```sh
+ FLASK_APP=events_app flask db upgrade
+ ```
+
+ 4. Check the integrity of the database.
+
+ ```sh
+ FLASK_APP=events_app flask db check
+ ```
+
+ 5. Create a migration.
+
+ ```sh
+flask db migrate -m "Add user model"
+```
+
+6. Upgrade the database.
+
+```sh
+flask db upgrade
+```
+
 ## Usage
 
 To run the application (whith no message broker):
