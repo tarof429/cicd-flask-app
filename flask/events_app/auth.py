@@ -64,7 +64,7 @@ def profile():
 
     if request.method == 'POST':
         if form.cancel.data:
-            return redirect(url_for('envents.index'))
+            return redirect(url_for('events.index'))
         elif form.validate_on_submit():
             username = form.username.data
             newPassword = form.newPassword.data
@@ -81,7 +81,7 @@ def profile():
                     user.name = name
                     db.session.commit()
 
-                    return redirect(url_for('events.index'))
+                    flash('Profile updated.', 'success')
 
     return render_template('profile_form.html', form=form, page_title='Profile')
 

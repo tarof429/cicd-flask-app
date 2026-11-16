@@ -90,19 +90,9 @@ class ProfileForm(FlaskForm):
                                Length(max=25,
                                       message='Username requried')
                            ])
-    newPassword = PasswordField('New password',
-                           validators = [
-                               DataRequired(),
-                               Length(max=25,
-                                      message='Password requried')
-                           ])
+    newPassword = PasswordField('New password')
 
-    newPasswordAgain = PasswordField('New password (again)',
-                           validators = [
-                               DataRequired(),
-                               Length(max=25,
-                                      message='Password requried')
-                           ])         
+    newPasswordAgain = PasswordField('New password (again)')   
 
     name = StringField('Name',
                            validators = [
