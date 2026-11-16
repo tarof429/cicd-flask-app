@@ -81,3 +81,35 @@ class RegisterForm(FlaskForm):
     
     submit = SubmitField('Register')
     cancel = SubmitField('Cancel')
+
+class ProfileForm(FlaskForm):
+    username = StringField('Username',
+                           
+                           validators = [
+                               DataRequired(),
+                               Length(max=25,
+                                      message='Username requried')
+                           ])
+    newPassword = PasswordField('New password',
+                           validators = [
+                               DataRequired(),
+                               Length(max=25,
+                                      message='Password requried')
+                           ])
+
+    newPasswordAgain = PasswordField('New password (again)',
+                           validators = [
+                               DataRequired(),
+                               Length(max=25,
+                                      message='Password requried')
+                           ])         
+
+    name = StringField('Name',
+                           validators = [
+                               DataRequired(),
+                               Length(max=25,
+                                      message='Name requried')
+                           ])
+    
+    submit = SubmitField('Save')
+    cancel = SubmitField('Cancel')

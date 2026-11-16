@@ -55,15 +55,24 @@
             </li>
             {% endif %}
 
+
+            {% if current_user.is_authenticated %}
+            <li class="nav-item">
+                <a class="nav-link text-white" href="{{ url_for('auth.profile') }}">Account Settings</a>
+            </li>
+            {% endif %}
+
+            {% if current_user.is_authenticated %}
+            <li class="nav-item">
+                <a class="nav-link text-white" href="{{ url_for('events.preferences') }}">System Preferences</a>
+            </li>
+            {% endif %}
+
             {% if current_user.is_authenticated %}
             <li class="nav-item">
                 <a class="nav-link text-white" href="{{ url_for('auth.logout') }}">Logout</a>
             </li>
             {% endif %}
-
-            <li class="nav-item">
-                <a class="nav-link text-white" href="{{ url_for('events.preferences') }}">Preferences</a>
-            </li>
         </ul>
     </header>
     {% set messages = get_flashed_messages(with_categories=true) %}

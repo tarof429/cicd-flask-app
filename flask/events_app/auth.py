@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, ProfileForm
 from .models import Event, User
 from . import db
 
@@ -53,6 +53,37 @@ def register():
             return redirect(url_for('auth.login'))
 
     return render_template('register_form.html', form=form, page_title='Signup')
+
+@auth.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    form = ProfileForm()
+
+    form.username.data = current_user.username
+    form.name.data = current_user.name
+
+    if request.method == 'POST':
+        if form.cancel.data:
+            return redirect(url_for('envents.index'))
+        elif form.validate_on_submit():
+            username = form.username.data
+            newPassword = form.newPassword.data
+            newPasswordAgain = form.newPasswordAgain.data
+            name = form.name.data
+
+            user = User.query.filter_by(username=username).first()
+
+            if user:
+                if newPassword != newPasswordAgain:
+                    flash('Passwords do not match', 'warning')
+                else:
+                    user.password = newPassword
+                    user.name = name
+                    db.session.commit()
+
+                    return redirect(url_for('events.index'))
+
+    return render_template('profile_form.html', form=form, page_title='Profile')
 
 @auth.route('/logout')
 @login_required
