@@ -43,3 +43,18 @@ class PreferencesForm(FlaskForm):
                             ])
     submit = SubmitField('Save')
     cancel = SubmitField('Cancel')
+
+class LoginForm(FlaskForm):
+    username = StringField('Username',
+                           validators = [
+                               DataRequired(),
+                               Length(max=25,
+                                      message='Username requried')
+                           ])
+    password = StringField('Password',
+                           validators = [
+                               DataRequired(),
+                               Length(max=25,
+                                      message='Password requried')
+                           ])
+    submit = SubmitField('Login')
