@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DateField, TimeField, IntegerField, SubmitField, EmailField
+from wtforms import StringField, DateField, TimeField, IntegerField, SubmitField, EmailField, PasswordField
 from wtforms.validators import DataRequired, Length, NumberRange
 
 class AddEventForm(FlaskForm):
@@ -51,10 +51,33 @@ class LoginForm(FlaskForm):
                                Length(max=25,
                                       message='Username requried')
                            ])
-    password = StringField('Password',
+    password = PasswordField('Password',
                            validators = [
                                DataRequired(),
                                Length(max=25,
                                       message='Password requried')
                            ])
     submit = SubmitField('Login')
+
+class RegisterForm(FlaskForm):
+    username = StringField('Username',
+                           validators = [
+                               DataRequired(),
+                               Length(max=25,
+                                      message='Username requried')
+                           ])
+    password = PasswordField('Password',
+                           validators = [
+                               DataRequired(),
+                               Length(max=25,
+                                      message='Password requried')
+                           ])
+    name = StringField('Name',
+                           validators = [
+                               DataRequired(),
+                               Length(max=25,
+                                      message='Name requried')
+                           ])
+    
+    submit = SubmitField('Register')
+    cancel = SubmitField('Cancel')

@@ -84,13 +84,13 @@ rm instance/events.db
  5. Create a migration.
 
  ```sh
-flask db migrate -m "Add user model"
+ FLASK_APP=events_app flask db migrate -m "Add user model"
 ```
 
 6. Upgrade the database.
 
 ```sh
-flask db upgrade
+ FLASK_APP=events_app flask db upgrade
 ```
 
 ## Usage

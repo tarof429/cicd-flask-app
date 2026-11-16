@@ -11,7 +11,7 @@ events_bp = Blueprint('events', __name__)
     
 @events_bp.route('/')
 def index():
-    current_app.logger.info("Home page accessed")
+    #current_app.logger.info("Home page accessed")
 
     return render_template('index.html')
 

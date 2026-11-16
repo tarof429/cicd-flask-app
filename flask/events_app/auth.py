@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from flask_login import login_user
+from flask_login import login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
-from .forms import LoginForm
-from .models import User
+from .forms import LoginForm, RegisterForm
+from .models import Event, User
+from . import db
 
 auth = Blueprint('auth', __name__)
 
@@ -20,7 +21,41 @@ def login():
             flash('Please check your login details and try again.', 'danger')
             return redirect(url_for('auth.login'))
 
-        # login_user(user)
-        return redirect(url_for('events.list_events'))
+        login_user(user)
+        return redirect(url_for('events.index'))
 
     return render_template('login_form.html', form=form, page_title='Login')
+
+@auth.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm()
+
+    if request.method == 'POST':
+        if form.cancel.data:
+            return redirect(url_for('events.index'))
+        elif form.validate_on_submit():
+            username = form.username.data
+            password = form.password.data
+            name = form.name.data
+
+            user = User.query.filter_by(username=username).first()
+
+            if user:
+                flash('User already registered.', 'danger')
+                return redirect(url_for('auth.register'))
+            new_user = User(username = username, 
+                             password = generate_password_hash(password),
+                             name = name)
+
+            db.session.add(new_user)
+            db.session.commit()
+
+            return redirect(url_for('auth.login'))
+
+    return render_template('register_form.html', form=form, page_title='Signup')
+
+@auth.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('events.index'))

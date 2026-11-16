@@ -43,9 +43,24 @@
         </ul>
 
         <ul class="nav position-absolute end-0 me-2">
+            {% if not current_user.is_authenticated %}
             <li class="nav-item">
                 <a class="nav-link text-white" href="{{ url_for('auth.login') }}">Login</a>
             </li>
+            {% endif %}
+
+            {% if not current_user.is_authenticated %}
+            <li class="nav-item">
+                <a class="nav-link text-white" href="{{ url_for('auth.register') }}">Signup</a>
+            </li>
+            {% endif %}
+
+            {% if current_user.is_authenticated %}
+            <li class="nav-item">
+                <a class="nav-link text-white" href="{{ url_for('auth.logout') }}">Logout</a>
+            </li>
+            {% endif %}
+
             <li class="nav-item">
                 <a class="nav-link text-white" href="{{ url_for('events.preferences') }}">Preferences</a>
             </li>

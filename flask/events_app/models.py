@@ -1,3 +1,4 @@
+from flask_login import UserMixin
 from . import db
 
 class Event(db.Model):
@@ -6,7 +7,7 @@ class Event(db.Model):
     date = db.Column(db.Date, nullable=False)
     time = db.Column(db.Time, nullable=False)
 
-class User (db.Model):
+class User (UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(25), unique=True)
     password = db.Column(db.String(25))
