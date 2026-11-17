@@ -3,10 +3,12 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-
+from werkzeug.security import generate_password_hash
 from logging.handlers import RotatingFileHandler
-
 from .config import *
+
+USER_ROLE = "user"
+ADMIN_ROLE = "admin"
 
 db = SQLAlchemy()
 
@@ -48,7 +50,7 @@ def create_app(mode=None):
     db.init_app(app)
 
     Migrate(app, db)
-
+    
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
@@ -63,6 +65,5 @@ def create_app(mode=None):
     
     from .events import events_bp
     app.register_blueprint(events_bp)
-
 
     return app

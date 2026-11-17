@@ -1,9 +1,12 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+import click
 from .forms import LoginForm, RegisterForm, ProfileForm
-from .models import Event, User
+from .models import User
 from . import db
+from .models import User
+from . import USER_ROLE
 
 auth = Blueprint('auth', __name__)
 
@@ -43,9 +46,12 @@ def register():
             if user:
                 flash('User already registered.', 'danger')
                 return redirect(url_for('auth.register'))
+
+
             new_user = User(username = username, 
                              password = generate_password_hash(password),
-                             name = name)
+                             name = name,
+                             role = USER_ROLE)
 
             db.session.add(new_user)
             db.session.commit()
@@ -90,3 +96,22 @@ def profile():
 def logout():
     logout_user()
     return redirect(url_for('events.index'))
+
+def create_admin_user():
+    user = User.query.filter_by(username='admin').first()
+
+    if user:
+        click.echo('admin user already exists')
+    if not user:
+        click.echo('Creating admin user')              
+        new_user = User(username = 'admin', 
+            password = generate_password_hash('admin'),
+            name = 'admin',
+            role = USER_ROLE)
+
+        db.session.add(new_user)
+        db.session.commit()
+    
+@auth.cli.command('create')
+def create():
+    create_admin_user()

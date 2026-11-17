@@ -173,3 +173,10 @@ PRIVATE_REGISTRY_SERVER=localhost PRIVATE_REGISTRY_PORT=3000 PRIVATE_REPOSITORY=
  ```
 
 If that was so successful, then most likeley the upgrade was succesful!
+
+
+## Create admin user
+
+```sh
+FLASK_APP=events_app MESSAGE_BROKER_TYPE=none flask auth create
+```
