@@ -6,11 +6,28 @@ Monitoring gives us visibility into the health of our servers and services. A po
 
 ## Using Docker Compose to start Prometheus/Grafana
 
-On the deployment server, download and instlal the latest node exporter from https://github.com/prometheus/node_exporter.  By default, metrics are published at http://localhost:9100/metrics.
+On jenkins-server and deployment-server, download the latest node exporter from https://github.com/prometheus/node_exporter and run it.  By default, metrics are published at http://localhost:9100/metrics.
 
 ```sh
 ./node_exporter &
 ```
+
+Note that if port 9100 is blocked by the firewall, then Prometheus will not be able to scrape the metrics. RedHat Linux uses firewalld by default. To configure the firewall with firewalld, run:
+
+```sh
+firewall-cmd --add-port 9100/tcp --zone=public --permanent
+firewall-cmd --reload
+```
+
+See https://www.redhat.com/en/blog/firewalld-rules-and-scenarios for more information.
+
+Ubuntu uses ufw by default. To configure ufw:
+
+```sh
+sudo ufw allow 9100
+```
+
+See https://ubuntu.com/server/docs/how-to/security/firewalls/ for more information.
 
 The included Docker Compose file can be used to start Prometheus and Grafana on the KVM host. The volume-mounted prometheus.yml file is pre-configured to monitor the deployment server.
 
@@ -41,8 +58,65 @@ sudo virsh shutdown jenkins-server
 sudo virsh setmaxmem jenkins-server 8G --config
 sudo virsh setmem jenkins-server 8G --config
 sudo virsh start jenkins-server
- ```
+```
 
- After 3 builds, memory usage remains well within maximum values.
+After 3 builds, memory usage remains well within maximum values.
 
- <img src="images/jenkins_server_after.png" />
+<img src="images/jenkins_server_after.png" />
+
+## Using cAdvisor
+
+cAdvisor exposes container metrics. See https://prometheus.io/docs/guides/cadvisor/.
+
+First open ports. On RedHat:
+ 
+```sh
+firewall-cmd --add-port 3030/tcp --zone=public --permanent
+```
+
+On ubuntu:
+
+```sh
+sudo ufw allow 3030
+```
+
+Next, copy the docker-compose file to each server.
+
+```ah
+scp docker-compose.yaml admin@192.168.1.226:cAdvisor-docker-compose.yaml
+scp docker-compose.yaml admin@192.168.1.30:cAdvisor-docker-compose.yam
+```
+
+Run the docker-compose file on each server. Run it and see that the services are running and healthy:
+
+```sh
+admin@jenkins-server:~$ docker compose -f cAdvisor-docker-compose.yaml ps
+NAME       IMAGE                             COMMAND                  SERVICE    CREATED          STATUS                    PORTS
+cadvisor   gcr.io/cadvisor/cadvisor:latest   "/usr/bin/cadvisor -…"   cadvisor   38 seconds ago   Up 38 seconds (healthy)   0.0.0.0:3030->8080/tcp, [::]:3030->8080/tcp
+redis      redis:latest                      "docker-entrypoint.s…"   redis      39 seconds ago   Up 38 seconds             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
+```
+
+You can view contianer metrics at port 3030.
+
+```sh
+curl http://192.168.1.226:3030/containers/
+curl http://192.168.1.30:3030/containers/
+```
+
+If prometheus.yml needs to be reloaded, you can reload all the services.
+
+```sh
+docker compose restart
+```
+
+To view cAdvisor metrics in Grafana, I like to use the cAdvisor exporter dashboard, which is dashboard 21743. Initially the line graphs were fairly flat. To generate stress, I built a simple tool called `stresstool`, which is based on an issue I found when developing the event-consumer. Below is a screenshot with the stresstool container running on deployment-server.
+
+<img src="images/stresstool_before.png" />
+
+Once I stopped the container the CPU usage went down.
+
+<img src="images/stresstool_after.png" />
+
+The cAdvisor metrics for the jenkins-server showed that CPU and memory usage for the Jenkins container were well within the limits, even during a build.
+
+<img src="images/cadvisor_jenkins.png" />
