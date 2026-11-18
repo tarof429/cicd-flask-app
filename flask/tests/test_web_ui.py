@@ -1,7 +1,6 @@
 from events_app.models import Event, db
 from datetime import date, time
 from sqlalchemy import select
-from events_app.auth import create_admin_user
 
 def test_request_example(client):
     response = client.get("/")

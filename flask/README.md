@@ -40,19 +40,19 @@ This Flask application uses migrations to initialize the database. Tables are cr
 To initialize the database:
 
 ```sh
-flask db init
+FLASK_APP=events_app flask db init
 ```
 
 To create a migration:
 
 ```sh
-flask db migrate -m "Initial"
+FLASK_APP=events_app flask db migrate -m "Initial"
 ```
 
 Create the events table:
 
 ```sh
-flask db upgrade
+FLASK_APP=events_app flask db upgrade
 ```
 
 If the migration fails, an easy workaround is:
