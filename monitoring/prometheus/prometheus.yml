@@ -10,3 +10,7 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ['192.168.1.226:3030', '192.168.1.30:3030']
+  - job_name: registry
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['192.168.1.226:3001']

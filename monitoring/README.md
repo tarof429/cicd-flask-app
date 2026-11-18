@@ -72,6 +72,7 @@ First open ports. On RedHat:
  
 ```sh
 firewall-cmd --add-port 3030/tcp --zone=public --permanent
+firewall-cmd --reload
 ```
 
 On ubuntu:
@@ -120,3 +121,76 @@ Once I stopped the container the CPU usage went down.
 The cAdvisor metrics for the jenkins-server showed that CPU and memory usage for the Jenkins container were well within the limits, even during a build.
 
 <img src="images/cadvisor_jenkins.png" />
+
+## Monitoring docker registry
+
+Docker registry (also known as distribution) publishes metrics out of the box. Inside the latest docker image, I found the following configuration:
+
+```sh
+]$ docker exec -ti registry sh
+/ #
+/ # cat /etc/distribution/config.yml 
+version: 0.1
+log:
+  level: debug
+  fields:
+    service: registry
+    environment: development
+storage:
+    delete:
+      enabled: true
+    cache:
+        blobdescriptor: inmemory
+    filesystem:
+        rootdirectory: /var/lib/registry
+    tag:
+      concurrencylimit: 5
+http:
+    addr: :5000
+    debug:
+        addr: :5001
+        prometheus:
+            enabled: true
+            path: /metrics
+health:
+  storagedriver:
+    enabled: true
+    interval: 10s
+    threshold: 3
+```
+
+This means that all we have to do is change our original command from:
+
+```sh
+docker run -d -p 3000:5000 --name registry registry:3
+```
+
+to:
+
+```sh
+docker run -d \
+    -p 3000:5000 \
+    -p 3001:5001 \
+    -v registry:/var/lib/registry \
+    --name registry \
+    registry:3.1.2
+```
+
+Below are some metrics:
+
+```sh
+$ curl http://localhost:3001/metrics
+# HELP go_gc_duration_seconds A summary of the wall-time pause (stop-the-world) duration in garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 3.7932e-05
+go_gc_duration_seconds{quantile="0.25"} 3.7932e-05
+go_gc_duration_seconds{quantile="0.5"} 0.00022268
+go_gc_duration_seconds{quantile="0.75"} 0.00022268
+go_gc_duration_seconds{quantile="1"} 0.00022268
+go_gc_duration_seconds_sum 0.000260612
+go_gc_duration_seconds_count 2
+```
+
+Below is a screenshot of the registry dashboard (dashboard 9621) after pushing a few docker images to the registry.
+
+<img src="images/registry_dashboard.png" />

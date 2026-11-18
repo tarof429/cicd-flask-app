@@ -38,7 +38,12 @@ Let's go through an exercise where we start a private registry on the Rocky VM (
 On the CI/CD server, run:
 
 ```sh
-docker run -d -p 3000:5000 --name registry registry:3
+docker run -d \
+    -p 3000:5000 \
+    -p 3001:5001 \
+    -v registry:/var/lib/registry \
+    --name registry \
+    registry:3.1.2
 ```
 
 Next, build and tag the image.
