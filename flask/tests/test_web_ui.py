@@ -1,6 +1,7 @@
 from events_app.models import Event, db
 from datetime import date, time
 from sqlalchemy import select
+from events_app.auth import create_admin_user
 
 def test_request_example(client):
     response = client.get("/")
@@ -37,3 +38,22 @@ def test_add_and_update_event(app, client):
     response = client.get("/list_events")
     assert b'My Event' in response.data
     assert response.status_code == 200
+
+def test_login_as_admin(app, client):
+    with app.app_context():
+
+        response = client.post('/login', 
+            follow_redirects=True, 
+            data = {
+            'username': 'admin',
+            'password': 'admin'
+        })
+
+        assert b"Welcome to the Community Calendar" in response.data
+        assert response.status_code == 200
+        assert '/' in response.request.path
+
+        response = client.get('/logout', follow_redirects=True)
+
+        assert len(response.history) == 1
+        assert '/' in response.request.path

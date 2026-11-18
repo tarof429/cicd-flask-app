@@ -1,12 +1,11 @@
-import pytest, shutil
+import pytest
 
 from events_app import db, create_app
+from events_app.auth import create_admin_user
 
 @pytest.fixture
 def app():
     test_data_dir = 'tests/data'
-
-    # shutil.rmtree(test_data_dir, ignore_errors = True)
 
     app = create_app(mode='test')
 
@@ -14,11 +13,14 @@ def app():
         db.drop_all()
         db.create_all()
 
+        create_admin_user()
+
         yield app
 
         db.session.remove()
         db.drop_all()
 
-@pytest.fixture()
+@pytest.fixture
 def client(app):
     return app.test_client()
+

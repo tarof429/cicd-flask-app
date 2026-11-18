@@ -6,7 +6,7 @@ from .forms import LoginForm, RegisterForm, ProfileForm
 from .models import User
 from . import db
 from .models import User
-from . import USER_ROLE
+from . import USER_ROLE, ADMIN_ROLE
 
 auth = Blueprint('auth', __name__)
 
@@ -109,7 +109,7 @@ def create_admin_user():
         new_user = User(username = 'admin', 
             password = generate_password_hash('admin'),
             name = 'admin',
-            role = USER_ROLE)
+            role = ADMIN_ROLE)
 
         db.session.add(new_user)
         db.session.commit()

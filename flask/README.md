@@ -177,6 +177,8 @@ If that was so successful, then most likeley the upgrade was succesful!
 
 ## Create admin user
 
+The following command will create the *admin* user.
+
 ```sh
 FLASK_APP=events_app MESSAGE_BROKER_TYPE=none flask auth create
 ```
