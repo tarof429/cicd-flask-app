@@ -9,13 +9,13 @@ Docker can be used to containerize applications so that they can run in any kind
 To build the image:
 
 ```sh
-docker build -f docker/Dockerfile4 -t events-app .
+docker build -f docker/Dockerfile5 -t events-app .
 ```
 
 or build the image and tag it to push to the local docker registry:
 
 ```sh
-docker build -f docker/Dockerfile4 -t localhost:3000/events-app:latest .
+docker build -f docker/Dockerfile5 -t localhost:3000/events-app:latest .
 ```
 
 To push the image to a local docker registry:

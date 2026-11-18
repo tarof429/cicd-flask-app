@@ -373,3 +373,6 @@ DB_PORT=dummy
 DB_NAME=dummy
 ```
 
+## Create admin user
+
+The script *Jenkinsfile-21* uses *Dockerfile5* to build the docker image. This doccker file uses entrypoint2.sh to create the admin user. 
