@@ -2,6 +2,7 @@ services:
   app:
     image: events-app:latest
     environment:
+      - ADMIN_PASS=${ADMIN_PASS:-secret}
       - FLASK_APP=events_app
       - FLASK_DEBUG=False
       - RUNTIME_MODE=${RUNTIME_MODE:-dev}

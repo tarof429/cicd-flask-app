@@ -99,7 +99,9 @@ def logout():
     logout_user()
     return redirect(url_for('events.index'))
 
-def create_admin_user():
+@auth.cli.command('create')
+@click.password_option('--pswd', default='admin', help='Password for admin users')
+def create_admin_user(pswd = 'admin'):
     user = User.query.filter_by(username='admin').first()
 
     if user:
@@ -107,13 +109,9 @@ def create_admin_user():
     if not user:
         click.echo('Creating admin user')              
         new_user = User(username = 'admin', 
-            password = generate_password_hash('admin'),
+            password = generate_password_hash(pswd),
             name = 'admin',
             role = ADMIN_ROLE)
 
         db.session.add(new_user)
         db.session.commit()
-    
-@auth.cli.command('create')
-def create():
-    create_admin_user()

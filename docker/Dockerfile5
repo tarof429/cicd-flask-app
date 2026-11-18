@@ -2,7 +2,8 @@ FROM python:3.11-alpine
 
 ENV FLASK_APP=events_app \
     FLASK_DEBUG=True \
-    RUNTIME_MODE=dev
+    RUNTIME_MODE=dev \
+    ADMIN_PASS=admin
 
 WORKDIR /app
 

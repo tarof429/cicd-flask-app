@@ -84,13 +84,13 @@ rm instance/events.db
  5. Create a migration.
 
  ```sh
- FLASK_APP=events_app flask db migrate -m "Add user model"
+FLASK_APP=events_app flask db migrate -m "Add user model"
 ```
 
 6. Upgrade the database.
 
 ```sh
- FLASK_APP=events_app flask db upgrade
+FLASK_APP=events_app flask db upgrade
 ```
 
 ## Usage
@@ -177,8 +177,14 @@ If that was so successful, then most likeley the upgrade was succesful!
 
 ## Create admin user
 
-The following command will create the *admin* user.
+The following command will create the *admin* user with the defalt password and is interactive.
 
 ```sh
 FLASK_APP=events_app MESSAGE_BROKER_TYPE=none flask auth create
+```
+
+The following command will create the *admin* user with a non-default password.
+
+```sh
+FLASK_APP=events_app MESSAGE_BROKER_TYPE=none flask auth create --pswd admin
 ```
