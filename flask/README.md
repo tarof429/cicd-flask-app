@@ -186,5 +186,5 @@ FLASK_APP=events_app MESSAGE_BROKER_TYPE=none flask auth create
 The following command will create the *admin* user with a non-default password.
 
 ```sh
-FLASK_APP=events_app MESSAGE_BROKER_TYPE=none flask auth create --pswd admin
+FLASK_APP=events_app MESSAGE_BROKER_TYPE=none flask auth create --pswd secret
 ```
