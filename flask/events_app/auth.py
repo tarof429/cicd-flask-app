@@ -67,17 +67,24 @@ def register():
 def profile():
     form = ProfileForm()
 
-
     if request.method == 'GET':
         form.username.data = current_user.username
         form.name.data = current_user.name
-        form.newPassword.data = 'foobar'
     elif request.method == 'POST':
         if form.cancel.data:
             return redirect(url_for('events.index'))
         
         if form.validate_on_submit():
-            current_user.name = form.name.data
+            current_user.name = form.name.data.strip()
+        
+            rules = [
+               form.newPassword.data.strip() != '',
+               form.newPasswordAgain.data.strip() != '',
+               form.newPassword.data.strip() == form.newPasswordAgain.data.strip()
+            ]
+
+            if all(rules):
+                current_user.password = generate_password_hash(form.newPassword.data.strip())
             
             try:
                 db.session.commit()
@@ -90,15 +97,6 @@ def profile():
             return redirect(url_for('auth.profile'))
 
     return render_template('profile_form.html', form=form, page_title='Profile')
-
-    #             if form.newPassword and form.newPasswordAgain:
-    #                 newPassword = form.newPassword.data
-    #                 newPasswordAgain = form.newPasswordAgain.data
-    #                 if newPassword != newPasswordAgain:
-    #                     flash('Passwords do not match', 'warning')
-    #                     return redirect(url_for('auth.profile'))
-    #                 else:
-    #                     user.password = generate_password_hash(newPassword)
 
 @auth.route('/logout')
 @login_required
