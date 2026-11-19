@@ -114,6 +114,9 @@ A successful run is shown below.
 
 The *Jenkinsfile-3* script takes the previous script one step further and uses the docker pipeline plugin (which needs to be installed) to build and push the docker image. This plugin can help abstract some of the details of interacting with docker.
 
+> [!NOTE]
+> If you want to checkout (clone) the git repository using SSH, upload your public certificate to github and use git@github.com:tarof429/cicd-flask-app.git the URL. Otherwise, if you want to use https://github.com/tarof429/cicd-flask-app.git, then you must use a PAT. I find it easier to use SSH.
+
 ## Jenkinsfile with test stage
 
 The *Jenkinsfile-4* script adds the test stage. Initially, the pipeline failed to run correctly. This is because our docker compose file expected COMMIT_HASH for the image tag, but our Jenkinsfile computes the tag as an aggregation of the commit hash plus the build number. Hence we make a new version of the docker compose file to align with our goals. Also we publish the test results to Jenkins. If we fix a broken test then we will see the trend directly in Jenkins.
