@@ -354,6 +354,22 @@ admin@web-server:~/cicd-flask-app/bash$ docker info | grep Root
  Docker Root Dir: /data/docker
 ```
 
+## Managing private docker registry.
+
+Below is a command that can be run to view all images in the registry.
+
+```sh
+curl http://localhost:3000/v2/_catalog
+{"repositories":["events-app","hello-world","postgres","rabbitmq"]}
+```
+
+Below is a command that shows all the tags in the registry.
+
+```sh
+curl http://localhost:3000/v2/postgres/tags/list
+{"name":"postgres","tags":["14.24-alpine3.23"]}
+```
+
 ## References
 
 https://hub.docker.com/_/registry
