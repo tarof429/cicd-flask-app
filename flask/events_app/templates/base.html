@@ -26,6 +26,13 @@
             padding-left: 10px;
             padding-right: 10px;
         }
+        .navbar-brand {
+            padding-bottom: 0;
+        }
+
+        .navbar-nav .nav-link {
+            padding-bottom: 0;
+        }
     </style>
 
 </head>
@@ -45,6 +52,7 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav ml-auto">
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="authDropdown" 
                             role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -69,8 +77,6 @@
                 </ul>
             </div>
         </nav>
-    </header>
-
     </header>
     {% set messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
