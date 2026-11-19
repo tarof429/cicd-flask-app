@@ -15,8 +15,8 @@ def login():
     form = LoginForm()
 
     if request.method == 'POST' and form.validate_on_submit():
-        username = form.username.data
-        password = form.password.data
+        username = form.username.data.strip()
+        password = form.password.data.strip()
 
         user = User.query.filter_by(username=username).first()
 
@@ -37,16 +37,15 @@ def register():
         if form.cancel.data:
             return redirect(url_for('events.index'))
         elif form.validate_on_submit():
-            username = form.username.data
-            password = form.password.data
-            name = form.name.data
+            username = form.username.data.strip()
+            password = form.password.data.strip()
+            name = form.name.data.strip()
 
             user = User.query.filter_by(username=username).first()
 
             if user:
                 flash('User already registered.', 'danger')
                 return redirect(url_for('auth.register'))
-
 
             new_user = User(username = username, 
                              password = generate_password_hash(password),
@@ -55,9 +54,7 @@ def register():
 
             db.session.add(new_user)
             db.session.commit()
-
             flash('Successfully registered.', 'success')
-
             return redirect(url_for('auth.login'))
 
     return render_template('register_form.html', form=form, page_title='Signup')
