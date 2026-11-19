@@ -73,7 +73,9 @@ def test_test_admin_change_name(app, client):
             follow_redirects=True,
             data = {
                 'username': 'admin',
-                'name': 'tester'
+                'name': 'tester',
+                'newPassword': 'secret',
+                'newPasswordAgain': 'secret'
             }
         )
 
