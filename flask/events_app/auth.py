@@ -103,20 +103,28 @@ def logout():
 
 @auth.cli.command('create')
 @click.password_option('--pswd', default='admin', help='Password for admin users')
-def create_admin_user(pswd = 'admin'):
-    create(pswd)
+@click.option('--force', default='false', is_flag=True, help='Force change')
+def create_admin_user(pswd = 'admin', force = False):
+    create(pswd, force)
 
-def create(pswd = 'admin'):
+def create(pswd = 'admin', force = False):
     user = User.query.filter_by(username='admin').first()
 
     if user:
-        click.echo('admin user already exists')
-    if not user:
-        click.echo('Creating admin user')              
+        if not force:
+            click.echo('admin user already exists')
+            return
+        else:
+            click.echo('Updating admin user')
+            user.password = generate_password_hash(pswd)
+            db.session.commit()
+    else:
+        click.echo('Creating admin user')
         new_user = User(username = 'admin', 
             password = generate_password_hash(pswd),
             name = 'admin',
             role = ADMIN_ROLE)
-
         db.session.add(new_user)
         db.session.commit()
+
+        
