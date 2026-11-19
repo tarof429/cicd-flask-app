@@ -85,7 +85,7 @@ def profile():
                 if newPassword != newPasswordAgain:
                     flash('Passwords do not match', 'warning')
                 else:
-                    user.password = newPassword
+                    user.password = generate_password_hash(newPassword)
                     user.name = name
                     db.session.commit()
 
