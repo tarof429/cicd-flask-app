@@ -1,11 +1,10 @@
 import pytest
 
 from events_app import db, create_app
-from events_app.auth import create_admin_user
+from events_app.auth import create
 
 @pytest.fixture
 def app():
-    test_data_dir = 'tests/data'
 
     app = create_app(mode='test')
 
@@ -13,7 +12,7 @@ def app():
         db.drop_all()
         db.create_all()
 
-        create_admin_user()
+        create()
 
         yield app
 

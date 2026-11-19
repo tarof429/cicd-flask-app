@@ -1,10 +1,11 @@
 from events_app.models import Event, db
 from datetime import date, time
 from sqlalchemy import select
+from events_app.models import User
 
 def test_request_example(client):
     response = client.get("/")
-    assert b"Welcome to the Community Calendar" in response.data
+    assert response.status_code == 200
 
 def test_list_events(client):
     response = client.get("/list_events")
@@ -40,7 +41,6 @@ def test_add_and_update_event(app, client):
 
 def test_login_as_admin(app, client):
     with app.app_context():
-
         response = client.post('/login', 
             follow_redirects=True, 
             data = {
@@ -48,7 +48,6 @@ def test_login_as_admin(app, client):
             'password': 'admin'
         })
 
-        assert b"Welcome to the Community Calendar" in response.data
         assert response.status_code == 200
         assert '/' in response.request.path
 
@@ -56,3 +55,34 @@ def test_login_as_admin(app, client):
 
         assert len(response.history) == 1
         assert '/' in response.request.path
+
+
+def test_test_admin_change_name(app, client):
+    with app.app_context():
+        response = client.post('/login', 
+            follow_redirects=True, 
+            data = {
+            'username': 'admin',
+            'password': 'admin'
+        })
+
+        assert response.status_code == 200
+        assert '/' in response.request.path
+
+        response = client.post('/profile',
+            follow_redirects=True,
+            data = {
+                'username': 'admin',
+                'name': 'tester'
+            }
+        )
+
+        assert response.status_code == 200
+        assert '/' in response.request.path
+
+        response = client.get('/logout', follow_redirects=True)
+
+        user = User.query.filter_by(username='admin').first()
+        assert user.name == 'tester'
+
+

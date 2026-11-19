@@ -67,37 +67,38 @@ def register():
 def profile():
     form = ProfileForm()
 
-    form.username.data = current_user.username
-    form.name.data = current_user.name
 
-    if request.method == 'POST':
+    if request.method == 'GET':
+        form.username.data = current_user.username
+        form.name.data = current_user.name
+        form.newPassword.data = 'foobar'
+    elif request.method == 'POST':
         if form.cancel.data:
             return redirect(url_for('events.index'))
-        elif form.validate_on_submit():
-            username = form.username.data
-            newPassword = form.newPassword.data
-            newPasswordAgain = form.newPasswordAgain.data
-            name = form.name.data
+        
+        if form.validate_on_submit():
+            current_user.name = form.name.data
+            
+            try:
+                db.session.commit()
+                flash('Profile updated.', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash('An unhandled exception hevents_bpened when updating profile', 'danger')
+                flash(str(e), 'danger')
 
-            user = User.query.filter_by(username=username).first()
-
-            if user:
-                if newPassword != newPasswordAgain:
-                    flash('Passwords do not match', 'warning')
-                else:
-                    try:
-                        user.password = generate_password_hash(newPassword)
-                        user.name = name
-                        db.session.commit()
-                    except Exception as e:
-                        db.session.rollback()
-                        flash('An unhandled exception hevents_bpened when updating profile', 'danger')
-                        flash(str(e), 'danger')
-                        return redirect(url_for('auth.profile'))
-
-                    flash('Profile updated.', 'success')
+            return redirect(url_for('auth.profile'))
 
     return render_template('profile_form.html', form=form, page_title='Profile')
+
+    #             if form.newPassword and form.newPasswordAgain:
+    #                 newPassword = form.newPassword.data
+    #                 newPasswordAgain = form.newPasswordAgain.data
+    #                 if newPassword != newPasswordAgain:
+    #                     flash('Passwords do not match', 'warning')
+    #                     return redirect(url_for('auth.profile'))
+    #                 else:
+    #                     user.password = generate_password_hash(newPassword)
 
 @auth.route('/logout')
 @login_required
@@ -108,6 +109,9 @@ def logout():
 @auth.cli.command('create')
 @click.password_option('--pswd', default='admin', help='Password for admin users')
 def create_admin_user(pswd = 'admin'):
+    create(pswd)
+
+def create(pswd = 'admin'):
     user = User.query.filter_by(username='admin').first()
 
     if user:
