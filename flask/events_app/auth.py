@@ -85,9 +85,15 @@ def profile():
                 if newPassword != newPasswordAgain:
                     flash('Passwords do not match', 'warning')
                 else:
-                    user.password = generate_password_hash(newPassword)
-                    user.name = name
-                    db.session.commit()
+                    try:
+                        user.password = generate_password_hash(newPassword)
+                        user.name = name
+                        db.session.commit()
+                    except Exception as e:
+                        db.session.rollback()
+                        flash('An unhandled exception hevents_bpened when updating profile', 'danger')
+                        flash(str(e), 'danger')
+                        return redirect(url_for('auth.profile'))
 
                     flash('Profile updated.', 'success')
 
