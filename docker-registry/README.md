@@ -38,7 +38,12 @@ Let's go through an exercise where we start a private registry on the Rocky VM (
 On the CI/CD server, run:
 
 ```sh
-docker run -d -p 3000:5000 --name registry registry:3
+docker run -d \
+    -p 3000:5000 \
+    -p 3001:5001 \
+    -v registry:/var/lib/registry \
+    --name registry \
+    registry:3.1.2
 ```
 
 Next, build and tag the image.
@@ -347,6 +352,22 @@ There is a docker command that can also show docker storage information. Normall
 ```sh
 admin@web-server:~/cicd-flask-app/bash$ docker info | grep Root
  Docker Root Dir: /data/docker
+```
+
+## Managing private docker registry.
+
+Below is a command that can be run to view all images in the registry.
+
+```sh
+curl http://localhost:3000/v2/_catalog
+{"repositories":["events-app","hello-world","postgres","rabbitmq"]}
+```
+
+Below is a command that shows all the tags in the registry.
+
+```sh
+curl http://localhost:3000/v2/postgres/tags/list
+{"name":"postgres","tags":["14.24-alpine3.23"]}
 ```
 
 ## References
