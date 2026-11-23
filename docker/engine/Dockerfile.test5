@@ -14,7 +14,7 @@ EXPOSE 5000
 
 COPY flask .
 
-COPY docker/engine/entrypoint_test3.sh ./entrypoint.sh
+COPY entrypoint_test3.sh ./entrypoint.sh
 RUN chmod +x entrypoint.sh
 
 ENTRYPOINT ["./entrypoint.sh"]
