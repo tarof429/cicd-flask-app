@@ -4,6 +4,8 @@
 
 Monitoring gives us visibility into the health of our servers and services. A popular technology stack used for monitoring includes Prometheus, Grafana, and Node Exporter.
 
+This directory contains configuration to monitor servers and services running on KVM.
+
 ## Using Docker Compose to start Prometheus/Grafana
 
 On jenkins-server and deployment-server, download the latest node exporter from https://github.com/prometheus/node_exporter and run it.  By default, metrics are published at http://localhost:9100/metrics.
@@ -196,3 +198,53 @@ go_gc_duration_seconds_count 2
 Below is a screenshot of the registry dashboard (dashboard 9621) after pushing a few docker images to the registry.
 
 <img src="images/registry_dashboard.png" />
+
+## Alertmanager
+
+Alertmanager is a service that fires alerts based on rules. In this example, the alertmanager serviece sends email notifications to mailpit if an alert rule criteria is met. 
+
+To validate the rules, run:
+
+```sh
+$ docker compose exec alertmanager amtool check-config /etc/alertmanager/alertmanager.yml
+Checking '/etc/alertmanager/alertmanager.yml'  SUCCESS
+Found:
+ - global config
+ - route
+ - 1 inhibit rules
+ - 1 receivers
+ - 0 templates
+ ```
+
+ Initially I started getting email notification because I hadn't started the node exporters on each node. But after fixing that, I still got alerts for each *job* defined in prometheus.yml.
+
+ <img src="alertmanager1.png" />
+
+ One alert I really liked was for the registry.
+
+ <img src="alertmanager2.png" />
+
+ After I started the registry I got an email that stated all alerts had been resolved.
+
+ <img src="alertmanager3.png" />
+
+After starting the stresstool on deployment-server, I expected to get an email notification. However I did not receive an alert. The following promql showed the average CPU usage per instance.
+
+```sh
+100 - (avg by(instance) (
+  rate(node_cpu_seconds_total{mode="idle"}[5m])
+) * 100)
+{instance="192.168.1.226:9100"}	0.967543859649183
+{instance="192.168.1.30:9100"}	56.68245614035091
+```
+
+On the other hand, this query returned some useful data:
+
+```sh
+100 - (rate(node_cpu_seconds_total{mode="idle"}[5m]) * 100) > 60
+{cpu="1", instance="192.168.1.30:9100", job="servers", mode="idle"}	70.26666666666674
+```
+
+After adjusting the rule, I was able to get an alert for high CPU usage per core.
+
+<img src="alertmanager4.png" />

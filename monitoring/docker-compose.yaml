@@ -9,6 +9,22 @@ services:
       - --config.file=/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    restart: unless-stopped
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager-data:/alertmanager
+    ports:
+      - 9093:9093
+  mailpit:
+    image: axllent/mailpit:v1.34
+    restart: unless-stopped
+    ports:
+      - 8025:8025
+      - 1025:1025
+    volumes:
+      - "mailpit-data:/data"
   grafana:
     image: grafana/grafana:13.2
     restart: unless-stopped
@@ -19,3 +35,5 @@ services:
 volumes:
   grafana:
   promdata:
+  alertmanager-data:
+  mailpit-data:

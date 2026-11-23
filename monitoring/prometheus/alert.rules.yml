@@ -1,0 +1,27 @@
+groups:
+  - name: Alert Rule Group
+    rules:
+    - alert: InstanceDown
+      expr: up == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Instance {{ $labels.instance }} down"
+        description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."
+    - alert: HighCPUUsageAvg
+      expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 60
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU usage (average) detected"
+        description: "Instance {{ $labels.instance }} has CPU average usage above 80% for more than 5 minutes."
+    - alert: HighCPUUsageCore
+      expr: 100 - (rate(node_cpu_seconds_total{mode="idle"}[5m]) * 100) > 60
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU usage (core) detected"
+        description: "Instance {{ $labels.instance }} has CPU core usage above 80% for more than 5 minutes."
