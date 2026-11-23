@@ -129,7 +129,7 @@ pipeline {
                         "IMAGE_NAME=${eventAppPrivateImageName}", 
                     ]) {
                             def buildResult = sh(returnStatus: true, 
-                                script: 'docker build -t  "${IMAGE_NAME}:${IMAGE_TAG}" -f docker/engine/Dockerfile.test4 .')
+                                script: 'docker build -t  "${IMAGE_NAME}:${IMAGE_TAG}" -f docker/engine/Dockerfile.test5 .')
                             if (buildResult != 0) {
                                 error("Docker build failed")
                             }                            
