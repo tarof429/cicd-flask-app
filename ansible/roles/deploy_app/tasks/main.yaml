@@ -1,7 +1,3 @@
-# - name: Ping
-#   debug:
-#     msg: Pong!
-
 - name: Login to docker registry
   community.docker.docker_login:
     username: "{{ docker_user }}"
@@ -11,6 +7,7 @@
   template:
     src: docker-compose.yaml.j2
     dest: docker-compose.yaml
+    mode: '0600'
 
 - name: Run docker compose file
   shell: IMAGE_TAG="{{ IMAGE_TAG }}" docker compose up -d --force-recreate app eventconsumer
