@@ -122,6 +122,8 @@ The cAdvisor metrics for the jenkins-server showed that CPU and memory usage for
 
 <img src="images/cadvisor_jenkins.png" />
 
+Be aware that cAdvisor needs access to the root filesystem of the host filesystem. The docker-compose file mounts */* as read-only. It's strongly advised not to change this, and to only run cAdvisor on VMs, not the host system.
+
 ## Monitoring docker registry
 
 Docker registry (also known as distribution) publishes metrics out of the box. Inside the latest docker image, I found the following configuration:
