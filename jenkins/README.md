@@ -86,7 +86,7 @@ One of the advantages of using docker compose to start the jenkins service with 
 
 ## Initial pipeline
 
-After logging into Jenkins, we should create a simple pipeline to test that we can pull Docker images. The *Jenkinsfile-1* script does just that. An important element is the *script* block. Essentially, it allows us to execute arbitary Groovy code (such as defining variables) within a pipeline.
+After logging into Jenkins, we should create a simple pipeline to test that we can pull Docker images. The *archives/Jenkinsfile-1* script does just that. An important element is the *script* block. Essentially, it allows us to execute arbitary Groovy code (such as defining variables) within a pipeline.
 
 To use this pipeline, in Jenkins navigate to New Item | Pipeline, create a pipeline job, and paste in this script.
 
@@ -100,9 +100,9 @@ After running the pipeline successfully, go to Build | Pipeline overview. This s
 
 I think it's best to read the official docs at https://www.jenkins.io/doc/book/pipeline/ instead of trying to repeat what's alredy been said.
 
-## Jenkinsfile with build stage
+## archives/Jenkinsfile with build stage
 
-The *Jenkinsfile-2* script defines several stages that we indicated earlier in *pipeline.sh*. In this script, only the *build* stage is defined; we'll continue to flesh out more stages in subsequent scripts. 
+The *archives/Jenkinsfile-2* script defines several stages that we indicated earlier in *pipeline.sh*. In this script, only the *build* stage is defined; we'll continue to flesh out more stages in subsequent scripts. 
 
 Environment variables defined at the top are globally available to the script. An alternative syntax syntax is to prefix the variable with *env.*. 
 
@@ -112,14 +112,14 @@ A successful run is shown below.
 
 <img src="images/successful_build_stage.png" />
 
-The *Jenkinsfile-3* script takes the previous script one step further and uses the docker pipeline plugin (which needs to be installed) to build and push the docker image. This plugin can help abstract some of the details of interacting with docker.
+The *archives/Jenkinsfile-3* script takes the previous script one step further and uses the docker pipeline plugin (which needs to be installed) to build and push the docker image. This plugin can help abstract some of the details of interacting with docker.
 
 > [!NOTE]
 > If you want to checkout (clone) the git repository using SSH, upload your public certificate to github and use git@github.com:tarof429/cicd-flask-app.git the URL. Otherwise, if you want to use https://github.com/tarof429/cicd-flask-app.git, then you must use a PAT. I find it easier to use SSH.
 
-## Jenkinsfile with test stage
+## archives/Jenkinsfile with test stage
 
-The *Jenkinsfile-4* script adds the test stage. Initially, the pipeline failed to run correctly. This is because our docker compose file expected COMMIT_HASH for the image tag, but our Jenkinsfile computes the tag as an aggregation of the commit hash plus the build number. Hence we make a new version of the docker compose file to align with our goals. Also we publish the test results to Jenkins. If we fix a broken test then we will see the trend directly in Jenkins.
+The *archives/Jenkinsfile-4* script adds the test stage. Initially, the pipeline failed to run correctly. This is because our docker compose file expected COMMIT_HASH for the image tag, but our archives/Jenkinsfile computes the tag as an aggregation of the commit hash plus the build number. Hence we make a new version of the docker compose file to align with our goals. Also we publish the test results to Jenkins. If we fix a broken test then we will see the trend directly in Jenkins.
 
 <img src="images/jenkins_test_trend.png" />
 
@@ -127,13 +127,13 @@ Although pytest can generate HTML reports, I think it's better to generate XML r
 
 I had difficulty putting theory into practice. This is because both Jenkins *and* the tests are running as separate containers, so the problem was how to pass the test results, which are files, back to a location where Jenkins could find them. My solution was to store them in a docker volume called *test-reports*. When the tests are done, the pipeline uses a temporary container to copy those files back to the Jenkins container. Due to the complexity of this logic, I ended up writing *pipeline2.sh* which mirrors the Jenkins pipeline more closely and allowed me to troubleshoot issues found during development. Consuquently, I believe bash scripts are an excellent way to troubleshoot pipeline issues. 
 
-## Jenkinsfile with the publish stage
+## archives/Jenkinsfile with the publish stage
 
-The *Jenkinsfile-5* script adds the publish stage. We wrap the *push* in *withRegistry* block. This allows us to authenticate to Dockerhub using credentials stored in Jenkins. We also push the image using the *latest* tag to make it easy to grab the latest stable image.
+The *archives/Jenkinsfile-5* script adds the publish stage. We wrap the *push* in *withRegistry* block. This allows us to authenticate to Dockerhub using credentials stored in Jenkins. We also push the image using the *latest* tag to make it easy to grab the latest stable image.
 
-## Jenkinsfile with the deploy stage
+## archives/Jenkinsfile with the deploy stage
 
-The *Jenkinsfile-6* script adds the deploy stage. I use the Jenkins SSH Agent plugin to copy files to the deployment server and run the deploy script. A few minor fixes were made to get this pipeline to work:
+The *archives/Jenkinsfile-6* script adds the deploy stage. I use the Jenkins SSH Agent plugin to copy files to the deployment server and run the deploy script. A few minor fixes were made to get this pipeline to work:
 
 - The psycopg2-binary Python library was added to requirements.txt
 - A new deploy2.sh which uses IMAGE_TAG was added
@@ -212,7 +212,7 @@ jenkins@cd939294be64:/$ which trivy
 /usr/local/bin/trivy
 ```
 
-Run the build with *Jenkinsfile-7*. The scan works!
+Run the build with *archives/Jenkinsfile-7*. The scan works!
 
 ```sh
 [Pipeline] }
@@ -233,13 +233,13 @@ The pipeline script has been updated to move the trivy results to a file under t
 
 ## Removing old images
 
-The *Jenkinsfile-8* script uses *at* to schedule removal old docker images. This helps to reduce disk usage on the deployment server. Why use *at*? Initially, I planned to run this command before the new image was brought up. Now it's a bit of legacy logic. Still, I find it interesting that cleanup tasks can be scheduled asynchronously, so the code is left as is.
+The *archives/Jenkinsfile-8* script uses *at* to schedule removal old docker images. This helps to reduce disk usage on the deployment server. Why use *at*? Initially, I planned to run this command before the new image was brought up. Now it's a bit of legacy logic. Still, I find it interesting that cleanup tasks can be scheduled asynchronously, so the code is left as is.
 
-*Jenkinsfile-9* extends the image cleanup to the webserver (the where Jenkins is running). Since we're inside the container we just delete the images immediately without scheduling.
+*archives/Jenkinsfile-9* extends the image cleanup to the webserver (the where Jenkins is running). Since we're inside the container we just delete the images immediately without scheduling.
 
 ## Conditional branch builds
 
-The *Jenkinsfile-10* script introduces the idea of conditional stages. 
+The *archives/Jenkinsfile-10* script introduces the idea of conditional stages. 
 
 Now that the pipeline runs correctly in KVM, we can explore how it works in Digital Ocean. But to be safe and prevent accidental deployment, we work in a development branch. Even if changes are pushed to github, we'll skip the last two stages, *Publish* and *Deploy*, if the pipeline job is configured to only poll for the main branch. We can remove the condition once we are comfortable. 
 
@@ -254,11 +254,11 @@ DO           feature/do  No
 
 ## [Digital Ocean pipeline](#digital_ocean_pipeline)
 
-The *Jenkinsfile-do-1* script is our first attempt to support Digital Ocean. An unexpected issue occurred when first running this pipeline: the build failed due to a missing current_image_tag.txt file. This is the reason why try...catch blocks were introdcued.
+The *archives/Jenkinsfile-do-1* script is our first attempt to support Digital Ocean. An unexpected issue occurred when first running this pipeline: the build failed due to a missing current_image_tag.txt file. This is the reason why try...catch blocks were introdcued.
 
 On further thought, I felt that having separate scripts for diferent cloud environments was not ideal and that ths could probably could be improved.
 
-The *Jenkinsfile-11* script is a simple fix that relies on parameters set in the Jenkins job. This solution depends on parameters defined in Jenkins itself, not in the pipeline script. As a reminder, I have added the appropriate values in the script as comments.
+The *archives/Jenkinsfile-11* script is a simple fix that relies on parameters set in the Jenkins job. This solution depends on parameters defined in Jenkins itself, not in the pipeline script. As a reminder, I have added the appropriate values in the script as comments.
 
 ```groovy
     environment {
@@ -294,31 +294,31 @@ I think that, in addition, also limit who has access to each Jenkins server. Dev
 
 ## Correction regarding conditional stages
 
-The script *Jenkinsfile-11* has been corrected to check for env.GIT_BRANCH. This means that Jenkins running in KVM will deploy to production while the Droplet will not. 
+The script *archives/Jenkinsfile-11* has been corrected to check for env.GIT_BRANCH. This means that Jenkins running in KVM will deploy to production while the Droplet will not. 
 
-On further thought, I find that the conditional stage for the git branch is making the build confusing. *Jenkinsfile-12* removes the condition. Also, temporarily we disable the build on the KVM Jenkins and only focus on Digital Ocean Jenkins so that we can deploy docker images to dockerhub.
+On further thought, I find that the conditional stage for the git branch is making the build confusing. *archives/Jenkinsfile-12* removes the condition. Also, temporarily we disable the build on the KVM Jenkins and only focus on Digital Ocean Jenkins so that we can deploy docker images to dockerhub.
 
 ## Digital Ocean deployment with managed database
 
-The script *Jenkinsfile-13* introduces the CLOUD_PROVIDER parameter to set values for our variables. We need to create the parameter through the Jenkins job since it is not provided by the script.
+The script *archives/Jenkinsfile-13* introduces the CLOUD_PROVIDER parameter to set values for our variables. We need to create the parameter through the Jenkins job since it is not provided by the script.
 
 ## Adjusting for new credentials
 
-The script *Jenkinsfile-14* uses the updated cicd-server-key credential that is populated by the cicd-server-key Ansible role. Previous playbooks used the deployment-server-key credential even though it actually contained the private key of the CI/CD server. 
+The script *archives/Jenkinsfile-14* uses the updated cicd-server-key credential that is populated by the cicd-server-key Ansible role. Previous playbooks used the deployment-server-key credential even though it actually contained the private key of the CI/CD server. 
 
 <img src="images/cloud_provider.png" />
 
 ## Adding support for RabbitMQ
 
-The script *Jenkinsfile-15* uses an updated docker compose file that includes RabbitMQ as a service. Tests have also been expanded to include RabbitMQ integration.
+The script *archives/Jenkinsfile-15* uses an updated docker compose file that includes RabbitMQ as a service. Tests have also been expanded to include RabbitMQ integration.
 
 ## Adding support for event-consumer
 
-The script *Jenkinsfile-16* add support for the event-consumer, a service that consumes RabbitMQ messages. Email is sent to the mailpit service.
+The script *archives/Jenkinsfile-16* add support for the event-consumer, a service that consumes RabbitMQ messages. Email is sent to the mailpit service.
 
 # Use a file credential secret
 
-The script *Jenkinsfile-17* uses a file credential secret set environment variables. Secrets such as usernames, IPs and the like are injected during build time and are no longer baked into the script. 
+The script *archives/Jenkinsfile-17* uses a file credential secret set environment variables. Secrets such as usernames, IPs and the like are injected during build time and are no longer baked into the script. 
 
 The format of this file (which I call cicd-credentials-kvm.sh) looks like this:
 
@@ -345,15 +345,15 @@ Incidentally, it is invalid to change the value of DB_PORT because PostgresSQL i
 
 ## Centralize file secret extraction
 
-The script *Jenkinsfile-18* goes one step further and sets all the variables in the file credential secret to global groovy variables. This simplifies the code per stage. Furthermore, we copy this file secret to a temporary file on the remote server and pass it to docker compose during the deploy stage.
+The script *archives/Jenkinsfile-18* goes one step further and sets all the variables in the file credential secret to global groovy variables. This simplifies the code per stage. Furthermore, we copy this file secret to a temporary file on the remote server and pass it to docker compose during the deploy stage.
 
 ## Use the new blueprint
 
-The script *Jenkinsfile-19* integrates with changes needed to enable blueprint.
+The script *archives/Jenkinsfile-19* integrates with changes needed to enable blueprint.
 
 ## Deploy to DigitalOcean using Ansible
 
-The script *Jenkinsfile-20* uses Ansible to deploy the app to DigitalOcean. 
+The script *archives/Jenkinsfile-20* uses Ansible to deploy the app to DigitalOcean. 
 
 Create a text file called *cicd-credentials-do.sh* with the following content and upload to Jenkins, overwriting the existing *cicd-credentials* secret (which should be used to deploy the app to KVM). See [here](../../ansible/README.md#deploy_app_using_ansible) for more information.
 
@@ -378,7 +378,7 @@ DB_NAME=dummy
 
 ## Create admin user
 
-The script *Jenkinsfile-21* uses *Dockerfile5* to build the docker image. This doccker file uses entrypoint2.sh to create the admin user. 
+The script *archives/Jenkinsfile-21* uses *Dockerfile5* to build the docker image. This doccker file uses entrypoint2.sh to create the admin user. 
 
 ## Update docker directory
 
