@@ -128,24 +128,22 @@ pipeline {
                     withEnv([
                         "IMAGE_NAME=${eventAppPrivateImageName}", 
                     ]) {
-                            dir('docker/engine') {
-                                def buildResult = sh(returnStatus: true, 
-                                    script: 'docker build -t  "${IMAGE_NAME}:${IMAGE_TAG}" -f Dockerfile.test5 .')
-                                if (buildResult != 0) {
-                                    error("Docker build failed")
-                                }                            
-                                
-                                def scanResult = sh(returnStatus: true, 
-                                    script: 'trivy image --severity HIGH,CRITICAL "${IMAGE_NAME}:${IMAGE_TAG}" > trivy_result.txt')
-                                if (scanResult != 0) {
-                                    error("Scan failed")
-                                }
+                            def buildResult = sh(returnStatus: true, 
+                                script: 'docker build -t  "${IMAGE_NAME}:${IMAGE_TAG}" -f docker/engine/Dockerfile.test4 .')
+                            if (buildResult != 0) {
+                                error("Docker build failed")
+                            }                            
+                            
+                            def scanResult = sh(returnStatus: true, 
+                                script: 'trivy image --severity HIGH,CRITICAL "${IMAGE_NAME}:${IMAGE_TAG}" > trivy_result.txt')
+                            if (scanResult != 0) {
+                                error("Scan failed")
+                            }
 
-                                def pushResult = sh(returnStatus: true, 
-                                    script: 'docker push "${IMAGE_NAME}:${IMAGE_TAG}"')
-                                if (pushResult != 0) {
-                                    error("Push failed")
-                                }
+                            def pushResult = sh(returnStatus: true, 
+                                script: 'docker push "${IMAGE_NAME}:${IMAGE_TAG}"')
+                            if (pushResult != 0) {
+                                   error("Push failed")
                             }
                     }
                     
@@ -285,8 +283,8 @@ pipeline {
                             "DEPLOYMENT_USER=${deploymentUser}",
                             "DEPLOYMENT_SERVER=${deploymentServer}",
                         ]) {
-                                dir('docker-compose') {
-                                    sh 'scp docker/compose/docker-compose7.yaml "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":docker-compose.yaml'
+                                dir('docker/compose') {
+                                    sh 'scp docker-compose7.yaml "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":docker-compose.yaml'
 
                                     tmpCredFile = sh(returnStdout: true,
                                         script: 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" \
@@ -409,7 +407,7 @@ pipeline {
                 docker.image('alpine:latest').inside('-v test-reports:/source:ro') {
                     sh 'cp -f /source/*.xml "$WORKSPACE/test-reports/"'
                 }
-                sh 'mv -f "$WORKSPACE/docker/engine/trivy_result.txt" "$WORKSPACE/test-reports/"'
+                sh 'mv -f "$WORKSPACE/trivy_result.txt" "$WORKSPACE/test-reports/"'
 
             }
             junit allowEmptyResults: true, testResults: 'test-reports/*.xml'
