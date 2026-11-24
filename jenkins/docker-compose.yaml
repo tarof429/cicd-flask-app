@@ -1,6 +1,6 @@
 services:
   jenkins:
-    image:  myjenkins:a92b7
+    image: myjenkins:${IMAGE_TAG}
     ports:
       - "8080:8080"
     volumes:
