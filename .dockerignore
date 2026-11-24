@@ -1,0 +1,7 @@
+flask/README.md
+flask/__pycache__/
+flask/.pytest_cache
+flask/instance/
+flask/logs/
+flask/venv/
+flask/.gitignore

@@ -129,7 +129,7 @@ pipeline {
                         "IMAGE_NAME=${eventAppPrivateImageName}", 
                     ]) {
                             def buildResult = sh(returnStatus: true, 
-                                script: 'docker build -t  "${IMAGE_NAME}:${IMAGE_TAG}" -f docker/engine/Dockerfile.test5 .')
+                                script: 'docker build -t  "${IMAGE_NAME}:${IMAGE_TAG}" -f docker/engine/Dockerfile.test6 .')
                             if (buildResult != 0) {
                                 error("Docker build failed")
                             }                            
@@ -209,7 +209,7 @@ pipeline {
                                     error("Unable to login to dockerhub")
                                 }
 
-                                def buildStatus = sh(returnStatus: true, script: 'docker build -t "${IMAGE}:${IMAGE_TAG}" -f docker/engine/Dockerfile6 .')
+                                def buildStatus = sh(returnStatus: true, script: 'docker build -t "${IMAGE}:${IMAGE_TAG}" -f docker/engine/Dockerfile7 .')
 
                                 if (buildStatus != 0) {
                                     error("Unable to build '$IMAGE'")

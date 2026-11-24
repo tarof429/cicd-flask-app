@@ -49,7 +49,7 @@ docker run -d \
 Next, build and tag the image.
 
 ```sh
-docker build -f docker/Dockerfile2 -t localhost:3000/events-app:latest .
+docker build -f docker/engine/Dockerfile7 -t localhost:3000/events-app:latest .
 ```
 
 Push the image. It should be very fast!
