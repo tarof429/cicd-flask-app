@@ -1,0 +1,23 @@
+FROM python:3.10.21-alpine3.24
+
+ENV FLASK_APP=app.py \
+    FLASK_DEBUG=True \
+    RUNTIME_MODE=dev
+
+WORKDIR /app
+
+COPY flask/requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+EXPOSE 5000
+
+COPY flask .
+
+COPY docker/entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
+
+#CMD ["tail", "-f", "/dev/null"]
+

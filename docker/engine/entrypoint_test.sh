@@ -1,3 +1,3 @@
 #!/bin/sh
 
-python -m pytest
+python -m pytest --junitxml=/app/reports/result.xml "$@"
