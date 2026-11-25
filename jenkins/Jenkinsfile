@@ -50,11 +50,11 @@ pipeline {
                         deploymentUser = values[3]
                         deploymentServer = values[4]
 
-                        echo "cloudProvider: ${cloudProvider}"
-                        echo "privateRegistryServer: ${privateRegistryServer}"
-                        echo "privateRegistryPort: ${privateRegistryPort}"
-                        echo "deploymentUser: ${deploymentUser}"
-                        echo "deploymentServer: ${deploymentServer}"
+                        // echo "cloudProvider: ${cloudProvider}"
+                        // echo "privateRegistryServer: ${privateRegistryServer}"
+                        // echo "privateRegistryPort: ${privateRegistryPort}"
+                        // echo "deploymentUser: ${deploymentUser}"
+                        // echo "deploymentServer: ${deploymentServer}"
 
                         values = sh(
                             returnStdout: true,
@@ -76,11 +76,11 @@ pipeline {
                         publicEventConsumerRepository = values[3]
                         runtimeMode = values[4]
 
-                        echo "privateEventAppRepository: ${privateEventAppRepository}"
-                        echo "publicEventAppRepository: ${publicEventAppRepository}"
-                        echo "privateEventConsumerRepository: ${privateEventConsumerRepository}"
-                        echo "publicEventConsumerRepository: ${publicEventConsumerRepository}"
-                        echo "runtimeMode: ${runtimeMode}"
+                        // echo "privateEventAppRepository: ${privateEventAppRepository}"
+                        // echo "publicEventAppRepository: ${publicEventAppRepository}"
+                        // echo "privateEventConsumerRepository: ${privateEventConsumerRepository}"
+                        // echo "publicEventConsumerRepository: ${publicEventConsumerRepository}"
+                        // echo "runtimeMode: ${runtimeMode}"
 
                        values = sh(
                             returnStdout: true,
@@ -102,14 +102,14 @@ pipeline {
                         dbPort = values[3]
                         dbName = values[4]
 
-                        echo "dbUser: ${dbUser}"
-                        echo "dbPass: ${dbPass}"
-                        echo "dbHost: ${dbHost}"
-                        echo "dbPort: ${dbPort}"
-                        echo "dbName: ${dbName}"
+                        // echo "dbUser: ${dbUser}"
+                        // echo "dbPass: ${dbPass}"
+                        // echo "dbHost: ${dbHost}"
+                        // echo "dbPort: ${dbPort}"
+                        // echo "dbName: ${dbName}"
 
                         eventAppPrivateImageName = "${privateRegistryServer}:${privateRegistryPort}/${privateEventAppRepository}"
-                        echo "eventAppPrivateImageName: ${eventAppPrivateImageName}"
+                        // echo "eventAppPrivateImageName: ${eventAppPrivateImageName}"
                     }
                 }
             }
@@ -128,8 +128,10 @@ pipeline {
                     withEnv([
                         "IMAGE_NAME=${eventAppPrivateImageName}", 
                     ]) {
+                            echo "*** Building ${IMAGE_NAME}:${IMAGE_TAG} ***"
+
                             def buildResult = sh(returnStatus: true, 
-                                script: 'docker build -t  "${IMAGE_NAME}:${IMAGE_TAG}" -f docker/engine/Dockerfile.test .')
+                                script: 'docker build -t  "${IMAGE_NAME}:${IMAGE_TAG}" -f docker/engine/Dockerfile .')
                             if (buildResult != 0) {
                                 error("Docker build failed")
                             }                            
@@ -169,12 +171,14 @@ pipeline {
                         withCredentials([file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')]) {
                             withEnv(["IMAGE_NAME=${eventAppPrivateImageName}"]) {
                                 def buildResult = sh(returnStatus: true, 
-                                    script: 'docker compose --env-file "$ENV_FILE" -f docker-compose-test5.yaml up \
-                                    --abort-on-container-exit --exit-code-from app')
+                                    script: 'docker compose --env-file "$ENV_FILE" -f docker-compose.yaml run \
+                                        --rm --entrypoint python app  -m pytest')
                                     
                                 if (buildResult != 0) {
                                     error("Docker compose failed")
-                                } 
+                                }
+
+                                sh('docker compose --env-file "$ENV_FILE" -f docker-compose.yaml down')
 
                                 if (env.PREVIOUS_IMAGE_TAG) {
                                     buildResult = sh(returnStatus: true, script: 'docker rmi "${IMAGE_NAME}:${PREVIOUS_IMAGE_TAG}"')
@@ -182,7 +186,6 @@ pipeline {
                                     if (buildResult != 0) {
                                         echo("Unable to delete image, ignoring.")
                                     }
-
                                 }
                             }
                         }
@@ -207,12 +210,6 @@ pipeline {
 
                                 if (loginStatus != 0) {
                                     error("Unable to login to dockerhub")
-                                }
-
-                                def buildStatus = sh(returnStatus: true, script: 'docker build -t "${IMAGE}:${IMAGE_TAG}" -f docker/engine/Dockerfile .')
-
-                                if (buildStatus != 0) {
-                                    error("Unable to build '$IMAGE'")
                                 }
 
                                 def pushStatus = sh(returnStatus: true, script: 'docker push "${IMAGE}:${IMAGE_TAG}"')
@@ -284,7 +281,7 @@ pipeline {
                             "DEPLOYMENT_SERVER=${deploymentServer}",
                         ]) {
                                 dir('docker/compose') {
-                                    sh 'scp docker-compose7.yaml "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":docker-compose.yaml'
+                                    sh 'scp docker-compose.yaml "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":docker-compose.yaml'
 
                                     tmpCredFile = sh(returnStdout: true,
                                         script: 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" \
