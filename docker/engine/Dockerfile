@@ -18,7 +18,8 @@ COPY flask .
 COPY docker/engine/entrypoint.sh entrypoint.sh
 RUN chmod +x entrypoint.sh
 
-RUN chown -R app:app /app
+RUN mkdir -p /app/reports \
+    && chown -R app:app /app
 
 USER app
 EXPOSE 5000
