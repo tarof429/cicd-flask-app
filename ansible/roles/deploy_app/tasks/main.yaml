@@ -9,8 +9,11 @@
     dest: docker-compose.yaml
     mode: '0600'
 
+- name: Pull images
+  shell: docker compose pull
+
 - name: Run docker compose file
-  shell: IMAGE_TAG="{{ IMAGE_TAG }}" docker compose up -d --force-recreate app eventconsumer
+  shell: docker compose up -d --force-recreate app eventconsumer
 
 - name: Ping app
   ansible.builtin.uri:
