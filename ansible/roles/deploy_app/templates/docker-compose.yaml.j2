@@ -1,6 +1,6 @@
 services:
   app:
-    image: ${IMAGE_NAME}:${IMAGE_TAG}
+    image: {{ IMAGE_NAME }}: {{ IMAGE_TAG }}
     environment:
       - FLASK_APP=events_app
       - FLASK_DEBUG=False
@@ -38,7 +38,7 @@ services:
     ports:
       - 15672:15672
   eventconsumer:
-    image: ${EVENTCONSUMER_IMAGE_NAME}:${IMAGE_TAG}
+    image: {{ EVENTCONSUMER_IMAGE_NAME }}:{{ IMAGE_TAG }}
     environment:
       - AMPQ_USER=rabbit
       - AMPQ_PASSWORD=secret
