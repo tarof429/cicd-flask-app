@@ -227,6 +227,7 @@ pipeline {
                                     error("Unable to login to dockerhub")
                                 }
 
+                                // Push Event App
                                 def buildStatus = sh(returnStatus: true, script: 'docker tag "${IMAGE_NAME_PRIVATE}:${IMAGE_TAG}" \
                                     "${IMAGE_NAME_PUBLIC}:${IMAGE_TAG}"')
 
@@ -240,7 +241,8 @@ pipeline {
                                     error("Unable to push $IMAGE_NAME_PUBLIC:$IMAGE_TAG")
                                 }
 
-                                def tagStatus = sh(returnStatus: true, script: 'docker tag "${IMAGE_NAME_PRIVATE}:${IMAGE_TAG}" "${IMAGE_NAME_PUBLIC}:latest"')
+                                def tagStatus = sh(returnStatus: true, script: 'docker tag "${IMAGE_NAME_PRIVATE}:${IMAGE_TAG}" \
+                                    "${IMAGE_NAME_PUBLIC}:latest"')
 
                                 if (tagStatus != 0) {
                                     error("Unable to create ${IMAGE_NAME_PUBLIC}:latest")
@@ -252,36 +254,62 @@ pipeline {
                                     error("Unable to push ${IMAGE_NAME_PUBLIC}:latest")
                                 }
 
-                                dir('go/event-consumer') {
         
-                                    tagStatus = sh(returnStatus: true, script: 'docker tag "${EVENTCONSUMER_IMAGE_NAME_PRIVATE}:${IMAGE_TAG}" "${EVENTCONSUMER_IMAGE_NAME_PUBLIC}:${IMAGE_TAG}"')
+                                // EventConsumer
+                                tagStatus = sh(returnStatus: true, script: 'docker tag "${EVENTCONSUMER_IMAGE_NAME_PRIVATE}:${IMAGE_TAG}" \
+                                    "${EVENTCONSUMER_IMAGE_NAME_PUBLIC}:${IMAGE_TAG}"')
 
-                                    if (tagStatus != 0) {
-                                        error("Unable to tag $EVENTCONSUMER_IMAGE_NAME_PUBLIC:$IMAGE_TAG")
-                                    }
+                                if (tagStatus != 0) {
+                                    error("Unable to tag $EVENTCONSUMER_IMAGE_NAME_PUBLIC:$IMAGE_TAG")
+                                }
 
-                                    pushStatus = sh(returnStatus: true, script: 'docker push "${EVENTCONSUMER_IMAGE_NAME_PUBLIC}:${IMAGE_TAG}"')
+                                pushStatus = sh(returnStatus: true, script: 'docker push "${EVENTCONSUMER_IMAGE_NAME_PUBLIC}:${IMAGE_TAG}"')
 
-                                    if (pushStatus != 0) {
-                                        error("Unable to push $EVENTCONSUMER_IMAGE_NAME_PUBLIC:$IMAGE_TAG")
-                                    }
+                                if (pushStatus != 0) {
+                                    error("Unable to push $EVENTCONSUMER_IMAGE_NAME_PUBLIC:$IMAGE_TAG")
+                                }
 
+                                tagStatus = sh(returnStatus: true, script: 'docker tag "${EVENTCONSUMER_IMAGE_NAME_PRIVATE}:${IMAGE_TAG}" \
+                                    "${EVENTCONSUMER_IMAGE_NAME_PUBLIC}:latest"')
 
+                                if (tagStatus != 0) {
+                                    error("Unable to tag $EVENTCONSUMER_IMAGE_NAME_PUBLIC:latest")
+                                }
 
-                                    tagStatus = sh(returnStatus: true, script: 'docker tag "${EVENTCONSUMER_IMAGE_NAME_PRIVATE}:${IMAGE_TAG}" "${EVENTCONSUMER_IMAGE_NAME_PUBLIC}:latest"')
-
-                                    if (tagStatus != 0) {
-                                        error("Unable to tag $EVENTCONSUMER_IMAGE_NAME_PUBLIC:latest")
-                                    }
-
-                                    pushStatus = sh(returnStatus: true, script: 'docker push "${EVENTCONSUMER_IMAGE_NAME_PUBLIC}:latest"')
+                                pushStatus = sh(returnStatus: true, script: 'docker push "${EVENTCONSUMER_IMAGE_NAME_PUBLIC}:latest"')
 
                                     if (pushStatus != 0) {
                                         error("Unable to push $EVENTCONSUMER_IMAGE_NAME_PUBLIC:latest")
                                     }
                                 }
+
+                                // Cleanup
+                                def cleanupStatus
+
+                                cleanupStatus =  sh(returnStatus: true, script: 'docker image rm "${IMAGE_NAME_PRIVATE}:${IMAGE_TAG}"')
+
+                                if (cleanupStatus != 0) {
+                                    echo("Unable to remove $IMAGE_NAME_PRIVATE:$IMAGE_TAG")
+                                }
+
+                                cleanupStatus =  sh(returnStatus: true, script: 'docker image rm "${IMAGE_NAME_PUBLIC}:${IMAGE_TAG}"')
+
+                                if (cleanupStatus != 0) {
+                                    echo("Unable to remove $IMAGE_NAME_PUBLIC:$IMAGE_TAG")
+                                }
+
+                                cleanupStatus =  sh(returnStatus: true, script: 'docker image rm "${EVENTCONSUMER_IMAGE_NAME_PRIVATE}:${IMAGE_TAG}"')
+
+                                if (cleanupStatus != 0) {
+                                    echo("Unable to remove $EVENTCONSUMER_IMAGE_NAME_PRIVATE:$IMAGE_TAG")
+                                }
                             
-                        }
+                                cleanupStatus =  sh(returnStatus: true, script: 'docker image rm "${EVENTCONSUMER_IMAGE_NAME_PUBLIC}:${IMAGE_TAG}"')
+
+                                if (cleanupStatus != 0) {
+                                    echo("Unable to remove $EVENTCONSUMER_IMAGE_NAME_PUBLIC:$IMAGE_TAG")
+                                }
+                        
                     }
                 }
             }
