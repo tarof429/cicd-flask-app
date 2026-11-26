@@ -126,9 +126,21 @@ pipeline {
                     env.IMAGE_TAG = "${COMMIT_HASH}-${env.BUILD_NUMBER}"
 
                     withEnv([
-                        "IMAGE_NAME=${eventAppPrivateImageName}", 
+                        "IMAGE_NAME=${eventAppPrivateImageName}",
+                        "EVENTCONSUMER_IMAGE_NAME=${privateEventConsumerRepository}"
                     ]) {
-                            def buildResult = sh(returnStatus: true, 
+                            def buildResult
+
+                            dir('go/event-consumer') {
+                                buildResult = sh(returnStatus: true, 
+                                    script: 'docker build -t "${EVENTCONSUMER_IMAGE_NAME}:${IMAGE_TAG}" .')
+
+                                if (buildResult != 0) {
+                                    error("Unable to tag ${EVENTCONSUMER_IMAGE_NAME}:${IMAGE_TAG}")
+                                }
+                            }
+
+                            buildResult = sh(returnStatus: true, 
                                 script: 'docker build -t  "${IMAGE_NAME}:${IMAGE_TAG}" -f docker/engine/Dockerfile.test .')
                             if (buildResult != 0) {
                                 error("Docker build failed")
@@ -167,14 +179,22 @@ pipeline {
                         writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
 
                         withCredentials([file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')]) {
-                            withEnv(["IMAGE_NAME=${eventAppPrivateImageName}"]) {
+                            withEnv(["IMAGE_NAME=${eventAppPrivateImageName}",
+                                "EVENTCONSUMER_IMAGE_NAME=${privateEventConsumerRepository}"
+                            ]) {
                                 def buildResult = sh(returnStatus: true, 
-                                    script: 'docker compose --env-file "$ENV_FILE" -f docker-compose-test5.yaml up \
-                                    --abort-on-container-exit --exit-code-from app')
-                                    
+                                    script: 'docker compose --env-file "$ENV_FILE" -f docker-compose.yaml run \
+                                        --rm --entrypoint python app  -m pytest')
+                                
                                 if (buildResult != 0) {
                                     error("Docker compose failed")
-                                } 
+                                }
+
+                                def teardownResult = sh(returnStatus: true, script: 'docker compoose down') 
+
+                                if (teardownResult != 0) {
+                                    error("Unable to teardown")
+                                }
 
                                 if (env.PREVIOUS_IMAGE_TAG) {
                                     buildResult = sh(returnStatus: true, script: 'docker rmi "${IMAGE_NAME}:${PREVIOUS_IMAGE_TAG}"')
@@ -199,8 +219,8 @@ pipeline {
                         file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')
                     ]){
                         withEnv([
-                                "IMAGE=${publicEventAppRepository}", 
-                                "EVENT_CONSUMER_IMAGE=${publicEventConsumerRepository}"
+                                "IMAGE_NAME=${eventAppPublicImageName}",
+                                "EVENTCONSUMER_IMAGE_NAME=${publicEventConsumerRepository}"
                                 ]) {
                             
                                 def loginStatus = sh(returnStatus: true, script: 'echo $PASS | docker login -u "$USER" --password-stdin')
@@ -209,54 +229,54 @@ pipeline {
                                     error("Unable to login to dockerhub")
                                 }
 
-                                def buildStatus = sh(returnStatus: true, script: 'docker build -t "${IMAGE}:${IMAGE_TAG}" -f docker/engine/Dockerfile .')
+                                def buildStatus = sh(returnStatus: true, script: 'docker build -t "${IMAGE_NAME}:${IMAGE_TAG}" -f docker/engine/Dockerfile .')
 
                                 if (buildStatus != 0) {
-                                    error("Unable to build '$IMAGE'")
+                                    error("Unable to build '$IMAGE_NAME'")
                                 }
 
-                                def pushStatus = sh(returnStatus: true, script: 'docker push "${IMAGE}:${IMAGE_TAG}"')
+                                def pushStatus = sh(returnStatus: true, script: 'docker push "${IMAGE_NAME}:${IMAGE_TAG}"')
 
                                 if (pushStatus != 0) {
-                                    error("Unable to push $IMAGE")
+                                    error("Unable to push $IMAGE_NAME")
                                 }
 
-                                def tagStatus = sh(returnStatus: true, script: 'docker tag "${IMAGE}:${IMAGE_TAG}" "${IMAGE}:latest"')
+                                def tagStatus = sh(returnStatus: true, script: 'docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${IMAGE_NAME}:latest"')
 
                                 if (tagStatus != 0) {
-                                    error("Unable to create ${IMAGE}:latest")
+                                    error("Unable to create ${IMAGE_NAME}:latest")
                                 }
 
-                                pushStatus = sh(returnStatus: true, script: 'docker push "${IMAGE}:latest"')
+                                pushStatus = sh(returnStatus: true, script: 'docker push "${IMAGE_NAME}:latest"')
 
                                 if (pushStatus != 0) {
-                                    error("Unable to push ${IMAGE}:latest")
+                                    error("Unable to push ${IMAGE_NAME}:latest")
                                 }
 
                                 dir('go/event-consumer') {
         
-                                    buildStatus = sh(returnStatus: true, script: 'docker build -t "${EVENT_CONSUMER_IMAGE}:${IMAGE_TAG}" .')
+                                    buildStatus = sh(returnStatus: true, script: 'docker build -t "${EVENTCONSUMER_IMAGE_NAME}:${IMAGE_TAG}" .')
 
                                     if (buildStatus != 0) {
-                                        error("Unable to tag ${EVENT_CONSUMER_IMAGE}:${IMAGE_TAG}")
+                                        error("Unable to tag ${EVENTCONSUMER_IMAGE_NAME}:${IMAGE_TAG}")
                                     }
 
-                                    pushStatus = sh(returnStatus: true, script: 'docker push "${EVENT_CONSUMER_IMAGE}:${IMAGE_TAG}"')
+                                    pushStatus = sh(returnStatus: true, script: 'docker push "${EVENTCONSUMER_IMAGE_NAME}:${IMAGE_TAG}"')
 
                                     if (pushStatus != 0) {
-                                        error("Unable to push ${EVENT_CONSUMER_IMAGE}:${IMAGE_TAG}")
+                                        error("Unable to push ${EVENTCONSUMER_IMAGE_NAME}:${IMAGE_TAG}")
                                     }
 
-                                    tagStatus = sh(returnStatus: true, script: 'docker tag "${EVENT_CONSUMER_IMAGE}:${IMAGE_TAG}" "${EVENT_CONSUMER_IMAGE}:latest"')
+                                    tagStatus = sh(returnStatus: true, script: 'docker tag "${EVENTCONSUMER_IMAGE_NAME}:${IMAGE_TAG}" "${EVENTCONSUMER_IMAGE_NAME}:latest"')
 
                                     if (tagStatus != 0) {
-                                        error("Unable to tag ${EVENT_CONSUMER_IMAGE}:latest")
+                                        error("Unable to tag ${EVENTCONSUMER_IMAGE_NAME}:latest")
                                     }
 
-                                    pushStatus = sh(returnStatus: true, script: 'docker push "${EVENT_CONSUMER_IMAGE}:latest"')
+                                    pushStatus = sh(returnStatus: true, script: 'docker push "${EVENTCONSUMER_IMAGE_NAME}:latest"')
 
                                     if (pushStatus != 0) {
-                                        error("Unable to push ${EVENT_CONSUMER_IMAGE}:latest")
+                                        error("Unable to push ${EVENTCONSUMER_IMAGE_NAME}:latest")
                                     }
                                 }
                             
@@ -284,7 +304,7 @@ pipeline {
                             "DEPLOYMENT_SERVER=${deploymentServer}",
                         ]) {
                                 dir('docker/compose') {
-                                    sh 'scp docker-compose7.yaml "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":docker-compose.yaml'
+                                    sh 'scp docker-compose.yaml "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}":docker-compose.yaml'
 
                                     tmpCredFile = sh(returnStdout: true,
                                         script: 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" \

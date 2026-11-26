@@ -1,6 +1,6 @@
 services:
   app:
-    image: ${PRIVATE_REGISTRY_SERVER}:${PRIVATE_REGISTRY_PORT}/${PRIVATE_EVENT_APP_REPOSITORY}:${IMAGE_TAG}
+    image: ${IMAGE_NAME}:${IMAGE_TAG}
     environment:
       - ADMIN_PASS=${ADMIN_PASS:-secret}
       - FLASK_APP=events_app
@@ -42,7 +42,7 @@ services:
     ports:
       - 15672:15672
   eventconsumer:
-    image: tarof429/event-consumer:${IMAGE_TAG}
+    image: ${EVENTCONSUMER_IMAGE_NAME}:${IMAGE_TAG}
     environment:
       - AMPQ_USER=rabbit
       - AMPQ_PASSWORD=secret
