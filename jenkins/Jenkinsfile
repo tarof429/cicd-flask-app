@@ -18,7 +18,9 @@ def dbHost
 def dbPort
 def dbName
 
-def eventAppPrivateImageName
+def privateEventAppImageName
+def publicEventAppImageName
+
 def imageTag
 
 def tmpCredFile
@@ -50,11 +52,11 @@ pipeline {
                         deploymentUser = values[3]
                         deploymentServer = values[4]
 
-                        echo "cloudProvider: ${cloudProvider}"
-                        echo "privateRegistryServer: ${privateRegistryServer}"
-                        echo "privateRegistryPort: ${privateRegistryPort}"
-                        echo "deploymentUser: ${deploymentUser}"
-                        echo "deploymentServer: ${deploymentServer}"
+                        // echo "cloudProvider: ${cloudProvider}"
+                        // echo "privateRegistryServer: ${privateRegistryServer}"
+                        // echo "privateRegistryPort: ${privateRegistryPort}"
+                        // echo "deploymentUser: ${deploymentUser}"
+                        // echo "deploymentServer: ${deploymentServer}"
 
                         values = sh(
                             returnStdout: true,
@@ -76,11 +78,11 @@ pipeline {
                         publicEventConsumerRepository = values[3]
                         runtimeMode = values[4]
 
-                        echo "privateEventAppRepository: ${privateEventAppRepository}"
-                        echo "publicEventAppRepository: ${publicEventAppRepository}"
-                        echo "privateEventConsumerRepository: ${privateEventConsumerRepository}"
-                        echo "publicEventConsumerRepository: ${publicEventConsumerRepository}"
-                        echo "runtimeMode: ${runtimeMode}"
+                        // echo "privateEventAppRepository: ${privateEventAppRepository}"
+                        // echo "publicEventAppRepository: ${publicEventAppRepository}"
+                        // echo "privateEventConsumerRepository: ${privateEventConsumerRepository}"
+                        // echo "publicEventConsumerRepository: ${publicEventConsumerRepository}"
+                        // echo "runtimeMode: ${runtimeMode}"
 
                        values = sh(
                             returnStdout: true,
@@ -102,16 +104,17 @@ pipeline {
                         dbPort = values[3]
                         dbName = values[4]
 
-                        echo "dbUser: ${dbUser}"
-                        echo "dbPass: ${dbPass}"
-                        echo "dbHost: ${dbHost}"
-                        echo "dbPort: ${dbPort}"
-                        echo "dbName: ${dbName}"
+                        // echo "dbUser: ${dbUser}"
+                        // echo "dbPass: ${dbPass}"
+                        // echo "dbHost: ${dbHost}"
+                        // echo "dbPort: ${dbPort}"
+                        // echo "dbName: ${dbName}"
 
-                        eventAppPrivateImageName = "${privateRegistryServer}:${privateRegistryPort}/${privateEventAppRepository}"
-                        echo "eventAppPrivateImageName: ${eventAppPrivateImageName}"
+                        privateEventAppImageName = "${privateRegistryServer}:${privateRegistryPort}/${privateEventAppRepository}"
+                        echo "privateEventAppImageName: ${privateEventAppImageName}"
 
-                        eventAppPublicImageName = "${publicEventAppRepository}"
+                        publicEventAppImageName = "${publicEventAppRepository}"
+                        echo "privateEventAppImageName: ${privateEventAppImageName}"
                     }
                 }
             }
@@ -128,7 +131,7 @@ pipeline {
                     env.IMAGE_TAG = "${COMMIT_HASH}-${env.BUILD_NUMBER}"
 
                     withEnv([
-                        "IMAGE_NAME=${eventAppPrivateImageName}",
+                        "IMAGE_NAME=${privateEventAppImageName}",
                         "EVENTCONSUMER_IMAGE_NAME=${privateEventConsumerRepository}"
                     ]) {
                             def buildResult
@@ -181,7 +184,7 @@ pipeline {
                         writeFile(file: "current_image_tag.txt", text: "${env.IMAGE_TAG}")
 
                         withCredentials([file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')]) {
-                            withEnv(["IMAGE_NAME=${eventAppPrivateImageName}",
+                            withEnv(["IMAGE_NAME=${privateEventAppImageName}",
                                 "EVENTCONSUMER_IMAGE_NAME=${privateEventConsumerRepository}"
                             ]) {
                                 def buildResult = sh(returnStatus: true, 
@@ -197,14 +200,6 @@ pipeline {
                                 if (teardownResult != 0) {
                                     error("Unable to teardown")
                                 }
-
-                                // if (env.PREVIOUS_IMAGE_TAG) {
-                                //     buildResult = sh(returnStatus: true, script: 'docker rmi "${IMAGE_NAME}:${PREVIOUS_IMAGE_TAG}"')
-                                        
-                                //     if (buildResult != 0) {
-                                //         echo("Unable to delete image, ignoring.")
-                                //     }
-                                // }
                             }
                         }
                     }
@@ -220,9 +215,9 @@ pipeline {
                         file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')
                     ]){
                         withEnv([
-                                "IMAGE_NAME_PUBLIC=${eventAppPublicImageName}",
+                                "IMAGE_NAME_PUBLIC=${publicEventAppImageName}",
                                 "EVENTCONSUMER_IMAGE_NAME_PUBLIC=${publicEventConsumerRepository}",
-                                "IMAGE_NAME_PRIVATE=${eventAppPrivateImageName}",
+                                "IMAGE_NAME_PRIVATE=${privateEventAppImageName}",
                                 "EVENTCONSUMER_IMAGE_NAME_PRIVATE=${privateEventConsumerRepository}"
                                 ]) {
                             
@@ -305,7 +300,7 @@ pipeline {
                         file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')
                     ]){
                         withEnv([
-                            "IMAGE_NAME=${eventAppPublicImageName}",
+                            "IMAGE_NAME=${publicEventAppImageName}",
                             "EVENTCONSUMER_IMAGE_NAME=${publicEventConsumerRepository}",
                             "IMAGE_TAG=${env.IMAGE_TAG}",
                             "DEPLOYMENT_USER=${deploymentUser}",
@@ -386,7 +381,7 @@ pipeline {
                                 variable: 'VAULT_PASSWORD_FILE')
                         ]) {
                         withEnv([
-                            "IMAGE_NAME=${eventAppPublicImageName}",
+                            "IMAGE_NAME=${publicEventAppImageName}",
                             "EVENTCONSUMER_IMAGE_NAME=${publicEventConsumerRepository}",
                             "IMAGE_TAG=${env.IMAGE_TAG}",
                             "DEPLOYMENT_SERVER=${deploymentServer}",
