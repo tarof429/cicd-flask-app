@@ -278,10 +278,10 @@ pipeline {
 
                                 pushStatus = sh(returnStatus: true, script: 'docker push "${EVENTCONSUMER_IMAGE_NAME_PUBLIC}:latest"')
 
-                                    if (pushStatus != 0) {
-                                        error("Unable to push $EVENTCONSUMER_IMAGE_NAME_PUBLIC:latest")
-                                    }
+                                if (pushStatus != 0) {
+                                    error("Unable to push $EVENTCONSUMER_IMAGE_NAME_PUBLIC:latest")
                                 }
+                                
 
                                 // Cleanup
                                 def cleanupStatus
@@ -309,6 +309,7 @@ pipeline {
                                 if (cleanupStatus != 0) {
                                     echo("Unable to remove $EVENTCONSUMER_IMAGE_NAME_PUBLIC:$IMAGE_TAG")
                                 }
+                        }
                         
                     }
                 }
