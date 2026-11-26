@@ -110,6 +110,8 @@ pipeline {
 
                         eventAppPrivateImageName = "${privateRegistryServer}:${privateRegistryPort}/${privateEventAppRepository}"
                         echo "eventAppPrivateImageName: ${eventAppPrivateImageName}"
+
+                        eventAppPublicImageName = "${publicEventAppRepository}"
                     }
                 }
             }
@@ -299,6 +301,8 @@ pipeline {
                         file(credentialsId: 'cicd-credentials', variable: 'ENV_FILE')
                     ]){
                         withEnv([
+                            "IMAGE_NAME=${eventAppPublicImageName}",
+                            "EVENTCONSUMER_IMAGE_NAME=${publicEventConsumerRepository}",
                             "IMAGE_TAG=${env.IMAGE_TAG}",
                             "DEPLOYMENT_USER=${deploymentUser}",
                             "DEPLOYMENT_SERVER=${deploymentServer}",
@@ -317,6 +321,8 @@ pipeline {
 
                                         def buildResult = sh(returnStatus: true, 
                                             script: 'ssh "${DEPLOYMENT_USER}"@"${DEPLOYMENT_SERVER}" \
+                                                IMAGE_NAME="${IMAGE_NAME}" \
+                                                EVENTCONSUMER_IMAGE_NAME="${EVENTCONSUMER_IMAGE_NAME}" \
                                                 IMAGE_TAG="${IMAGE_TAG}" docker compose --env-file "${TMPCREDFILE}" -f docker-compose.yaml up \
                                                 -d --force-recreate app eventconsumer')
 
@@ -376,6 +382,8 @@ pipeline {
                                 variable: 'VAULT_PASSWORD_FILE')
                         ]) {
                         withEnv([
+                            "IMAGE_NAME=${eventAppPublicImageName}",
+                            "EVENTCONSUMER_IMAGE_NAME=${publicEventConsumerRepository}",
                             "IMAGE_TAG=${env.IMAGE_TAG}",
                             "DEPLOYMENT_SERVER=${deploymentServer}",
                             "PREVIOUS_IMAGE_TAG=${env.PREVIOUS_IMAGE_TAG}"
@@ -385,6 +393,8 @@ pipeline {
                                         script: 'ansible-playbook \
                                             -i inventory-do2.yaml \
                                             deploy_app.yaml \
+                                            -e "IMAGE_NAME=${IMAGE_NAME}" \
+                                            -e "EVENTCONSUMER_IMAGE_NAME=${EVENTCONSUMER_IMAGE_NAME}" \
                                             -e "IMAGE_TAG=${IMAGE_TAG}" \
                                             -e "DEPLOYMENT_SERVER=${DEPLOYMENT_SERVER}" \
                                             -e "PREVIOUS_IMAGE_TAG=${PREVIOUS_IMAGE_TAG}" \
