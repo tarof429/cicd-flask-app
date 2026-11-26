@@ -382,4 +382,4 @@ The script *archives/Jenkinsfile-21* uses *Dockerfile5* to build the docker imag
 
 ## Update docker directory
 
-The script *Jenkinsfile* is compatible with the updated directory structure for docker.
+The script *Jenkinsfile-22* is compatible with the updated directory structure for docker.
