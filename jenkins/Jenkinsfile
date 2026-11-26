@@ -190,7 +190,7 @@ pipeline {
                                     error("Docker compose failed")
                                 }
 
-                                def teardownResult = sh(returnStatus: true, script: 'docker compoose down') 
+                                def teardownResult = sh(returnStatus: true, script: 'docker compose down') 
 
                                 if (teardownResult != 0) {
                                     error("Unable to teardown")
