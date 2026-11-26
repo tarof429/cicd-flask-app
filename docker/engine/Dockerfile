@@ -19,7 +19,9 @@ COPY docker/engine/entrypoint.sh entrypoint.sh
 RUN chmod +x entrypoint.sh
 
 RUN mkdir -p /app/reports \
-    && chown -R app:app /app
+    && mkdir -p /prefs \
+    && chown -R app:app /app \
+    && chown -R app:app /prefs
 
 USER app
 EXPOSE 5000
