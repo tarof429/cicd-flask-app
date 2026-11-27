@@ -1,0 +1,5 @@
+- hosts: web_server
+  become: true
+  become_user: admin
+  roles:
+    - redact_docker_compose

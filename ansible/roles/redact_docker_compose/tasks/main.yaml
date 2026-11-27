@@ -1,0 +1,11 @@
+- name: Redact database URI
+  replace:
+    path: docker-compose.yaml
+    regexp: DATABASE_URI=(.*)
+    replace: DATABASE_URI=redacted
+
+- name: Redact default admin password
+  replace:
+    path: docker-compose.yaml
+    regexp: ADMIN_PASS=(.*)
+    replace: ADMIN_PASS=redacted
