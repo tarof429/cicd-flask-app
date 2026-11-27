@@ -467,7 +467,7 @@ pipeline {
                 }
                 sh 'mv -f "$WORKSPACE/trivy_result.txt" "$WORKSPACE/test-reports/"'
                                 
-                  sshagent(['cicd-server-key']) { {
+                  sshagent(['cicd-server-key']) {
                         withEnv([
                             "DEPLOYMENT_SERVER=${deploymentServer}",
                         ]) {
