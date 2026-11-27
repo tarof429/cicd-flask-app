@@ -25,11 +25,19 @@
   retries: 12 # 12 * 5 seconds = 1 minute
   delay: 5 # Every 5 seconds
 
+- name: Remove old events-app image (msg)
+  debug:
+    msg: "Removing tarof42/events-app:{{ PREVIOUS_IMAGE_TAG }}"
+
 - name: Remove old events-app image
   community.docker.docker_image_remove:
     name: tarof42/events-app
     tag: "{{ PREVIOUS_IMAGE_TAG }}"
   ignore_errors: true
+
+- name: Remove old event-consumer image (msg)
+  debug:
+    msg: "Removing tarof42/event-consumer:{{ PREVIOUS_IMAGE_TAG }}"
 
 - name: Remove old event-consumer image
   community.docker.docker_image_remove:
