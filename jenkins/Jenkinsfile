@@ -467,15 +467,23 @@ pipeline {
                 }
                 sh 'mv -f "$WORKSPACE/trivy_result.txt" "$WORKSPACE/test-reports/"'
                                 
-                dir('ansible') {
-                    def buildResult = sh(returnStatus: true, 
-                        script: 'ansible-playbook -i inventory-do2.yaml \
-                        react_docker_compose.yaml')
-                                            
-                    if (buildResult != 0) {
-                        echo "Failed to redact ansible template"
-                    }
-                }
+                  sshagent(['cicd-server-key']) { {
+                        withEnv([
+                            "DEPLOYMENT_SERVER=${deploymentServer}",
+                        ]) {
+
+                            dir('ansible') {
+                                def buildResult = sh(returnStatus: true, 
+                                    script: 'ansible-playbook -i inventory-do2.yaml \
+                                    -e "DEPLOYMENT_SERVER=${DEPLOYMENT_SERVER}" \
+                                    react_docker_compose.yaml')
+                                                        
+                                if (buildResult != 0) {
+                                    echo "Failed to redact ansible template"
+                                }
+                            }
+                        }
+                  }
 
             }
             junit allowEmptyResults: true, testResults: 'test-reports/*.xml'
