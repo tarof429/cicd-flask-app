@@ -476,7 +476,7 @@ pipeline {
                                 def buildResult = sh(returnStatus: true, 
                                     script: 'ansible-playbook -i inventory-do2.yaml \
                                     -e "DEPLOYMENT_SERVER=${DEPLOYMENT_SERVER}" \
-                                    react_docker_compose.yaml')
+                                    redact_docker_compose.yaml')
                                                         
                                 if (buildResult != 0) {
                                     echo "Failed to redact ansible template"
